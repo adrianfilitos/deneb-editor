@@ -366,7 +366,7 @@ function buildMenu(win) {
             dialog.showMessageBox(win, {
               type: 'info',
               title: 'Nova',
-              message: 'Nova Editor 1.0.0',
+              message: `Nova Editor ${app.getVersion()}`,
               detail: 'Editor de código con IA integrada.\nHecho con Electron, React, Monaco y Vite.',
             })
           },

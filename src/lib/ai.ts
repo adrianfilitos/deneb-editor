@@ -35,10 +35,16 @@ interface LLMConfig {
 
 type LLMRole = 'system' | 'user' | 'assistant' | 'tool'
 
+interface ApiToolCall {
+  id: string
+  type: 'function'
+  function: { name: string; arguments: string }
+}
+
 interface LLMMessage {
   role: LLMRole
   content: string
-  tool_calls?: ToolCall[]
+  tool_calls?: ApiToolCall[]
   tool_call_id?: string
 }
 
@@ -362,7 +368,15 @@ export async function chatWithTools(
       onEvent({ done: true })
       return
     }
-    messages.push({ role: 'assistant', content: text, tool_calls: toolCalls })
+    messages.push({
+      role: 'assistant',
+      content: text,
+      tool_calls: toolCalls.map((tc) => ({
+        id: tc.id,
+        type: 'function' as const,
+        function: { name: tc.name, arguments: tc.args },
+      })),
+    })
     for (const tc of toolCalls) {
       onEvent({ toolCall: tc })
       const result = await runTool(tc.name, tc.args)
