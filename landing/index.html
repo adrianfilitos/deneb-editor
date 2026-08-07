@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="dark" />
+<title>Nova — Editor de código con IA integrada</title>
+<meta name="description" content="Nova es un editor de código moderno con IA integrada: edita con Monaco, usa el asistente con herramientas reales, terminal PowerShell y más." />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0d14;
+    --bg2: #10131d;
+    --panel: #141828;
+    --border: #232838;
+    --fg: #e6e9f2;
+    --muted: #9aa4ba;
+    --faint: #6b7489;
+    --blue: #82aaff;
+    --purple: #c792ea;
+    --teal: #5eead4;
+    --green: #9ece6a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* glow background */
+  .bg-glow {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(600px 420px at 12% -5%, rgba(130,170,255,.16), transparent 60%),
+      radial-gradient(700px 500px at 88% 8%, rgba(199,146,234,.14), transparent 60%),
+      radial-gradient(800px 600px at 50% 110%, rgba(94,234,212,.10), transparent 60%);
+  }
+
+  /* nav */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(12px);
+    background: rgba(11,13,20,.7);
+    border-bottom: 1px solid rgba(35,40,56,.7);
+  }
+  nav .container { display: flex; align-items: center; justify-content: space-between; height: 62px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17px; letter-spacing: .3px; }
+  .nav-links { display: flex; align-items: center; gap: 26px; }
+  .nav-links a { color: var(--muted); font-size: 14px; font-weight: 500; }
+  .nav-links a:hover { color: var(--fg); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px 18px; border-radius: 10px; font-weight: 600; font-size: 14px;
+    border: 1px solid transparent; cursor: pointer; transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    color: #0b0d14; box-shadow: 0 8px 24px rgba(130,170,255,.25);
+  }
+  .btn-ghost { border-color: var(--border); color: var(--fg); background: transparent; }
+  .btn-ghost:hover { background: var(--bg2); }
+  .btn-teal {
+    background: linear-gradient(135deg, var(--teal), var(--blue));
+    color: #0b0d14; box-shadow: 0 8px 24px rgba(94,234,212,.22);
+  }
+
+  /* hero */
+  .hero { padding: 90px 0 70px; text-align: center; }
+  .hero .logo { width: 92px; height: 92px; margin: 0 auto 26px; border-radius: 24px; box-shadow: 0 18px 50px rgba(130,170,255,.35); }
+  .badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 13px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
+    color: var(--teal); border: 1px solid rgba(94,234,212,.28); background: rgba(94,234,212,.08);
+    margin-bottom: 22px;
+  }
+  .hero h1 { font-size: clamp(40px, 6vw, 62px); font-weight: 800; letter-spacing: -1.5px; line-height: 1.08; }
+  .hero h1 .grad {
+    background: linear-gradient(120deg, var(--blue), var(--purple), var(--teal));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p.sub { max-width: 620px; margin: 22px auto 34px; color: var(--muted); font-size: 18px; }
+  .hero .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .hero .hint { margin-top: 18px; color: var(--faint); font-size: 13px; }
+
+  /* sections */
+  section { padding: 70px 0; }
+  .sec-head { text-align: center; max-width: 640px; margin: 0 auto 48px; }
+  .sec-head h2 { font-size: clamp(28px, 4vw, 38px); font-weight: 800; letter-spacing: -.8px; }
+  .sec-head p { color: var(--muted); margin-top: 12px; font-size: 16px; }
+  .kicker {
+    display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--blue); margin-bottom: 12px;
+  }
+
+  /* features */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .card {
+    background: linear-gradient(180deg, rgba(20,24,40,.7), rgba(16,19,29,.7));
+    border: 1px solid var(--border); border-radius: 16px; padding: 26px;
+    transition: transform .15s ease, border-color .15s ease;
+  }
+  .card:hover { transform: translateY(-3px); border-color: #33405c; }
+  .card .ic {
+    width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; margin-bottom: 16px;
+    background: rgba(130,170,255,.12); color: var(--blue);
+  }
+  .card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+  .card p { color: var(--muted); font-size: 14px; }
+  .card code, .cmd code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: rgba(255,255,255,.05); padding: 2px 7px; border-radius: 6px; color: var(--teal); }
+
+  /* AI tools */
+  .ai-wrap { display: grid; grid-template-columns: 1.05fr .95fr; gap: 34px; align-items: center; }
+  .ai-wrap ul { list-style: none; margin-top: 8px; }
+  .ai-wrap li { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(35,40,56,.6); }
+  .ai-wrap li:last-child { border-bottom: 0; }
+  .ai-wrap .tic {
+    flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; margin-top: 2px;
+    display: grid; place-items: center; font-size: 13px; font-weight: 700;
+    background: rgba(94,234,212,.14); color: var(--teal);
+  }
+  .ai-wrap li b { display: block; font-size: 15px; }
+  .ai-wrap li span { color: var(--muted); font-size: 14px; }
+  .console {
+    background: #0a0c12; border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  }
+  .console .bar { display: flex; gap: 7px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .console .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .console pre { padding: 18px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #c9d1e3; overflow-x: auto; }
+  .console .c { color: var(--blue); }
+  .console .g { color: var(--green); }
+  .console .t { color: var(--teal); }
+  .console .p { color: var(--purple); }
+
+  /* CLI */
+  .cmds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .cmd-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+  .cmd-card code { font-size: 14px; display: block; margin-bottom: 6px; color: var(--fg); background: none; padding: 0; }
+  .cmd-card p { color: var(--muted); font-size: 13.5px; }
+
+  /* download */
+  .dl-wrap { text-align: center; }
+  .dl-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
+  .dl-btns .btn { padding: 14px 26px; font-size: 15px; }
+  .dl-note { margin-top: 16px; color: var(--faint); font-size: 13px; }
+  .dl-note a { color: var(--blue); }
+
+  footer { border-top: 1px solid rgba(35,40,56,.7); padding: 30px 0; color: var(--faint); font-size: 13.5px; }
+  footer .container { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--fg); }
+
+  @media (max-width: 880px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .ai-wrap { grid-template-columns: 1fr; }
+    .cmds { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+  }
+  @media (max-width: 560px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+
+<nav>
+  <div class="container">
+    <a class="brand" href="#">
+      <svg width="26" height="26" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="ng1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#7fb0ff"/><stop offset="55%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#5eead4"/>
+          </linearGradient>
+        </defs>
+        <rect width="64" height="64" rx="15" fill="url(#ng1)"/>
+        <path d="M20 46V18l24 28V18" stroke="#fff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M50 7.5l1.6 4 4 1.6-4 1.6-1.6 4-1.6-4-4-1.6 4-1.6z" fill="#fff"/>
+      </svg>
+      Nova
+    </a>
+    <div class="nav-links">
+      <a href="#funciones">Funciones</a>
+      <a href="#ia">IA</a>
+      <a href="#cli">Terminal</a>
+      <a href="#descargar">Descargar</a>
+      <a class="btn btn-primary" style="padding:8px 16px" href="https://github.com/adrianfilitos/nova-editor">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero container">
+  <svg class="logo" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="ng2" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#7fb0ff"/><stop offset="55%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#5eead4"/>
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" rx="15" fill="url(#ng2)"/>
+    <path d="M20 46V18l24 28V18" stroke="#fff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M50 7.5l1.6 4 4 1.6-4 1.6-1.6 4-1.6-4-4-1.6 4-1.6z" fill="#fff"/>
+  </svg>
+  <div class="badge">● v1.0.0-alpha · código abierto</div>
+  <h1>El editor de código<br/>con <span class="grad">IA integrada</span></h1>
+  <p class="sub">Nova combina el poder de Monaco con un asistente de IA que de verdad trabaja contigo: lee tu proyecto, propone cambios y ejecuta comandos — con tu aprobación.</p>
+  <div class="cta">
+    <a class="btn btn-primary" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0-alpha/Nova.Setup.1.0.0.exe">Descargar para Windows</a>
+    <a class="btn btn-teal" href="/app/">Probar en el navegador</a>
+    <a class="btn btn-ghost" href="https://github.com/adrianfilitos/nova-editor/releases">Ver releases</a>
+  </div>
+  <p class="hint">Windows · instalador y versión portable · gratuito</p>
+</header>
+
+<section id="funciones">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">Funciones</span>
+      <h2>Todo lo que esperas de un editor moderno</h2>
+      <p>Construido con Electron, React, Monaco y Vite. Rápido, oscuro y listo para tu día a día.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="ic">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6z"/><path d="M14 3v6h6"/></svg>
+        </div>
+        <h3>Editor Monaco</h3>
+        <p>Sintaxis, minimapa, multi-cursor, esquema de símbolos y atajos tipo VS Code.</p>
+      </div>
+      <div class="card">
+        <div class="ic">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/></svg>
+        </div>
+        <h3>IA con herramientas</h3>
+        <p>El asistente <b>lee</b> y <b>busca</b> en tu proyecto, <b>escribe</b> archivos y <b>ejecuta</b> comandos con tu permiso.</p>
+      </div>
+      <div class="card">
+        <div class="ic">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
+        </div>
+        <h3>Terminal real</h3>
+        <p>PowerShell integrado en el editor, no un simulacro. Ejecuta de verdad.</p>
+      </div>
+      <div class="card">
+        <div class="ic">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+        </div>
+        <h3>Explorador de archivos</h3>
+        <p>Árbol de archivos con búsqueda, crear/renombrar/eliminar y arrastrar y soltar.</p>
+      </div>
+      <div class="card">
+        <div class="ic">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        </div>
+        <h3>Búsqueda global</h3>
+        <p>Busca y reemplaza en todos los archivos del espacio de trabajo con resultados en vivo.</p>
+      </div>
+      <div class="card">
+        <div class="ic">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5 5 5-5"/><path d="M4 21h16"/></svg>
+        </div>
+        <h3>DeepSeek · OpenAI · Anthropic</h3>
+        <p>Elige tu proveedor de IA favorito. <code>DeepSeek</code> viene preconfigurado y recomendado.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ia" style="background:linear-gradient(180deg, transparent, rgba(130,170,255,.04), transparent)">
+  <div class="container ai-wrap">
+    <div>
+      <span class="kicker">Asistente de IA</span>
+      <h2 style="font-size:clamp(26px,3.5vw,36px);font-weight:800;letter-spacing:-.7px;margin-bottom:14px">No solo chatea: actúa</h2>
+      <p style="color:var(--muted);font-size:16px;margin-bottom:14px">Nova AI tiene acceso a tu espacio de trabajo y usa herramientas reales para ayudarte mejor. Las acciones que modifican archivos o ejecutan comandos siempre requieren tu aprobación.</p>
+      <ul>
+        <li><span class="tic">✓</span><div><b>Lista y lee archivos</b><span><code>list_dir</code> y <code>read_file</code> para entender tu proyecto antes de responder.</span></div></li>
+        <li><span class="tic">✓</span><div><b>Busca en el código</b><span><code>search_files</code> encuentra coincidencias con número de línea.</span></div></li>
+        <li><span class="tic">✓</span><div><b>Escribe archivos</b><span><code>write_file</code> crea o reemplaza archivos solo tras tu confirmación.</span></div></li>
+        <li><span class="tic">✓</span><div><b>Ejecuta comandos</b><span><code>run_command</code> corre en PowerShell con tu permiso explícito.</span></div></li>
+      </ul>
+    </div>
+    <div class="console">
+      <div class="bar"><span class="dot" style="background:#f7768e"></span><span class="dot" style="background:#e0af68"></span><span class="dot" style="background:#9ece6a"></span></div>
+      <pre><span class="p">tú</span>: ¿dónde se valida la API key y qué falta por hacer?
+<span class="p">Nova</span>: déjame revisar el proyecto…
+
+> [herramienta] <span class="c">search_files</span> pattern=apiKey
+> [resultado] <span class="t">src/lib/ai.ts:158</span>: if (!cfg.apiKey) { onChunk(...) }
+
+<span class="p">Nova</span>: se valida en <span class="t">src/lib/ai.ts</span>. Falta añadir un
+indicador en la UI cuando no hay clave configurada.
+¿Quieres que lo implemente? <span class="g">[escribe el archivo]</span></pre>
+    </div>
+  </div>
+</section>
+
+<section id="cli">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">Terminal y CLI</span>
+      <h2>Nova desde tu terminal</h2>
+      <p>El instalador añade los comandos <code>nova</code> y <code>nova-ai</code> a tu PATH.</p>
+    </div>
+    <div class="cmds">
+      <div class="cmd-card"><code>nova</code><p>Abre el editor.</p></div>
+      <div class="cmd-card"><code>nova .</code><p>Abre la carpeta actual como espacio de trabajo.</p></div>
+      <div class="cmd-card"><code>nova archivo.ts</code><p>Abre un archivo directamente en el editor.</p></div>
+      <div class="cmd-card"><code>nova-ai</code><p>Abre el editor con el asistente de IA enfocado.</p></div>
+      <div class="cmd-card"><code>Ctrl+K Ctrl+S</code><p>Referencia completa de atajos dentro de la app.</p></div>
+      <div class="cmd-card"><code>Ctrl+`</code><p>Abre la terminal PowerShell integrada.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="descargar">
+  <div class="container dl-wrap">
+    <span class="kicker">Descargar</span>
+    <h2 style="font-size:clamp(28px,4vw,40px);font-weight:800;letter-spacing:-.8px">Empieza en un minuto</h2>
+    <p style="color:var(--muted);margin-top:12px;max-width:520px;margin-left:auto;margin-right:auto">Instala el editor y añade tu clave de IA en <b>Ajustes → Asistente de IA</b>. Tu clave se guarda solo en tu equipo.</p>
+    <div class="dl-btns">
+      <a class="btn btn-primary" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0-alpha/Nova.Setup.1.0.0.exe">Instalador (.exe)</a>
+      <a class="btn btn-ghost" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0-alpha/Nova.1.0.0.exe">Portable (.exe)</a>
+      <a class="btn btn-teal" href="/app/">Probar en el navegador</a>
+    </div>
+    <p class="dl-note">También en <a href="https://github.com/adrianfilitos/nova-editor/releases">GitHub Releases</a> · Código abierto bajo <a href="https://github.com/adrianfilitos/nova-editor">licencia MIT</a></p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <span>© 2026 Nova · Hecho con Electron, React, Monaco y Vite</span>
+    <span><a href="https://github.com/adrianfilitos/nova-editor">GitHub</a> · <a href="https://github.com/adrianfilitos/nova-editor/releases">Releases</a></span>
+  </div>
+</footer>
+</body>
+</html>

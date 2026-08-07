@@ -2,7 +2,8 @@
 
 Editor de código moderno con IA integrada, hecho con **Electron, React, Monaco y Vite**.
 
-- **Versión web** (GitHub Pages): disponible en la URL del proyecto.
+- **Landing page** (GitHub Pages): la página de presentación del proyecto.
+- **Editor web (demo)**: disponible en `/app` de la landing.
 - **Escritorio (Windows)**: instalador `.exe` y versión portable en Releases.
 
 ## Características
