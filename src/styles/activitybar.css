@@ -1,0 +1,89 @@
+.activity-bar {
+  width: 48px;
+  flex-shrink: 0;
+  background: var(--bg-activity);
+  border-right: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  gap: 2px;
+  z-index: 20;
+  user-select: none;
+}
+
+.activity-bar__logo {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 8px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.activity-bar__logo:hover {
+  transform: scale(1.12) rotate(-6deg);
+}
+
+.activity-btn {
+  position: relative;
+  width: 44px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: var(--fg-muted);
+  border-radius: 8px;
+  transition: color 0.15s, background 0.15s, transform 0.12s;
+}
+
+.activity-btn:hover {
+  color: var(--fg);
+  background: var(--bg-hover);
+}
+
+.activity-btn:active {
+  transform: scale(0.92);
+}
+
+.activity-btn--active {
+  color: var(--accent);
+}
+
+.activity-btn--active::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 22px;
+  border-radius: 3px;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: fadeIn 0.2s ease;
+}
+
+.activity-btn--active:hover {
+  background: transparent;
+}
+
+.activity-btn--ai {
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  color: #fff;
+  border-radius: 10px;
+  margin: 2px 0;
+}
+
+.activity-btn--ai:hover {
+  color: #fff;
+  filter: brightness(1.1);
+}
+
+.activity-bar__bottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}

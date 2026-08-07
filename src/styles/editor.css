@@ -1,0 +1,18 @@
+.editor-pane {
+  position: absolute;
+  inset: 0;
+}
+
+.editor-loading {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--fg-muted);
+  font-size: 13px;
+}
+
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused {
+  background: var(--bg-active) !important;
+}
