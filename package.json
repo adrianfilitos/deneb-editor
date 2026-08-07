@@ -1,7 +1,7 @@
 {
   "name": "nova-code-editor",
   "private": true,
-  "version": "1.1.0-alpha",
+  "version": "1.2.0-alpha",
   "description": "Nova — Editor de código con IA (web + escritorio)",
   "type": "module",
   "main": "electron/main.cjs",

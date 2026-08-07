@@ -249,7 +249,7 @@ export function SettingsPanel() {
           <div className="settings__logo"><Icons.sparkles size={22} /></div>
           <div>
             <div className="settings__name">Nova Editor</div>
-            <div className="settings__version">Versión 1.1.0-alpha · Editor de código con IA</div>
+            <div className="settings__version">Versión 1.2.0-alpha · Editor de código con IA</div>
           </div>
         </div>
       </div>
