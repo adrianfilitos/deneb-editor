@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import { AI_PROVIDERS, providerPreset } from '../lib/ai'
+import { clearNovaData } from '../lib/storageReset'
 import type { AIProvider } from '../types'
 import { Icons } from './icons'
 
@@ -199,6 +200,26 @@ export function SettingsPanel() {
         <p className="settings__note">
           Tu clave se guarda solo en este navegador (localStorage) y se envía únicamente a la URL base configurada.
         </p>
+      </div>
+
+      <div className="settings__group">
+        <h4>Datos</h4>
+        <p className="settings__note">
+          Restablece ajustes, sesión y extensiones instaladas para empezar desde cero.
+        </p>
+        <div className="settings__row">
+          <label></label>
+          <button
+            className="btn btn--danger"
+            onClick={() => {
+              if (window.confirm('¿Borrar todos los datos de Nova (ajustes, sesión y extensiones) y empezar de nuevo?')) {
+                void clearNovaData().then(() => window.location.reload())
+              }
+            }}
+          >
+            <Icons.trash size={14} /> Restablecer todos los datos
+          </button>
+        </div>
       </div>
 
       <div className="settings__group">
