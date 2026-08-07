@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import { AI_PROVIDERS, providerPreset } from '../lib/ai'
 import { clearNovaData } from '../lib/storageReset'
+import { UpdatesSection } from './UpdatesSection'
 import type { AIProvider } from '../types'
 import { Icons } from './icons'
 
@@ -201,6 +202,8 @@ export function SettingsPanel() {
           Tu clave se guarda solo en este navegador (localStorage) y se envía únicamente a la URL base configurada.
         </p>
       </div>
+
+      <UpdatesSection />
 
       <div className="settings__group">
         <h4>Datos</h4>

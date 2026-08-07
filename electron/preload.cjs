@@ -41,6 +41,16 @@ contextBridge.exposeInMainWorld('novaDesktop', {
     installed: () => ipcRenderer.invoke('nova:ext:installed'),
     dir: () => ipcRenderer.invoke('nova:ext:dir'),
   },
+  updates: {
+    version: () => ipcRenderer.invoke('nova:update:version'),
+    check: () => ipcRenderer.send('nova:update:check'),
+    install: () => ipcRenderer.send('nova:update:install'),
+    onStatus: (cb) => {
+      const handler = (_e, data) => cb(data)
+      ipcRenderer.on('nova:update:status', handler)
+      return () => ipcRenderer.removeListener('nova:update:status', handler)
+    },
+  },
   term: {
     start: (cwd) => ipcRenderer.invoke('nova:term:start', cwd),
     write: (data) => ipcRenderer.invoke('nova:term:write', data),

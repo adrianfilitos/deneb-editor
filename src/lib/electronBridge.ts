@@ -98,6 +98,29 @@ export interface NovaDesktopExt {
   dir: () => Promise<string>
 }
 
+export type UpdateStatusType = 'checking' | 'available' | 'downloading' | 'downloaded' | 'not-available' | 'error'
+
+export interface UpdateStatusPayload {
+  type: UpdateStatusType
+  version?: string
+  percent?: number
+  message?: string
+}
+
+export interface UpdateVersionInfo {
+  version: string
+  supported: boolean
+  portable: boolean
+  packaged: boolean
+}
+
+export interface NovaDesktopUpdates {
+  version: () => Promise<UpdateVersionInfo>
+  check: () => void
+  install: () => void
+  onStatus: (cb: (data: UpdateStatusPayload) => void) => () => void
+}
+
 export interface NovaDesktopBridge {
   isDesktop: boolean
   on: (channel: string, cb: (data?: unknown) => void) => () => void
@@ -107,6 +130,7 @@ export interface NovaDesktopBridge {
   menu: NovaDesktopMenu
   git?: NovaDesktopGit
   ext?: NovaDesktopExt
+  updates?: NovaDesktopUpdates
 }
 
 declare global {

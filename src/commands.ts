@@ -184,6 +184,17 @@ export function commands(): CommandDef[] {
       },
     },
     {
+      id: 'workbench.action.checkUpdates',
+      title: 'Preferencias: Buscar actualizaciones',
+      category: 'Preferencias',
+      icon: 'download',
+      run: () => {
+        const store = useEditorStore.getState()
+        store.setSidebarView('settings')
+        window.dispatchEvent(new CustomEvent('nova:update:check'))
+      },
+    },
+    {
       id: 'ai.action.newChat',
       title: 'IA: Nueva conversación',
       category: 'IA',

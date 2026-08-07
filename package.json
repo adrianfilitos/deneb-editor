@@ -5,6 +5,10 @@
   "description": "Nova — Editor de código con IA (web + escritorio)",
   "type": "module",
   "main": "electron/main.cjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adrianfilitos/nova-editor.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -12,10 +16,12 @@
     "typecheck": "tsc -b",
     "electron:dev": "concurrently -k \"npm:dev\" \"cross-env NOVA_DEV=1 electron .\"",
     "electron:build": "npm run build && electron-builder",
-    "electron:start": "cross-env NOVA_DEV=0 electron ."
+    "electron:start": "cross-env NOVA_DEV=0 electron .",
+    "dist": "electron-builder --publish never"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
+    "electron-updater": "^6.8.9",
     "monaco-editor": "^0.52.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -35,6 +41,11 @@
   "build": {
     "appId": "com.nova.editor",
     "productName": "Nova",
+    "publish": {
+      "provider": "github",
+      "owner": "adrianfilitos",
+      "repo": "nova-editor"
+    },
     "directories": {
       "output": "release"
     },
@@ -55,7 +66,11 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "include": "installer.nsh",
-      "warningsAsErrors": false
+      "warningsAsErrors": false,
+      "artifactName": "Nova-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "Nova-${version}.${ext}"
     }
   },
   "allowScripts": {

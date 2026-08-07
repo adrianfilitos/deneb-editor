@@ -3,9 +3,14 @@ const path = require('path')
 const fs = require('fs')
 const os = require('os')
 const { spawn } = require('child_process')
+const { autoUpdater } = require('electron-updater')
 
 const isDev = process.env.NOVA_DEV === '1'
 const DEV_URL = 'http://127.0.0.1:5173'
+
+// Portapapel portable: electron-builder fija PORTABLE_EXECUTABLE_FILE solo en la build portable
+const isPortable = !!process.env.PORTABLE_EXECUTABLE_FILE
+const updatesSupported = app.isPackaged && !isPortable && !isDev
 
 let mainWindow = null
 let workspaceRoot = null
@@ -34,6 +39,101 @@ function sendToWindow(channel, ...args) {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send(channel, ...args)
   }
+}
+
+// ---------------------------------------------------------------------------
+// Sistema de actualizaciones (electron-updater + GitHub Releases)
+// ---------------------------------------------------------------------------
+
+function setupAutoUpdater() {
+  if (!updatesSupported) return
+
+  autoUpdater.autoDownload = true
+  autoUpdater.autoInstallOnAppQuit = true
+  autoUpdater.allowPrerelease = true
+  autoUpdater.logger = {
+    info() {},
+    warn() {},
+    error() {},
+    debug() {},
+  }
+
+  try {
+    autoUpdater.setFeedURL({ provider: 'github', owner: 'adrianfilitos', repo: 'nova-editor' })
+  } catch (e) {
+    sendToWindow('nova:update:status', { type: 'error', message: String(e.message || e) })
+    return
+  }
+
+  autoUpdater.on('checking-for-update', () => {
+    sendToWindow('nova:update:status', { type: 'checking' })
+  })
+
+  autoUpdater.on('update-available', (info) => {
+    sendToWindow('nova:update:status', { type: 'available', version: info.version })
+  })
+
+  autoUpdater.on('update-not-available', (info) => {
+    sendToWindow('nova:update:status', { type: 'not-available', version: info.version })
+  })
+
+  autoUpdater.on('download-progress', (p) => {
+    sendToWindow('nova:update:status', { type: 'downloading', percent: Math.round(p.percent || 0) })
+  })
+
+  autoUpdater.on('update-downloaded', (info) => {
+    sendToWindow('nova:update:status', { type: 'downloaded', version: info.version })
+  })
+
+  autoUpdater.on('error', (err) => {
+    sendToWindow('nova:update:status', { type: 'error', message: String((err && err.message) || err) })
+  })
+
+  // Comprobación silenciosa al arrancar (una vez la ventana está lista)
+  mainWindow?.webContents.once('did-finish-load', () => {
+    setTimeout(() => {
+      try {
+        autoUpdater.checkForUpdates().catch(() => {})
+      } catch {
+        // ignore
+      }
+    }, 8000)
+  })
+}
+
+function registerUpdateHandlers() {
+  ipcMain.handle('nova:update:version', () => ({
+    version: app.getVersion(),
+    supported: updatesSupported,
+    portable: isPortable,
+    packaged: app.isPackaged,
+  }))
+
+  ipcMain.on('nova:update:check', () => {
+    if (!updatesSupported) {
+      sendToWindow('nova:update:status', {
+        type: 'error',
+        message: isPortable
+          ? 'La versión portable no se actualiza automáticamente. Descarga la nueva versión desde GitHub Releases.'
+          : 'Las actualizaciones automáticas solo están disponibles en la versión instalada.',
+      })
+      return
+    }
+    try {
+      autoUpdater.checkForUpdates().catch(() => {})
+    } catch {
+      // ignore
+    }
+  })
+
+  ipcMain.on('nova:update:install', () => {
+    if (!updatesSupported) return
+    try {
+      autoUpdater.quitAndInstall(false, true)
+    } catch {
+      // ignore
+    }
+  })
 }
 
 function startTerminal(cwd) {
@@ -510,6 +610,23 @@ function buildMenu(win) {
       label: 'Ayuda',
       submenu: [
         {
+          label: 'Buscar actualizaciones…',
+          click: () => {
+            if (!updatesSupported) {
+              dialog.showMessageBox(win, {
+                type: 'info',
+                title: 'Nova',
+                message: isPortable
+                  ? 'La versión portable no se actualiza automáticamente.'
+                  : 'Las actualizaciones automáticas solo están disponibles en la versión instalada.',
+                detail: 'Descarga la nueva versión desde GitHub Releases: https://github.com/adrianfilitos/nova-editor/releases',
+              })
+              return
+            }
+            sendToWindow('nova:update:check')
+          },
+        },
+        {
           label: 'Referencia de atajos',
           click: () => sendToWindow('nova:show-shortcuts'),
         },
@@ -604,10 +721,12 @@ app.whenReady().then(() => {
   registerFsHandlers()
   registerGitHandlers()
   registerExtHandlers()
+  registerUpdateHandlers()
   registerTerminalHandlers()
   registerWindowHandlers()
   registerMenuHandlers()
   createWindow()
+  setupAutoUpdater()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
