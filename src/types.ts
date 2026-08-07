@@ -41,8 +41,19 @@ export interface OpenTab {
   dirty: boolean
 }
 
+export type ThemeId =
+  | 'nova-dark'
+  | 'nova-light'
+  | 'nova-midnight'
+  | 'nova-ocean'
+  | 'nova-forest'
+  | 'nova-sunset'
+  | 'nova-sakura'
+  | 'nova-mono'
+  | 'nova-paper'
+
 export interface ThemeSettings {
-  mode: 'nova-dark' | 'nova-light' | 'system'
+  mode: ThemeId
 }
 
 export type AIProvider = 'deepseek' | 'openai' | 'anthropic' | 'local'

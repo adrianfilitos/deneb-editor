@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import Editor, { type Monaco, type OnMount } from '@monaco-editor/react'
 import type { editor as monacoEditor, languages as monacoLanguages } from 'monaco-editor'
 import { useEditorStore } from '../store/editorStore'
-import { defineNovaThemes, setEditorTheme, NOVA_DARK, NOVA_LIGHT } from '../lib/monaco'
+import { defineNovaThemes, setEditorTheme } from '../lib/monaco'
 import { VimMode } from '../lib/vim'
 import { useAIChatStore } from '../store/aiChatStore'
 import type { ChatMessage } from '../types'
@@ -28,7 +28,7 @@ export function EditorPane({ groupId }: { groupId: string }) {
       defineNovaThemes()
       themesDefined = true
     }
-    setEditorTheme(settings.theme === NOVA_LIGHT ? NOVA_LIGHT : NOVA_DARK)
+    setEditorTheme(settings.theme)
   }, [settings.theme])
 
   // Vim mode toggle
@@ -142,7 +142,7 @@ export function EditorPane({ groupId }: { groupId: string }) {
         path={activeTab?.path}
         language={activeTab?.language}
         value={activeTab?.content}
-        theme={settings.theme === NOVA_LIGHT ? NOVA_LIGHT : NOVA_DARK}
+        theme={settings.theme}
         options={options}
         onMount={handleMount}
         onChange={handleChange}

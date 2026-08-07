@@ -2,9 +2,22 @@ import { useState } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import { AI_PROVIDERS, providerPreset } from '../lib/ai'
 import { clearNovaData } from '../lib/storageReset'
+import { THEME_PALETTES, THEME_IDS } from '../lib/monaco'
 import { UpdatesSection } from './UpdatesSection'
-import type { AIProvider } from '../types'
+import type { AIProvider, ThemeId } from '../types'
 import { Icons } from './icons'
+
+const THEME_NAMES: Record<ThemeId, string> = {
+  'nova-dark': 'Nova Dark',
+  'nova-light': 'Nova Light',
+  'nova-midnight': 'Midnight',
+  'nova-ocean': 'Ocean',
+  'nova-forest': 'Forest',
+  'nova-sunset': 'Sunset',
+  'nova-sakura': 'Sakura',
+  'nova-mono': 'Mono',
+  'nova-paper': 'Paper',
+}
 
 export function SettingsPanel() {
   const settings = useEditorStore((s) => s.settings)
@@ -35,20 +48,25 @@ export function SettingsPanel() {
         <div className="settings__row">
           <label>Tema</label>
           <div className="settings__themes">
-            <button
-              className={`theme-card${settings.theme === 'nova-dark' ? ' theme-card--active' : ''}`}
-              onClick={() => update({ theme: 'nova-dark' })}
-            >
-              <span className="theme-card__preview theme-card__preview--dark" />
-              <span>Nova Dark</span>
-            </button>
-            <button
-              className={`theme-card${settings.theme === 'nova-light' ? ' theme-card--active' : ''}`}
-              onClick={() => update({ theme: 'nova-light' })}
-            >
-              <span className="theme-card__preview theme-card__preview--light" />
-              <span>Nova Light</span>
-            </button>
+            {THEME_IDS.map((id) => {
+              const p = THEME_PALETTES[id]
+              return (
+                <button
+                  key={id}
+                  className={`theme-card${settings.theme === id ? ' theme-card--active' : ''}`}
+                  onClick={() => update({ theme: id })}
+                  title={id}
+                >
+                  <span
+                    className="theme-card__preview"
+                    style={{ background: `linear-gradient(135deg, ${p.bg} 0 60%, ${p.widgetBg} 60% 100%)` }}
+                  >
+                    <span className="theme-card__preview-accent" style={{ background: p.cursor }} />
+                  </span>
+                  <span>{THEME_NAMES[id]}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>

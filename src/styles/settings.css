@@ -145,8 +145,10 @@ select.settings__input {
 }
 
 .settings__themes {
-  display: flex;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  width: 100%;
 }
 
 .theme-card {
@@ -180,34 +182,13 @@ select.settings__input {
   position: relative;
 }
 
-.theme-card__preview--dark {
-  background: #0f111a;
-}
-
-.theme-card__preview--dark::after {
-  content: '';
+.theme-card__preview-accent {
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
   width: 14px;
-  background: #82aaff;
-  opacity: 0.7;
-}
-
-.theme-card__preview--light {
-  background: #fbfbfd;
-}
-
-.theme-card__preview--light::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 14px;
-  background: #2962ff;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 .toggle {

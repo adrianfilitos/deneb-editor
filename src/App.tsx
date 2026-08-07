@@ -16,7 +16,6 @@ import { TitleBar } from './components/TitleBar'
 export default function App() {
   const sidebarVisible = useEditorStore((s) => s.sidebarVisible)
   const groups = useEditorStore((s) => s.groups)
-  const theme = useEditorStore((s) => s.settings.theme)
   const settings = useEditorStore((s) => s.settings)
   const zenMode = useEditorStore((s) => s.zenMode)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
@@ -24,8 +23,8 @@ export default function App() {
   useGlobalShortcuts()
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme === 'nova-light' ? 'nova-light' : 'nova-dark'
-  }, [theme])
+    document.documentElement.dataset.theme = settings.theme
+  }, [settings.theme])
 
   useEffect(() => {
     document.body.style.fontSize = `${settings.fontSize - 3}px`
