@@ -76,6 +76,7 @@ export function EditorPane({ groupId }: { groupId: string }) {
     focusWindow.__novaEditor = editor
     if (activePath) focusWindow.__novaFocusPath = activePath
     vimRef.current = new VimMode(editor)
+    vimRef.current.setEnabled(settings.vimMode)
     setupAIActions(editor, monaco)
     setupInlineCompletions(monaco)
     editor.onDidChangeCursorPosition((e) => {

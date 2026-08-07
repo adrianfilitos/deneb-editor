@@ -161,7 +161,7 @@ export class VimMode {
       return
     }
 
-    if (key.length !== 1 && !['Enter', 'Backspace', 'Space'].includes(key)) {
+    if (key.length !== 1 && !['Enter', 'Backspace', 'Space', 'Escape'].includes(key)) {
       return
     }
 
