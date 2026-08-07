@@ -3,6 +3,7 @@ import Editor, { type Monaco, type OnMount } from '@monaco-editor/react'
 import type { editor as monacoEditor, languages as monacoLanguages } from 'monaco-editor'
 import { useEditorStore } from '../store/editorStore'
 import { defineNovaThemes, setEditorTheme, NOVA_DARK, NOVA_LIGHT } from '../lib/monaco'
+import { VimMode } from '../lib/vim'
 import { useAIChatStore } from '../store/aiChatStore'
 import type { ChatMessage } from '../types'
 
@@ -19,6 +20,7 @@ export function EditorPane({ groupId }: { groupId: string }) {
   const setCursor = useEditorStore((s) => s.setCursor)
   const settings = useEditorStore((s) => s.settings)
   const editorRef = useRef<monacoEditor.IStandaloneCodeEditor | null>(null)
+  const vimRef = useRef<VimMode | null>(null)
   const pathRef = useRef(activePath)
 
   useEffect(() => {
@@ -28,6 +30,11 @@ export function EditorPane({ groupId }: { groupId: string }) {
     }
     setEditorTheme(settings.theme === NOVA_LIGHT ? NOVA_LIGHT : NOVA_DARK)
   }, [settings.theme])
+
+  // Vim mode toggle
+  useEffect(() => {
+    vimRef.current?.setEnabled(settings.vimMode)
+  }, [settings.vimMode])
 
   const options = useMemo<monacoEditor.IStandaloneEditorConstructionOptions>(() => ({
     fontSize: settings.fontSize,
@@ -68,6 +75,7 @@ export function EditorPane({ groupId }: { groupId: string }) {
     editorRef.current = editor
     focusWindow.__novaEditor = editor
     if (activePath) focusWindow.__novaFocusPath = activePath
+    vimRef.current = new VimMode(editor)
     setupAIActions(editor, monaco)
     setupInlineCompletions(monaco)
     editor.onDidChangeCursorPosition((e) => {

@@ -103,6 +103,14 @@ export function commands(): CommandDef[] {
       run: () => s.setSidebarView('outline'),
     },
     {
+      id: 'workbench.action.view.git',
+      title: 'Ver: Control de código fuente (Git)',
+      category: 'Ver',
+      keybinding: 'Ctrl+Shift+G',
+      icon: 'git',
+      run: () => s.setSidebarView('git'),
+    },
+    {
       id: 'workbench.action.view.problems',
       title: 'Ver: Problemas',
       category: 'Ver',
@@ -164,6 +172,16 @@ export function commands(): CommandDef[] {
       keybinding: 'Ctrl+,',
       icon: 'gear',
       run: () => s.setSidebarView('settings'),
+    },
+    {
+      id: 'workbench.action.toggleVim',
+      title: 'Preferencias: Alternar modo Vim',
+      category: 'Preferencias',
+      icon: 'command',
+      run: () => {
+        const next = !useEditorStore.getState().settings.vimMode
+        useEditorStore.getState().updateSettings({ vimMode: next })
+      },
     },
     {
       id: 'ai.action.newChat',

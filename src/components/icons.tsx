@@ -243,6 +243,40 @@ export const Icons = {
       <rect x="5.5" y="5.5" width="13" height="13" rx="1.5" />
     </Base>
   ),
+  gitBranch: (p: IconProps) => (
+    <Base {...p}>
+      <circle cx="6" cy="6" r="2.5" />
+      <circle cx="6" cy="18" r="2.5" />
+      <circle cx="18" cy="6" r="2.5" />
+      <path d="M8.5 6h5a4.5 4.5 0 0 1 4.5 4.5V8.5M6 8.5v7" />
+    </Base>
+  ),
+  arrowUp: (p: IconProps) => (
+    <Base {...p}>
+      <path d="M12 19V5M5 12l7-7 7 7" />
+    </Base>
+  ),
+  arrowDown: (p: IconProps) => (
+    <Base {...p}>
+      <path d="M12 5v14M5 12l7 7 7-7" />
+    </Base>
+  ),
+  download: (p: IconProps) => (
+    <Base {...p}>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <path d="M7 10l5 5 5-5M12 15V3" />
+    </Base>
+  ),
+  diff: (p: IconProps) => (
+    <Base {...p}>
+      <path d="M12 3v18M3 12h18M3 3l18 18M21 3L3 21" />
+    </Base>
+  ),
+  extension: (p: IconProps) => (
+    <Base {...p}>
+      <path d="M8 3a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1h3a2 2 0 0 1 2 2v3h1a2 2 0 0 1 0 4h-1v3a2 2 0 0 1-2 2h-3v1a2 2 0 0 1-4 0v-1H7a2 2 0 0 1-2-2v-3H4a2 2 0 0 1 0-4h1V6a2 2 0 0 1 2-2h3V3z" />
+    </Base>
+  ),
 } as const
 
 export type IconName = keyof typeof Icons

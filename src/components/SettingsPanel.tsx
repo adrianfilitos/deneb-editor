@@ -79,6 +79,11 @@ export function SettingsPanel() {
           value={settings.formatOnSave}
           onChange={(v) => update({ formatOnSave: v })}
         />
+        <ToggleRow
+          label="Modo Vim (teclas de Vim)"
+          value={settings.vimMode}
+          onChange={(v) => update({ vimMode: v })}
+        />
         <div className="settings__row">
           <label>Envolver línea</label>
           <div className="settings__segmented">
@@ -202,7 +207,7 @@ export function SettingsPanel() {
           <div className="settings__logo"><Icons.sparkles size={22} /></div>
           <div>
             <div className="settings__name">Nova Editor</div>
-            <div className="settings__version">Versión 1.0.1-alpha · Editor de código con IA</div>
+            <div className="settings__version">Versión 1.1.0-alpha · Editor de código con IA</div>
           </div>
         </div>
       </div>

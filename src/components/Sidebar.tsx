@@ -5,12 +5,14 @@ import { AIPanel } from './AIPanel'
 import { ExtensionsPanel } from './ExtensionsPanel'
 import { SettingsPanel } from './SettingsPanel'
 import { OutlinePanel } from './OutlinePanel'
+import { GitPanel } from './GitPanel'
 import { ErrorBoundary } from './ErrorBoundary'
 import { Icons } from './icons'
 
 const TITLES: Record<string, { title: string; subtitle?: string }> = {
   explorer: { title: 'Explorador' },
   search: { title: 'Buscar', subtitle: 'en archivos' },
+  git: { title: 'Control de código fuente', subtitle: 'Git' },
   ai: { title: 'Asistente de IA', subtitle: 'Nova AI' },
   extensions: { title: 'Extensiones' },
   settings: { title: 'Ajustes' },
@@ -44,6 +46,7 @@ export function Sidebar() {
         <ErrorBoundary label="el explorador">
           {view === 'explorer' && <Explorer />}
           {view === 'search' && <SearchPanel />}
+          {view === 'git' && <GitPanel />}
           {view === 'ai' && <AIPanel />}
           {view === 'extensions' && <ExtensionsPanel />}
           {view === 'settings' && <SettingsPanel />}

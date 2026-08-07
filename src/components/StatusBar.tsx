@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react'
 import { useEditorStore } from '../store/editorStore'
+import { useGitStore } from '../store/gitStore'
 import { displayLanguage } from '../lib/languages'
 import { Icons } from './icons'
 
@@ -16,6 +18,25 @@ export function StatusBar() {
   const setBottomView = useEditorStore((s) => s.setBottomView)
   const toggleZen = useEditorStore((s) => s.toggleZen)
   const zenMode = useEditorStore((s) => s.zenMode)
+  const gitAvailable = useGitStore((s) => s.available && s.isRepo)
+  const gitBranch = useGitStore((s) => s.branch)
+  const gitChanges = useGitStore((s) => s.changes.length)
+
+  const [vimState, setVimState] = useState<'NORMAL' | 'INSERT' | 'VISUAL' | 'VISUAL LINE' | 'SEARCH' | 'OFF'>(
+    settings.vimMode ? 'NORMAL' : 'OFF',
+  )
+
+  useEffect(() => {
+    const onMode = (e: Event) => {
+      const detail = (e as CustomEvent).detail as typeof vimState
+      if (detail) setVimState(detail)
+    }
+    window.addEventListener('nova:vim-mode', onMode)
+    return () => window.removeEventListener('nova:vim-mode', onMode)
+  }, [])
+
+  const showVim = settings.vimMode && vimState !== 'OFF'
+  const branch = gitAvailable ? gitBranch : ''
 
   return (
     <div className="statusbar">
@@ -35,9 +56,21 @@ export function StatusBar() {
             <button className="status-item" onClick={() => openPalette('command')} title="Paleta de comandos">
               <Icons.command size={13} />
             </button>
-            <span className="status-item status-item--text">
-              <Icons.git size={12} style={{ verticalAlign: -1 }} /> main
-            </span>
+            {showVim && (
+              <span className={`status-item status-item--vim status-item--vim-${vimState.toLowerCase().replace(' ', '-')}`} title="Modo Vim">
+                {vimState === 'VISUAL LINE' ? '-- VISUAL LÍNEA' : vimState === 'SEARCH' ? '-- BUSCAR' : `-- ${vimState}`}
+              </span>
+            )}
+            {branch ? (
+              <button className="status-item status-item--text" onClick={() => setSidebarView('git')} title="Control de código fuente">
+                <Icons.git size={12} style={{ verticalAlign: -1 }} /> {branch}
+                {gitChanges > 0 && <span className="status-item__dot">{gitChanges}</span>}
+              </button>
+            ) : (
+              <span className="status-item status-item--text">
+                <Icons.git size={12} style={{ verticalAlign: -1 }} /> main
+              </span>
+            )}
             <span className="status-item status-item--text status-item--accent">
               {dirtyCount > 0 ? `● ${dirtyCount} sin guardar` : 'Sincronizado'}
             </span>

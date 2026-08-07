@@ -49,6 +49,55 @@ export interface NovaDesktopMenu {
   about: () => void
 }
 
+export interface GitResult {
+  ok: boolean
+  out?: string
+  error?: string
+}
+
+export interface GitStatusResult {
+  ok: boolean
+  status: string
+  branch: string
+  log: string
+  error?: string
+}
+
+export interface GitBranchesResult {
+  ok: boolean
+  branches: string[]
+  current: string
+  error?: string
+}
+
+export interface GitDiffResult {
+  ok: boolean
+  diff: string
+  error?: string
+}
+
+export interface NovaDesktopGit {
+  available: () => Promise<boolean>
+  status: () => Promise<GitStatusResult>
+  add: (paths: string[]) => Promise<GitResult>
+  reset: (paths: string[]) => Promise<GitResult>
+  commit: (msg: string) => Promise<GitResult>
+  branches: () => Promise<GitBranchesResult>
+  checkout: (name: string) => Promise<GitResult>
+  createBranch: (name: string) => Promise<GitResult>
+  diff: (file: string, staged?: boolean) => Promise<GitDiffResult>
+  push: () => Promise<GitResult>
+  pull: () => Promise<GitResult>
+  fetch: () => Promise<GitResult>
+  log: () => Promise<{ ok: boolean; log: string; error?: string }>
+}
+
+export interface NovaDesktopExt {
+  install: (url: string, filename: string) => Promise<{ ok: boolean; path?: string; size?: number; error?: string }>
+  installed: () => Promise<{ file: string; size: number }[]>
+  dir: () => Promise<string>
+}
+
 export interface NovaDesktopBridge {
   isDesktop: boolean
   on: (channel: string, cb: (data?: unknown) => void) => () => void
@@ -56,6 +105,8 @@ export interface NovaDesktopBridge {
   term: NovaDesktopTerm
   windowControls: NovaDesktopWindow
   menu: NovaDesktopMenu
+  git?: NovaDesktopGit
+  ext?: NovaDesktopExt
 }
 
 declare global {

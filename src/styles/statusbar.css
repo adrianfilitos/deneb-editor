@@ -72,3 +72,54 @@ button.status-item:hover {
 .statusbar .spin {
   animation: spin 1s linear infinite;
 }
+
+.status-item__dot {
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--green);
+  color: #0b0d14;
+  font-size: 9px;
+  font-weight: 700;
+  display: inline-grid;
+  place-items: center;
+}
+
+.status-item--vim {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.status-item--vim-normal {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.status-item--vim-insert {
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 12%, transparent);
+}
+
+.status-item--vim-visual {
+  color: var(--orange);
+  background: color-mix(in srgb, var(--orange) 12%, transparent);
+}
+
+.status-item--vim-visual-line {
+  color: var(--orange);
+  background: color-mix(in srgb, var(--orange) 12%, transparent);
+}
+
+.status-item--vim-search {
+  color: var(--purple);
+  background: color-mix(in srgb, var(--purple) 12%, transparent);
+}
+
+.vim-search-match {
+  background: color-mix(in srgb, var(--orange) 38%, transparent);
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--orange) 55%, transparent);
+}

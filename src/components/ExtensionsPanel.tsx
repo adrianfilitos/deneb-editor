@@ -1,174 +1,212 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useEditorStore } from '../store/editorStore'
+import {
+  searchOpenVSX,
+  iconUrl,
+  downloadUrl,
+  extDisplayName,
+  extPublisher,
+  extId,
+  extFileName,
+  formatDownloads,
+  type OpenVSXExtension,
+} from '../lib/openvsx'
+import { isDesktop } from '../lib/electronBridge'
 import { Icons } from './icons'
 
-interface ExtDef {
-  id: string
-  name: string
-  publisher: string
+const INSTALLED_KEY = 'nova.extensions.installed.v1'
+
+interface InstalledMeta {
   version: string
-  description: string
-  icon: string
-  color: string
-  installs: string
-  rating: number
-  action?: 'formatOnSave' | 'minimap' | 'wordWrap' | 'aiProvider'
+  when: number
 }
 
-const FEATURED: ExtDef[] = [
-  {
-    id: 'nova.auto-format',
-    name: 'Auto-Formato',
-    publisher: 'Nova Labs',
-    version: '1.2.0',
-    description: 'Formatea automáticamente el código al guardar el archivo.',
-    icon: 'sparkles',
-    color: '#82aaff',
-    installs: '2.1M',
-    rating: 4.8,
-    action: 'formatOnSave',
-  },
-  {
-    id: 'nova.ai-copilot',
-    name: 'Copilot de Código',
-    publisher: 'Nova AI',
-    version: '2.0.1',
-    description: 'Sugerencias de código en tiempo real con IA mientras escribes.',
-    icon: 'zap',
-    color: '#c792ea',
-    installs: '5.3M',
-    rating: 4.9,
-    action: 'aiProvider',
-  },
-  {
-    id: 'nova.minimap',
-    name: 'Minimapa Mejorado',
-    publisher: 'Nova Labs',
-    version: '3.1.0',
-    description: 'Mapa general del archivo con resaltado de código y navegación.',
-    icon: 'file',
-    color: '#7dcfff',
-    installs: '1.8M',
-    rating: 4.6,
-    action: 'minimap',
-  },
-  {
-    id: 'nova.word-wrap',
-    name: 'Ajuste de Línea',
-    publisher: 'Nova Labs',
-    version: '1.0.4',
-    description: 'Envuelve automáticamente las líneas largas en todos los editores.',
-    icon: 'panel',
-    color: '#9ece6a',
-    installs: '890K',
-    rating: 4.5,
-    action: 'wordWrap',
-  },
-  {
-    id: 'nova.theme-nova',
-    name: 'Tema Nova Dark+',
-    publisher: 'Nova Theme',
-    version: '4.3.2',
-    description: 'Tema oscuro moderno con colores vibrantes y alto contraste.',
-    icon: 'sparkles',
-    color: '#f7768e',
-    installs: '1.2M',
-    rating: 4.7,
-  },
-  {
-    id: 'nova.language-packs',
-    name: 'Paquetes de Lenguaje ES',
-    publisher: 'Microsoft-like',
-    version: '1.94.0',
-    description: 'Traduce la interfaz a más de 100 idiomas.',
-    icon: 'git',
-    color: '#e0af68',
-    installs: '12M',
-    rating: 4.9,
-  },
-  {
-    id: 'nova.error-lens',
-    name: 'Error Lens',
-    publisher: 'Community',
-    version: '3.18.0',
-    description: 'Muestra los errores y advertencias en línea, junto al código.',
-    icon: 'warning',
-    color: '#f7768e',
-    installs: '4.4M',
-    rating: 4.8,
-  },
-  {
-    id: 'nova.prettier',
-    name: 'Prettier',
-    publisher: 'Prettier Team',
-    version: '10.5.0',
-    description: 'Formateador de código opinado para JS, TS, CSS y más.',
-    icon: 'bold',
-    color: '#e44d26',
-    installs: '9.2M',
-    rating: 4.9,
-  },
-]
+function loadInstalled(): Record<string, InstalledMeta> {
+  try {
+    const raw = localStorage.getItem(INSTALLED_KEY)
+    if (raw) return JSON.parse(raw) as Record<string, InstalledMeta>
+  } catch {
+    // ignore
+  }
+  return {}
+}
 
-function ExtIcon({ name }: { name: string }) {
-  const C = Icons[name as keyof typeof Icons] || Icons.file
-  return <C size={18} />
+function saveInstalled(map: Record<string, InstalledMeta>) {
+  try {
+    localStorage.setItem(INSTALLED_KEY, JSON.stringify(map))
+  } catch {
+    // ignore
+  }
 }
 
 export function ExtensionsPanel() {
-  const [installed, setInstalled] = useState<Set<string>>(() => new Set(['nova.theme-nova', 'nova.language-packs']))
-  const updateSettings = useEditorStore((s) => s.updateSettings)
+  const setStatus = useEditorStore((s) => s.setStatus)
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<OpenVSXExtension[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [installed, setInstalled] = useState<Record<string, InstalledMeta>>(loadInstalled)
+  const [busyId, setBusyId] = useState<string | null>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  function toggle(ext: ExtDef) {
-    const next = new Set(installed)
-    if (next.has(ext.id)) {
-      next.delete(ext.id)
-    } else {
-      next.add(ext.id)
-      if (ext.action === 'formatOnSave') updateSettings({ formatOnSave: true })
-      if (ext.action === 'minimap') updateSettings({ minimap: true })
-      if (ext.action === 'wordWrap') updateSettings({ wordWrap: 'on' })
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      void load(query)
+    }, 300)
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query])
+
+  async function load(q: string) {
+    setLoading(true)
+    setError(null)
+    try {
+      const list = await searchOpenVSX(q, 30, q.trim() ? 'relevance' : 'downloadCount')
+      setResults(list)
+    } catch (e) {
+      setError((e as Error).message)
+      setResults([])
+    }
+    setLoading(false)
+  }
+
+  async function install(ext: OpenVSXExtension) {
+    const url = downloadUrl(ext)
+    if (!url) {
+      setStatus('Esta extensión no tiene archivo de descarga', 3000)
+      return
+    }
+    setBusyId(extId(ext))
+    try {
+      if (isDesktop() && window.novaDesktop?.ext) {
+        const r = await window.novaDesktop.ext.install(url, extFileName(ext))
+        if (!r.ok) {
+          setStatus(`Error al instalar: ${r.error}`, 3500)
+          setBusyId(null)
+          return
+        }
+        setStatus(`Instalada ${extDisplayName(ext)} en la carpeta de extensiones`, 2500)
+      } else {
+        // Web: la descarga del .vsix la gestiona el navegador
+        const a = document.createElement('a')
+        a.href = url
+        a.download = extFileName(ext)
+        a.rel = 'noopener'
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        setStatus(`Descargando ${extFileName(ext)}…`, 2500)
+      }
+      const next = { ...installed, [extId(ext)]: { version: ext.version, when: Date.now() } }
+      setInstalled(next)
+      saveInstalled(next)
+    } catch (e) {
+      setStatus(`Error al instalar: ${(e as Error).message}`, 3500)
+    }
+    setBusyId(null)
+  }
+
+  function uninstall(ext: OpenVSXExtension) {
+    const next = { ...installed }
+    delete next[extId(ext)]
     setInstalled(next)
+    saveInstalled(next)
+    setStatus(`${extDisplayName(ext)} desinstalada`, 2000)
   }
 
   return (
     <div className="extensions">
       <div className="extensions__search">
         <Icons.search size={14} />
-        <input placeholder="Buscar extensiones en el marketplace…" />
+        <input
+          placeholder="Buscar en el marketplace (Open VSX)…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        {query && (
+          <button className="extensions__clear" onClick={() => setQuery('')} title="Limpiar">
+            <Icons.close size={13} />
+          </button>
+        )}
       </div>
-      <div className="extensions__section-title">Popular</div>
-      <div className="extensions__list">
-        {FEATURED.map((ext) => {
-          const isInstalled = installed.has(ext.id)
-          return (
-            <div key={ext.id} className="ext-card">
-              <div className="ext-card__icon" style={{ background: `${ext.color}22`, color: ext.color, border: `1px solid ${ext.color}55` }}>
-                <ExtIcon name={ext.icon} />
-              </div>
-              <div className="ext-card__body">
-                <div className="ext-card__name">{ext.name}</div>
-                <div className="ext-card__meta">
-                  {ext.publisher} · v{ext.version}
-                </div>
-                <div className="ext-card__desc">{ext.description}</div>
-                <div className="ext-card__stats">
-                  <span>{ext.installs}</span>
-                  <span>★ {ext.rating.toFixed(1)}</span>
-                </div>
-              </div>
-              <button
-                className={`ext-card__install${isInstalled ? ' ext-card__install--installed' : ''}`}
-                onClick={() => toggle(ext)}
-              >
-                {isInstalled ? <><Icons.check size={12} /> Instalada</> : 'Instalar'}
-              </button>
+
+      <div className="extensions__toolbar">
+        <span className="extensions__source">
+          <Icons.extension size={13} />
+          Marketplace abierto · open-vsx.org
+        </span>
+        <button className="extensions__refresh" title="Recargar" onClick={() => void load(query)}>
+          <Icons.refresh size={13} className={loading ? 'spin' : ''} />
+        </button>
+      </div>
+
+      {error && (
+        <div className="extensions__error">
+          No se pudo contactar con Open VSX: {error}. Comprueba tu conexión e inténtalo de nuevo.
+        </div>
+      )}
+
+      {loading ? (
+        <div className="extensions__loading">
+          <span className="spinner spinner--sm" />
+          Consultando el marketplace…
+        </div>
+      ) : (
+        <div className="extensions__list">
+          {results.length === 0 && !error && (
+            <div className="extensions__empty">
+              No se encontraron extensiones para «{query || '…'}»
             </div>
-          )
-        })}
+          )}
+          {results.map((ext) => {
+            const id = extId(ext)
+            const meta = installed[id]
+            const icon = iconUrl(ext)
+            return (
+              <div key={id} className="ext-card">
+                <div className="ext-card__icon">
+                  {icon ? (
+                    <img src={icon} alt="" loading="lazy" onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')} />
+                  ) : (
+                    <Icons.extension size={18} />
+                  )}
+                </div>
+                <div className="ext-card__body">
+                  <div className="ext-card__name">{extDisplayName(ext)}</div>
+                  <div className="ext-card__meta">
+                    {extPublisher(ext)} · v{ext.version}
+                    {ext.preview && <span className="ext-card__preview">preview</span>}
+                  </div>
+                  <div className="ext-card__desc">{ext.description}</div>
+                  <div className="ext-card__stats">
+                    <span><Icons.download size={11} /> {formatDownloads(ext.downloadCount)}</span>
+                    {ext.averageRating ? <span>★ {ext.averageRating.toFixed(1)}</span> : null}
+                  </div>
+                </div>
+                {meta ? (
+                  <button className="ext-card__install ext-card__install--installed" onClick={() => uninstall(ext)}>
+                    <Icons.check size={12} /> Instalada
+                  </button>
+                ) : (
+                  <button className="ext-card__install" onClick={() => void install(ext)} disabled={busyId === id}>
+                    {busyId === id ? <span className="spinner spinner--sm" /> : <Icons.download size={12} />}
+                    Instalar
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      <div className="extensions__footer">
+        {isDesktop()
+          ? 'En el escritorio, las extensiones se guardan en la carpeta de extensiones de Nova.'
+          : 'En la web, Instalar descarga el archivo .vsix a tu equipo.'}
       </div>
-      <div className="extensions__footer">Marketplace de Nova · 84.201 extensiones disponibles</div>
     </div>
   )
 }

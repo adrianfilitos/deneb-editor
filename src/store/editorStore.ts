@@ -96,6 +96,7 @@ function loadSettings(): EditorSettings {
           minimap: true,
           lineNumbers: 'on' as const,
           formatOnSave: false,
+          vimMode: false,
           theme: 'nova-dark' as const,
           ai: DEFAULT_AI_SETTINGS,
         },
@@ -113,6 +114,7 @@ function loadSettings(): EditorSettings {
     minimap: true,
     lineNumbers: 'on',
     formatOnSave: false,
+    vimMode: false,
     theme: 'nova-dark',
     ai: DEFAULT_AI_SETTINGS,
   }

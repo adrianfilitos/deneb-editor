@@ -1,4 +1,4 @@
-export type SidebarView = 'explorer' | 'search' | 'ai' | 'extensions' | 'settings' | 'outline'
+export type SidebarView = 'explorer' | 'search' | 'ai' | 'extensions' | 'settings' | 'outline' | 'git'
 
 export interface VirtualFile {
   kind: 'file'
@@ -63,6 +63,7 @@ export interface EditorSettings {
   minimap: boolean
   lineNumbers: 'on' | 'relative' | 'off'
   formatOnSave: boolean
+  vimMode: boolean
   theme: ThemeSettings['mode']
   ai: AISettings
 }

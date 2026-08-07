@@ -153,6 +153,160 @@ function guard(absPath) {
   return target
 }
 
+function runGit(args, opts = {}) {
+  return new Promise((resolve) => {
+    if (!workspaceRoot) {
+      resolve({ ok: false, out: '', err: 'Sin espacio de trabajo abierto' })
+      return
+    }
+    const child = spawn('git', args, { cwd: workspaceRoot, windowsHide: true, env: process.env })
+    let out = ''
+    let err = ''
+    child.stdout.setEncoding('utf8')
+    child.stderr.setEncoding('utf8')
+    child.stdout.on('data', (d) => (out += d))
+    child.stderr.on('data', (d) => (err += d))
+    child.on('error', (e) => resolve({ ok: false, out, err: `No se pudo ejecutar git: ${e.message}` }))
+    child.on('close', (code) => resolve({ ok: code === 0, out, err }))
+  })
+}
+
+function registerGitHandlers() {
+  ipcMain.handle('nova:git:available', async () => {
+    if (!workspaceRoot) return false
+    try {
+      const r = await runGit(['rev-parse', '--is-inside-work-tree'])
+      return r.ok && r.out.trim() === 'true'
+    } catch {
+      return false
+    }
+  })
+
+  ipcMain.handle('nova:git:status', async () => {
+    const [st, br, lg] = await Promise.all([
+      runGit(['status', '--porcelain=v1', '-uall', '-b']),
+      runGit(['rev-parse', '--abbrev-ref', 'HEAD']),
+      runGit(['log', '--oneline', '-10']),
+    ])
+    return {
+      ok: st.ok,
+      status: st.out,
+      branch: br.ok ? br.out.trim() : '',
+      log: lg.ok ? lg.out.trim() : '',
+      error: (!st.ok && st.err) || (!br.ok && br.err) || '',
+    }
+  })
+
+  ipcMain.handle('nova:git:add', async (_e, paths) => {
+    const list = Array.isArray(paths) ? paths : [paths]
+    const r = await runGit(['add', '--', ...list])
+    return { ok: r.ok, out: r.out, error: r.err }
+  })
+
+  ipcMain.handle('nova:git:reset', async (_e, paths) => {
+    const list = Array.isArray(paths) ? paths : [paths]
+    const r = await runGit(['reset', '--', ...list])
+    return { ok: r.ok, out: r.out, error: r.err }
+  })
+
+  ipcMain.handle('nova:git:commit', async (_e, msg) => {
+    if (!msg || !msg.trim()) return { ok: false, out: '', error: 'El mensaje del commit no puede estar vacío' }
+    const r = await runGit(['commit', '-m', msg.trim()])
+    return { ok: r.ok, out: r.out, error: r.err }
+  })
+
+  ipcMain.handle('nova:git:branches', async () => {
+    const [list, cur] = await Promise.all([
+      runGit(['branch', '-a']),
+      runGit(['rev-parse', '--abbrev-ref', 'HEAD']),
+    ])
+    return {
+      ok: list.ok,
+      branches: list.out
+        .split('\n')
+        .map((s) => s.trim().replace(/^\* /, '').replace(/^remotes\//, 'remotes/'))
+        .filter(Boolean),
+      current: cur.ok ? cur.out.trim() : '',
+      error: list.err,
+    }
+  })
+
+  ipcMain.handle('nova:git:checkout', async (_e, name) => {
+    const r = await runGit(['checkout', String(name)])
+    return { ok: r.ok, out: r.out, error: r.err }
+  })
+
+  ipcMain.handle('nova:git:create-branch', async (_e, name) => {
+    const n = String(name || '').trim()
+    if (!n) return { ok: false, out: '', error: 'Nombre de rama vacío' }
+    const r = await runGit(['checkout', '-b', n])
+    return { ok: r.ok, out: r.out, error: r.err }
+  })
+
+  ipcMain.handle('nova:git:diff', async (_e, file, staged) => {
+    const args = ['diff', '--no-color', '-M', '--ignore-space-at-eol']
+    if (staged) args.push('--cached')
+    args.push('--', String(file))
+    const r = await runGit(args)
+    return { ok: r.ok, diff: r.out, error: r.err }
+  })
+
+  ipcMain.handle('nova:git:push', async () => {
+    const r = await runGit(['push'])
+    return { ok: r.ok, out: r.out, error: r.err }
+  })
+
+  ipcMain.handle('nova:git:pull', async () => {
+    const r = await runGit(['pull'])
+    return { ok: r.ok, out: r.out, error: r.err }
+  })
+
+  ipcMain.handle('nova:git:fetch', async () => {
+    const r = await runGit(['fetch'])
+    return { ok: r.ok, out: r.out, error: r.err }
+  })
+
+  ipcMain.handle('nova:git:log', async () => {
+    const r = await runGit(['log', '--oneline', '-15'])
+    return { ok: r.ok, log: r.out, error: r.err }
+  })
+}
+
+function registerExtHandlers() {
+  const extDir = () => path.join(app.getPath('userData'), 'extensions')
+
+  ipcMain.handle('nova:ext:install', async (_e, downloadUrl, filename) => {
+    try {
+      const dir = extDir()
+      fs.mkdirSync(dir, { recursive: true })
+      const safe = String(filename).replace(/[^a-zA-Z0-9._-]/g, '_')
+      const target = path.join(dir, safe)
+      const res = await fetch(String(downloadUrl))
+      if (!res.ok) throw new Error(`HTTP ${res.status} al descargar`)
+      const buf = Buffer.from(await res.arrayBuffer())
+      fs.writeFileSync(target, buf)
+      return { ok: true, path: target, size: buf.length }
+    } catch (e) {
+      return { ok: false, error: e && e.message ? e.message : String(e) }
+    }
+  })
+
+  ipcMain.handle('nova:ext:installed', async () => {
+    try {
+      const dir = extDir()
+      if (!fs.existsSync(dir)) return []
+      return fs
+        .readdirSync(dir)
+        .filter((f) => f.endsWith('.vsix'))
+        .map((f) => ({ file: f, size: fs.statSync(path.join(dir, f)).size }))
+    } catch {
+      return []
+    }
+  })
+
+  ipcMain.handle('nova:ext:dir', () => extDir())
+}
+
 function registerFsHandlers() {
   ipcMain.handle('nova:fs:open-workspace', async () => {
     const res = await dialog.showOpenDialog(mainWindow, {
@@ -448,6 +602,8 @@ function createWindow() {
 
 app.whenReady().then(() => {
   registerFsHandlers()
+  registerGitHandlers()
+  registerExtHandlers()
   registerTerminalHandlers()
   registerWindowHandlers()
   registerMenuHandlers()

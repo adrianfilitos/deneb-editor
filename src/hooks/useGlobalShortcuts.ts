@@ -83,6 +83,12 @@ export function useGlobalShortcuts() {
         store.setSidebarView('search')
         return
       }
+      // Ctrl+Shift+G → git
+      if (isModKey(e) && e.shiftKey && key === 'g') {
+        e.preventDefault()
+        store.setSidebarView('git')
+        return
+      }
       // Ctrl+Shift+E → explorer
       if (isModKey(e) && e.shiftKey && key === 'e') {
         e.preventDefault()

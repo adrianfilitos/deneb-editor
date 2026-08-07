@@ -205,7 +205,7 @@ function PowerShellTerminal() {
 
 function NovaShell() {
   const [lines, setLines] = useState<Line[]>(() => [
-    { id: lineCounter++, text: '\u001b[1m\u001b[36mNova Shell\u001b[0m 1.0.1-alpha — escribe \u001b[33mhelp\u001b[0m para ver los comandos' },
+    { id: lineCounter++, text: '\u001b[1m\u001b[36mNova Shell\u001b[0m 1.1.0-alpha — escribe \u001b[33mhelp\u001b[0m para ver los comandos' },
     { id: lineCounter++, text: '' },
   ])
   const [cwd, setCwd] = useState('')
