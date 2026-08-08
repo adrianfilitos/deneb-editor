@@ -18,6 +18,7 @@ class CDPDebugAdapter {
     this.onEvent = null
     this.onConsole = null
     this.started = false
+    this.scriptUrls = new Set()
   }
 
   start({ program, args = [], env = {} }) {
@@ -90,6 +91,13 @@ class CDPDebugAdapter {
       }
       return
     }
+    if (m.method === 'Debugger.scriptParsed') {
+      const url = m.params?.url
+      if (url) {
+        this.scriptUrls = this.scriptUrls || new Set()
+        this.scriptUrls.add(url)
+      }
+    }
     if (m.method === 'Debugger.paused') this.handlePaused(m.params)
     else if (m.method === 'Debugger.resumed') {
       this.paused = false
@@ -134,17 +142,33 @@ class CDPDebugAdapter {
     this.bpByScript.clear()
     this.breakpoints.clear()
     const results = []
-    const url = 'file:///' + filePath.replace(/\\/g, '/')
+    const scriptBase = String(filePath).replace(/\\/g, '/').split('/').pop()
+    const constructedUrl = 'file:///' + filePath.replace(/\\/g, '/')
+    // URL real reportada por CDP (maneja symlinks en macOS)
+    const realUrl = [...(this.scriptUrls || [])].find((u) => String(u).split('/').pop() === scriptBase) || constructedUrl
     for (const line of lines) {
       try {
         const res = await this.send('Debugger.setBreakpointByUrl', {
           lineNumber: line - 1,
-          url,
+          url: realUrl,
         })
         const id = res.breakpointId
+        // Si quedó pendiente (locations vacío), probar con la URL construida
+        if ((res.locations || []).length === 0 && realUrl !== constructedUrl) {
+          const res2 = await this.send('Debugger.setBreakpointByUrl', {
+            lineNumber: line - 1,
+            url: constructedUrl,
+          }).catch(() => null)
+          if (res2?.breakpointId) {
+            this.breakpoints.set(line, res2.breakpointId)
+            this.bpByScript.set(line, res2.breakpointId)
+            results.push({ verified: (res2.locations || []).length > 0, line, id: res2.breakpointId })
+            continue
+          }
+        }
         this.breakpoints.set(line, id)
         this.bpByScript.set(line, id)
-        results.push({ verified: !!id, line, id })
+        results.push({ verified: (res.locations || []).length > 0, line, id })
       } catch (e) {
         results.push({ verified: false, line, message: String(e.message) })
       }

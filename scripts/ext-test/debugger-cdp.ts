@@ -108,13 +108,15 @@ console.log(result);
   const paused0 = await waitNewEvent('Debugger.paused', 6000)
   check('pausa inicial (script del usuario compilado)', !!paused0)
 
-  // Esperar a que el script del usuario esté registrado (scriptParsed)
-  const fileUrl = 'file:///' + script.replace(/\\/g, '/')
+  // Esperar a que el script del usuario esté registrado (scriptParsed).
+  // En macOS/Linux el path real puede diferir (/private/tmp vs /tmp), así que
+  // comparamos por el nombre base del archivo.
+  const scriptBase = script.replace(/\\/g, '/').split('/').pop()
   const scriptLoaded = await new Promise<boolean>((resolve) => {
     const t = setTimeout(() => resolve(false), 4000)
     const check = () => {
       const ev = events.find(
-        (e) => e.method === 'Debugger.scriptParsed' && (e.params?.url as string | undefined)?.replace(/\\/g, '/') === fileUrl,
+        (e) => e.method === 'Debugger.scriptParsed' && ((e.params?.url as string | undefined) || '').split('/').pop() === scriptBase,
       )
       if (ev) {
         clearTimeout(t)
@@ -126,8 +128,13 @@ console.log(result);
   })
   check('script del usuario compilado (scriptParsed)', scriptLoaded)
 
-  // 6) Poner breakpoint real en la línea 3 (return msg) → se resuelve
-  const setBp = await send('Debugger.setBreakpointByUrl', { lineNumber: 2, url: fileUrl })
+  // 6) Poner breakpoint real en la línea 3 (return msg) → se resuelve.
+  //    Usamos la URL real reportada por CDP para manejar symlinks de macOS.
+  const scriptParsedEv = events.find(
+    (e) => e.method === 'Debugger.scriptParsed' && ((e.params?.url as string | undefined) || '').split('/').pop() === scriptBase,
+  )
+  const scriptParsedUrl = (scriptParsedEv?.params?.url as string | undefined) || 'file:///' + script.replace(/\\/g, '/')
+  const setBp = await send('Debugger.setBreakpointByUrl', { lineNumber: 2, url: scriptParsedUrl })
   const bp = setBp as { breakpointId?: string; locations?: { lineNumber: number }[] }
   check('setBreakpointByUrl devuelve breakpointId', !!bp.breakpointId, JSON.stringify(setBp))
   check('breakpoint resuelto en el script', (bp.locations?.length ?? 0) > 0, JSON.stringify(bp.locations))
