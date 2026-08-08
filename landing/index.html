@@ -262,11 +262,30 @@
 
   /* ---------- download ---------- */
   .dl-wrap { text-align: center; }
-  .dl-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; justify-content: center; margin: 26px auto 22px; max-width: 760px; }
-  .dl-group { border: 1px solid rgba(35,40,56,.9); border-radius: 14px; padding: 16px 18px; background: #12151f; }
-  .dl-group b { display: block; color: var(--fg); font-size: 15px; margin-bottom: 10px; letter-spacing: .2px; }
-  .dl-group a { display: block; color: var(--blue); font-size: 13.5px; padding: 5px 0; transition: color .2s; }
-  .dl-group a:hover { color: #6cb1ff; }
+  .dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 34px auto 0; max-width: 860px; position: relative; }
+  .dl-card { position: relative; border: 1px solid rgba(40,47,68,.9); border-radius: 16px; padding: 26px 20px 22px; background: linear-gradient(180deg, rgba(20,24,40,.9), rgba(14,17,28,.9)); display: flex; flex-direction: column; align-items: center; transition: transform .22s, border-color .22s, box-shadow .22s; }
+  .dl-card:hover { transform: translateY(-4px); border-color: #3a4a6e; box-shadow: 0 14px 34px rgba(0,0,0,.35); }
+  .dl-card.is-you { border-color: #3b82f6; box-shadow: 0 0 0 1px rgba(59,130,246,.55), 0 14px 34px rgba(0,0,0,.4); }
+  .dl-badge { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg,#3b82f6,#6366f1); color: #fff; font-size: 10.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; padding: 4px 12px; border-radius: 999px; opacity: 0; transition: opacity .25s; white-space: nowrap; }
+  .dl-card.is-you .dl-badge { opacity: 1; }
+  .dl-logo { width: 62px; height: 62px; border-radius: 16px; display: grid; place-items: center; margin-bottom: 14px; }
+  .dl-logo.win { background: rgba(0,120,215,.14); color: #4aa9ff; }
+  .dl-logo.mac { background: rgba(220,220,220,.1); color: #e8e8ea; }
+  .dl-logo.linux { background: rgba(255,197,0,.12); color: #ffc500; }
+  .dl-card h3 { margin: 0 0 4px; font-size: 17px; color: var(--fg); letter-spacing: .2px; }
+  .dl-card p { margin: 0 0 16px; font-size: 12.5px; color: var(--muted); min-height: 16px; }
+  .dl-btn { display: block; width: 100%; padding: 11px 0; border-radius: 10px; font-size: 13.5px; font-weight: 600; text-align: center; transition: all .2s; margin-bottom: 8px; }
+  .dl-btn.primary { background: linear-gradient(135deg,#2563eb,#4f46e5); color: #fff; }
+  .dl-btn.primary:hover { filter: brightness(1.15); }
+  .dl-btn.ghost { border: 1px solid rgba(50,58,80,.9); color: var(--muted); font-weight: 500; }
+  .dl-btn.ghost:hover { border-color: #3a4a6e; color: var(--fg); background: rgba(25,30,46,.6); }
+  .dl-meta { font-size: 12px; color: var(--faint); margin-top: 2px; }
+  .dl-meta b { color: var(--muted); font-weight: 600; }
+
+  .dl-steps { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 30px auto 6px; max-width: 760px; }
+  .step { display: flex; align-items: center; gap: 9px; background: rgba(18,22,35,.8); border: 1px solid rgba(40,47,68,.9); border-radius: 999px; padding: 8px 16px 8px 9px; font-size: 13px; color: var(--muted); }
+  .step b { width: 22px; height: 22px; border-radius: 50%; background: rgba(59,130,246,.18); color: #6cb1ff; display: grid; place-items: center; font-size: 12px; }
+
   .dl-note { margin-top: 16px; color: var(--faint); font-size: 13px; }
   .dl-note a { color: var(--blue); }
 
@@ -289,7 +308,8 @@
     .shots { grid-template-columns: 1fr; }
     .nav-links { display: none; }
     .stats { grid-template-columns: repeat(2, 1fr); }
-    .dl-btns { grid-template-columns: 1fr; }
+    .dl-grid { grid-template-columns: 1fr; max-width: 420px; }
+    .dl-steps { flex-direction: column; align-items: center; }
   }
   @media (max-width: 560px) {
     .grid { grid-template-columns: 1fr; }
@@ -495,26 +515,46 @@ indicador en la UI cuando no hay clave configurada.
   <div class="container dl-wrap">
     <span class="kicker">Descargar</span>
     <h2 style="font-size:clamp(28px,4vw,40px);font-weight:800;letter-spacing:-.8px">Empieza en un minuto</h2>
-    <p style="color:var(--muted);margin-top:12px;max-width:520px;margin-left:auto;margin-right:auto">Instala el editor y añade tu clave de IA en <b>Ajustes → Asistente de IA</b>. Tu clave se guarda solo en tu equipo.</p>
-    <div class="dl-btns">
-      <div class="dl-group">
-        <b>Windows</b>
-        <a href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-Setup-1.0.0.exe">Instalador (.exe)</a>
-        <a href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0.exe">Portable (.exe)</a>
+    <p style="color:var(--muted);margin-top:12px;max-width:540px;margin-left:auto;margin-right:auto">Elige tu sistema y descarga Nova. Añade tu clave de IA en <b>Ajustes → Asistente de IA</b> — se guarda solo en tu equipo.</p>
+
+    <div class="dl-grid">
+      <div class="dl-card" data-os="win">
+        <span class="dl-badge">tu sistema</span>
+        <div class="dl-logo win"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M0 3.45l9.83-1.33V11.5H0zM11.33 1.99L24 0v11.5H11.33zM0 12.5h9.83v9.38L0 20.55zM11.33 12.5H24v11.5L11.33 22z"/></svg></div>
+        <h3>Windows</h3>
+        <p>Instalador o versión portable</p>
+        <a class="dl-btn primary" data-dl="win-installer" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-Setup-1.0.0.exe">Descargar instalador</a>
+        <a class="dl-btn ghost" data-dl="win-portable" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0.exe">Portable .exe</a>
+        <span class="dl-meta"><b data-size="Nova-Setup-1.0.0.exe">…</b> · instalador</span>
       </div>
-      <div class="dl-group">
-        <b>macOS</b>
-        <a href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0-mac.dmg">App (.dmg)</a>
-        <a href="https://github.com/adrianfilitos/nova-editor/releases">Ver alternativas</a>
+      <div class="dl-card" data-os="mac">
+        <span class="dl-badge">tu sistema</span>
+        <div class="dl-logo mac"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M21.03 12.02c.02 2.66 2.33 3.55 2.36 3.56-.02.06-.37 1.26-1.22 2.5-.73 1.07-1.49 2.14-2.69 2.16-1.18.03-1.56-.7-2.91-.7s-1.77.68-2.89.72c-1.17.05-2.06-1.16-2.8-2.23-1.52-2.2-2.68-6.21-1.12-8.92.78-1.35 2.17-2.21 3.68-2.23 1.15-.02 2.23.77 2.93.77s1.6-.96 2.9-.82c.98.04 2 .44 2.76 1.17a6.04 6.04 0 0 0-1.1 2.06l.1.06zM17.82 4.9c.61-.74 1.02-1.76.91-2.78-.88.04-1.94.59-2.57 1.33-.57.66-1.06 1.71-.93 2.72.98.08 1.98-.5 2.59-1.27z"/></svg></div>
+        <h3>macOS</h3>
+        <p>Apple Silicon e Intel</p>
+        <a class="dl-btn primary" data-dl="mac" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0-mac.dmg">Descargar .dmg</a>
+        <span class="dl-meta"><b data-size="Nova-1.0.0-mac.dmg">…</b> · universal</span>
       </div>
-      <div class="dl-group">
-        <b>Linux</b>
-        <a href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0-linux.AppImage">AppImage</a>
-        <a href="https://github.com/adrianfilitos/nova-editor/releases">Ver alternativas (.deb)</a>
+      <div class="dl-card" data-os="linux">
+        <span class="dl-badge">tu sistema</span>
+        <div class="dl-logo linux"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><circle cx="12" cy="12" r="2.2"/><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 17l9 5 9-5"/></svg></div>
+        <h3>Linux</h3>
+        <p>AppImage · funciona en la mayoría de distros</p>
+        <a class="dl-btn primary" data-dl="linux" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0-linux.AppImage">Descargar AppImage</a>
+        <a class="dl-btn ghost" href="https://github.com/adrianfilitos/nova-editor/releases">Otros formatos (.deb)</a>
+        <span class="dl-meta"><b data-size="Nova-1.0.0-linux.AppImage">…</b> · x64</span>
       </div>
     </div>
+
+    <div class="dl-steps">
+      <div class="step"><b>1</b><span>Descarga tu archivo</span></div>
+      <div class="step"><b>2</b><span>Instala o descomprime</span></div>
+      <div class="step"><b>3</b><span>Abre Nova y añade tu clave de IA</span></div>
+    </div>
+
     <a class="btn btn-teal" href="app/">Probar en el navegador</a>
-    <p class="dl-note">También en <a href="https://github.com/adrianfilitos/nova-editor/releases">GitHub Releases</a> · Código abierto bajo <a href="https://github.com/adrianfilitos/nova-editor">licencia MIT</a></p>
+    <p class="dl-note">¿No sabes cuál elegir? <a href="#descargar" id="pick-os">Detecta tu sistema automáticamente</a> · Código abierto bajo <a href="https://github.com/adrianfilitos/nova-editor">licencia MIT</a></p>
+    <p class="dl-note" id="dl-updates">Comprobando la última versión…</p>
   </div>
 </section>
 
@@ -577,6 +617,59 @@ indicador en la UI cuando no hay clave configurada.
       }, 180)
     })
   })
+
+  // ---------- Descargas: detectar SO + tamaños desde GitHub ----------
+  ;(() => {
+    const cards = document.querySelectorAll('.dl-card')
+    const RELEASE_URL = 'https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0'
+    const detect = () => {
+      const ua = navigator.userAgent
+      if (/windows/i.test(ua)) return 'win'
+      if (/macintosh|mac os x|iphone|ipad/i.test(ua)) return 'mac'
+      if (/linux|ubuntu|fedora|debian|manjaro/i.test(ua)) return 'linux'
+      return null
+    }
+    const you = detect()
+    if (you) {
+      cards.forEach((c) => {
+        if (c.dataset.os === you) {
+          c.classList.add('is-you')
+        }
+      })
+    }
+    document.getElementById('pick-os')?.addEventListener('click', (e) => {
+      e.preventDefault()
+      if (!you) return
+      cards.forEach((c) => c.classList.remove('is-you'))
+      document.querySelector(`.dl-card[data-os="${you}"]`)?.classList.add('is-you')
+      document.querySelector(`.dl-card[data-os="${you}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+    // Tamaños reales desde la API de GitHub (solo nombres 1.0.0)
+    const sizes = { 'Nova-Setup-1.0.0.exe': null, 'Nova-1.0.0-mac.dmg': null, 'Nova-1.0.0-linux.AppImage': null }
+    fetch('https://api.github.com/repos/adrianfilitos/nova-editor/releases/tags/v1.0.0')
+      .then((r) => r.json())
+      .then((rel) => {
+        if (!rel || !Array.isArray(rel.assets)) return
+        for (const a of rel.assets) sizes[a.name] = a.size
+        const fmt = (b) => (b >= 1e6 ? (b / 1e6).toFixed(0) + ' MB' : (b / 1e3).toFixed(0) + ' KB')
+        document.querySelectorAll('[data-size]').forEach((el) => {
+          const s = sizes[el.dataset.size]
+          el.textContent = s ? fmt(s) : '—'
+        })
+      })
+      .catch(() => {})
+    // Versión más reciente
+    fetch('https://api.github.com/repos/adrianfilitos/nova-editor/releases/latest')
+      .then((r) => r.json())
+      .then((rel) => {
+        if (rel && rel.tag_name) {
+          document.getElementById('dl-updates').textContent = `Última versión: ${rel.tag_name} · compilada para Windows, macOS y Linux`
+        }
+      })
+      .catch(() => {
+        document.getElementById('dl-updates').textContent = ''
+      })
+  })()
 </script>
 </body>
 </html>
