@@ -665,7 +665,7 @@ export function createVscodeApi(extId: string, pkg: { id: string; version: strin
     EventEmitter,
     Event: (cb: any) => cb,
     Disposable,
-    Version: '1.2.0',
+    Version: '1.0.0',
     ThemeColor: class {
       constructor(public id: string) {}
     },
@@ -737,7 +737,7 @@ export function createVscodeApi(extId: string, pkg: { id: string; version: strin
       appRoot: '/',
       language: 'es',
       uriScheme: 'nova',
-      version: '1.2.0',
+      version: '1.0.0',
       machineId: 'nova-desktop',
       shell: 'powershell',
     },

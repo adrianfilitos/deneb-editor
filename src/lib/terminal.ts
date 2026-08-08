@@ -306,7 +306,7 @@ export async function executeCommand(rootHandle: AnyHandle, cwd: string, raw: st
 
     case 'version':
     case 'nova':
-      out.push('\u001b[1m\u001b[36mNova Shell\u001b[0m 1.2.0-alpha')
+      out.push('\u001b[1m\u001b[36mNova Shell\u001b[0m 1.0.0')
       out.push('Editor de código con IA · powered by Monaco')
       break
 

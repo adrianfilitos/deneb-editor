@@ -92,11 +92,29 @@ function loadSettings(): EditorSettings {
         ...{
           fontSize: 14,
           tabSize: 4,
+          lineHeight: 1.5,
           wordWrap: 'off' as const,
           minimap: true,
           lineNumbers: 'on' as const,
           formatOnSave: false,
+          formatOnPaste: false,
           vimMode: false,
+          autoSave: false,
+          confirmBeforeClose: true,
+          cursorBlinking: 'smooth' as const,
+          cursorStyle: 'line' as const,
+          fontLigatures: true,
+          renderWhitespace: 'selection' as const,
+          smoothScrolling: true,
+          stickyScroll: true,
+          bracketPairColorization: true,
+          indentGuides: true,
+          scrollBeyondLastLine: false,
+          autoClosingBrackets: true,
+          mouseWheelZoom: true,
+          wordBasedSuggestions: true,
+          parameterHints: true,
+          folding: true,
           theme: 'nova-dark' as const,
           ai: DEFAULT_AI_SETTINGS,
         },
@@ -110,11 +128,29 @@ function loadSettings(): EditorSettings {
   return {
     fontSize: 14,
     tabSize: 4,
+    lineHeight: 1.5,
     wordWrap: 'off',
     minimap: true,
     lineNumbers: 'on',
     formatOnSave: false,
+    formatOnPaste: false,
     vimMode: false,
+    autoSave: false,
+    confirmBeforeClose: true,
+    cursorBlinking: 'smooth',
+    cursorStyle: 'line',
+    fontLigatures: true,
+    renderWhitespace: 'selection',
+    smoothScrolling: true,
+    stickyScroll: true,
+    bracketPairColorization: true,
+    indentGuides: true,
+    scrollBeyondLastLine: false,
+    autoClosingBrackets: true,
+    mouseWheelZoom: true,
+    wordBasedSuggestions: true,
+    parameterHints: true,
+    folding: true,
     theme: 'nova-dark',
     ai: DEFAULT_AI_SETTINGS,
   }
@@ -329,15 +365,19 @@ export const useEditorStore = create<EditorStore>((set, get) => {
     },
 
     closeTab: async (path, force) => {
-      const { openTabs, activePath } = get()
+      const { openTabs, activePath, settings } = get()
       const tab = openTabs.find((t) => t.path === path)
       if (!tab) return
       if (tab.dirty && !force) {
-        const keep = window.confirm(`El archivo "${tab.name}" tiene cambios sin guardar.\n\n¿Guardar los cambios?`)
-        if (keep) {
-          await get().saveTab(path)
+        if (settings.confirmBeforeClose) {
+          const keep = window.confirm(`El archivo "${tab.name}" tiene cambios sin guardar.\n\n¿Guardar los cambios?`)
+          if (keep) {
+            await get().saveTab(path)
+          } else {
+            return
+          }
         } else {
-          return
+          await get().saveTab(path)
         }
       }
       const remaining = openTabs.filter((t) => t.path !== path)

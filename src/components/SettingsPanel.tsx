@@ -19,7 +19,211 @@ const THEME_NAMES: Record<ThemeId, string> = {
   'nova-paper': 'Paper',
 }
 
+type SettingsTab = 'apariencia' | 'editor' | 'ia' | 'sistema'
+
+const TABS: { id: SettingsTab; label: string; icon: keyof typeof Icons }[] = [
+  { id: 'apariencia', label: 'Apariencia', icon: 'sparkles' },
+  { id: 'editor', label: 'Editor', icon: 'pencil' },
+  { id: 'ia', label: 'Asistente de IA', icon: 'zap' },
+  { id: 'sistema', label: 'Sistema', icon: 'gear' },
+]
+
 export function SettingsPanel() {
+  const [tab, setTab] = useState<SettingsTab>('apariencia')
+
+  return (
+    <div className="settings">
+      <div className="settings__tabs">
+        {TABS.map(({ id, label, icon }) => {
+          const Icon = Icons[icon]
+          return (
+            <button
+              key={id}
+              className={`settings__tab${tab === id ? ' settings__tab--active' : ''}`}
+              onClick={() => setTab(id)}
+            >
+              <Icon size={14} />
+              {label}
+            </button>
+          )
+        })}
+      </div>
+      <div className="settings__scroll">
+        {tab === 'apariencia' && <AppearanceTab />}
+        {tab === 'editor' && <EditorTab />}
+        {tab === 'ia' && <AITab />}
+        {tab === 'sistema' && <SystemTab />}
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+//  APARIENCIA
+// ---------------------------------------------------------------------------
+
+function AppearanceTab() {
+  const settings = useEditorStore((s) => s.settings)
+  const update = useEditorStore((s) => s.updateSettings)
+  return (
+    <>
+      <Group title="Tema" subtitle="El aspecto global de Nova">
+        <div className="settings__themes">
+          {THEME_IDS.map((id) => {
+            const p = THEME_PALETTES[id]
+            return (
+              <button
+                key={id}
+                className={`theme-card${settings.theme === id ? ' theme-card--active' : ''}`}
+                onClick={() => update({ theme: id })}
+                title={id}
+              >
+                <span className="theme-card__preview" style={{ background: `linear-gradient(135deg, ${p.bg} 0 60%, ${p.widgetBg} 60% 100%)` }}>
+                  <span className="theme-card__preview-accent" style={{ background: p.cursor }} />
+                </span>
+                <span>{THEME_NAMES[id]}</span>
+              </button>
+            )
+          })}
+        </div>
+      </Group>
+    </>
+  )
+}
+
+// ---------------------------------------------------------------------------
+//  EDITOR
+// ---------------------------------------------------------------------------
+
+const CURSOR_BLINK_OPTIONS = [
+  { value: 'blink', label: 'Parpadeo' },
+  { value: 'smooth', label: 'Suave' },
+  { value: 'phase', label: 'Fase' },
+  { value: 'expand', label: 'Expandir' },
+  { value: 'solid', label: 'Sólido' },
+] as const
+
+const CURSOR_STYLE_OPTIONS = [
+  { value: 'line', label: 'Línea' },
+  { value: 'block', label: 'Bloque' },
+  { value: 'underline', label: 'Subrayado' },
+] as const
+
+const WHITESPACE_OPTIONS = [
+  { value: 'none', label: 'Ninguno' },
+  { value: 'selection', label: 'En selección' },
+  { value: 'all', label: 'Todo' },
+] as const
+
+function EditorTab() {
+  const settings = useEditorStore((s) => s.settings)
+  const update = useEditorStore((s) => s.updateSettings)
+  return (
+    <>
+      <Group title="Tipografía" subtitle="Fuente, tamaño y espaciado">
+        <Row label="Tamaño de fuente">
+          <Stepper value={settings.fontSize} min={10} max={28} onChange={(v) => update({ fontSize: v })} suffix="px" />
+        </Row>
+        <Row label="Altura de línea">
+          <Stepper value={settings.lineHeight} min={1} max={2.2} step={0.1} onChange={(v) => update({ lineHeight: v })} />
+        </Row>
+        <Row label="Tabulación">
+          <Stepper value={settings.tabSize} min={2} max={8} onChange={(v) => update({ tabSize: v })} suffix="esp" />
+        </Row>
+        <Row label="Ligaduras de fuente">
+          <Toggle value={settings.fontLigatures} onChange={(v) => update({ fontLigatures: v })} />
+        </Row>
+      </Group>
+
+      <Group title="Cursor" subtitle="Cómo se ve y se mueve el cursor">
+        <Row label="Estilo">
+          <Segmented options={CURSOR_STYLE_OPTIONS} value={settings.cursorStyle} onChange={(v) => update({ cursorStyle: v })} />
+        </Row>
+        <Row label="Parpadeo">
+          <Segmented options={CURSOR_BLINK_OPTIONS} value={settings.cursorBlinking} onChange={(v) => update({ cursorBlinking: v })} />
+        </Row>
+      </Group>
+
+      <Group title="Layout" subtitle="Minimapa, ajuste y numeración">
+        <Row label="Envolver línea">
+          <Segmented options={[{ value: 'off', label: 'Off' }, { value: 'on', label: 'On' }]} value={settings.wordWrap} onChange={(v) => update({ wordWrap: v as 'off' | 'on' })} />
+        </Row>
+        <Row label="Números de línea">
+          <Segmented options={[{ value: 'on', label: 'On' }, { value: 'relative', label: 'Relativo' }, { value: 'off', label: 'Off' }]} value={settings.lineNumbers} onChange={(v) => update({ lineNumbers: v as 'on' | 'relative' | 'off' })} />
+        </Row>
+        <Row label="Minimapa">
+          <Toggle value={settings.minimap} onChange={(v) => update({ minimap: v })} />
+        </Row>
+        <Row label="Espacios en blanco">
+          <Segmented options={WHITESPACE_OPTIONS} value={settings.renderWhitespace} onChange={(v) => update({ renderWhitespace: v })} />
+        </Row>
+      </Group>
+
+      <Group title="Asistencia" subtitle="Autocompletado y resaltado">
+        <Row label="Sugerencias por palabra">
+          <Toggle value={settings.wordBasedSuggestions} onChange={(v) => update({ wordBasedSuggestions: v })} />
+        </Row>
+        <Row label="Sugerencias de parámetros">
+          <Toggle value={settings.parameterHints} onChange={(v) => update({ parameterHints: v })} />
+        </Row>
+        <Row label="Cerrar paréntesis automático">
+          <Toggle value={settings.autoClosingBrackets} onChange={(v) => update({ autoClosingBrackets: v })} />
+        </Row>
+        <Row label="Plegado de código">
+          <Toggle value={settings.folding} onChange={(v) => update({ folding: v })} />
+        </Row>
+      </Group>
+
+      <Group title="Ayudas visuales" subtitle="Guías, brackets y scroll">
+        <Row label="Color de brackets">
+          <Toggle value={settings.bracketPairColorization} onChange={(v) => update({ bracketPairColorization: v })} />
+        </Row>
+        <Row label="Guías de indentación">
+          <Toggle value={settings.indentGuides} onChange={(v) => update({ indentGuides: v })} />
+        </Row>
+        <Row label="Scroll pegajoso">
+          <Toggle value={settings.stickyScroll} onChange={(v) => update({ stickyScroll: v })} />
+        </Row>
+        <Row label="Scroll suave">
+          <Toggle value={settings.smoothScrolling} onChange={(v) => update({ smoothScrolling: v })} />
+        </Row>
+        <Row label="Scroll más allá del final">
+          <Toggle value={settings.scrollBeyondLastLine} onChange={(v) => update({ scrollBeyondLastLine: v })} />
+        </Row>
+        <Row label="Zoom con la rueda (Ctrl)">
+          <Toggle value={settings.mouseWheelZoom} onChange={(v) => update({ mouseWheelZoom: v })} />
+        </Row>
+      </Group>
+
+      <Group title="Guardado" subtitle="Cuándo y cómo se guardan los archivos">
+        <Row label="Formatear al guardar">
+          <Toggle value={settings.formatOnSave} onChange={(v) => update({ formatOnSave: v })} />
+        </Row>
+        <Row label="Formatear al pegar">
+          <Toggle value={settings.formatOnPaste} onChange={(v) => update({ formatOnPaste: v })} />
+        </Row>
+        <Row label="Auto-guardado">
+          <Toggle value={settings.autoSave} onChange={(v) => update({ autoSave: v })} />
+        </Row>
+        <Row label="Preguntar al cerrar sucio">
+          <Toggle value={settings.confirmBeforeClose} onChange={(v) => update({ confirmBeforeClose: v })} />
+        </Row>
+      </Group>
+
+      <Group title="Vim" subtitle="Teclas de Vim en el editor">
+        <Row label="Modo Vim">
+          <Toggle value={settings.vimMode} onChange={(v) => update({ vimMode: v })} />
+        </Row>
+      </Group>
+    </>
+  )
+}
+
+// ---------------------------------------------------------------------------
+//  IA
+// ---------------------------------------------------------------------------
+
+function AITab() {
   const settings = useEditorStore((s) => s.settings)
   const update = useEditorStore((s) => s.updateSettings)
   const [showKey, setShowKey] = useState(false)
@@ -42,92 +246,11 @@ export function SettingsPanel() {
   }
 
   return (
-    <div className="settings">
-      <div className="settings__group">
-        <h4>Apariencia</h4>
-        <div className="settings__row">
-          <label>Tema</label>
-          <div className="settings__themes">
-            {THEME_IDS.map((id) => {
-              const p = THEME_PALETTES[id]
-              return (
-                <button
-                  key={id}
-                  className={`theme-card${settings.theme === id ? ' theme-card--active' : ''}`}
-                  onClick={() => update({ theme: id })}
-                  title={id}
-                >
-                  <span
-                    className="theme-card__preview"
-                    style={{ background: `linear-gradient(135deg, ${p.bg} 0 60%, ${p.widgetBg} 60% 100%)` }}
-                  >
-                    <span className="theme-card__preview-accent" style={{ background: p.cursor }} />
-                  </span>
-                  <span>{THEME_NAMES[id]}</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      </div>
-
-      <div className="settings__group">
-        <h4>Editor</h4>
-        <div className="settings__row">
-          <label>Fuente</label>
-          <div className="settings__stepper">
-            <button onClick={() => update({ fontSize: Math.max(10, settings.fontSize - 1) })}>−</button>
-            <span className="mono">{settings.fontSize}px</span>
-            <button onClick={() => update({ fontSize: Math.min(28, settings.fontSize + 1) })}>+</button>
-          </div>
-        </div>
-        <div className="settings__row">
-          <label>Tamaño de tabulación</label>
-          <div className="settings__stepper">
-            <button onClick={() => update({ tabSize: Math.max(2, settings.tabSize - 1) })}>−</button>
-            <span className="mono">{settings.tabSize}</span>
-            <button onClick={() => update({ tabSize: Math.min(8, settings.tabSize + 1) })}>+</button>
-          </div>
-        </div>
-        <ToggleRow
-          label="Minimapa"
-          value={settings.minimap}
-          onChange={(v) => update({ minimap: v })}
-        />
-        <ToggleRow
-          label="Formato al guardar"
-          value={settings.formatOnSave}
-          onChange={(v) => update({ formatOnSave: v })}
-        />
-        <ToggleRow
-          label="Modo Vim (teclas de Vim)"
-          value={settings.vimMode}
-          onChange={(v) => update({ vimMode: v })}
-        />
-        <div className="settings__row">
-          <label>Envolver línea</label>
-          <div className="settings__segmented">
-            <button className={settings.wordWrap === 'off' ? 'active' : ''} onClick={() => update({ wordWrap: 'off' })}>Off</button>
-            <button className={settings.wordWrap === 'on' ? 'active' : ''} onClick={() => update({ wordWrap: 'on' })}>On</button>
-          </div>
-        </div>
-        <div className="settings__row">
-          <label>Números de línea</label>
-          <div className="settings__segmented">
-            {(['on', 'relative', 'off'] as const).map((m) => (
-              <button key={m} className={settings.lineNumbers === m ? 'active' : ''} onClick={() => update({ lineNumbers: m })}>
-                {m === 'on' ? 'On' : m === 'relative' ? 'Relativo' : 'Off'}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="settings__group">
-        <h4>Asistente de IA</h4>
-        <div className="settings__row">
-          <label>Proveedor</label>
+    <>
+      <Group title="Proveedor" subtitle="Con quién habla el asistente">
+        <Row label="Proveedor">
           <select
+            className="settings__input"
             value={settings.ai.provider}
             onChange={(e) => {
               const provider = e.target.value as AIProvider
@@ -144,22 +267,21 @@ export function SettingsPanel() {
           >
             {AI_PROVIDERS.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.label}{p.recommended ? ' — Recomendado' : ''}
+                {p.label}
+                {p.recommended ? ' — Recomendado' : ''}
               </option>
             ))}
           </select>
-        </div>
-        <div className="settings__row">
-          <label>URL base</label>
+        </Row>
+        <Row label="URL base">
           <input
             className="settings__input mono"
             value={settings.ai.baseUrl}
             onChange={(e) => update({ ai: { ...settings.ai, baseUrl: e.target.value } })}
             placeholder="https://api.openai.com/v1"
           />
-        </div>
-        <div className="settings__row">
-          <label>Clave de API</label>
+        </Row>
+        <Row label="Clave de API">
           <div className="settings__key-input">
             <input
               className="settings__input mono"
@@ -172,18 +294,16 @@ export function SettingsPanel() {
               <Icons.info size={14} />
             </button>
           </div>
-        </div>
-        <div className="settings__row">
-          <label>Modelo</label>
+        </Row>
+        <Row label="Modelo">
           <input
             className="settings__input mono"
             value={settings.ai.model}
             onChange={(e) => update({ ai: { ...settings.ai, model: e.target.value } })}
             placeholder="gpt-4o-mini"
           />
-        </div>
-        <div className="settings__row">
-          <label>Temperatura · <span className="mono">{settings.ai.temperature.toFixed(2)}</span></label>
+        </Row>
+        <Row label={`Temperatura · ${settings.ai.temperature.toFixed(2)}`}>
           <input
             className="settings__range"
             type="range"
@@ -193,9 +313,8 @@ export function SettingsPanel() {
             value={settings.ai.temperature}
             onChange={(e) => update({ ai: { ...settings.ai, temperature: Number(e.target.value) } })}
           />
-        </div>
-        <div className="settings__row">
-          <label>Tokens máximos</label>
+        </Row>
+        <Row label="Tokens máximos">
           <input
             className="settings__input mono"
             type="number"
@@ -204,32 +323,35 @@ export function SettingsPanel() {
             value={settings.ai.maxTokens}
             onChange={(e) => update({ ai: { ...settings.ai, maxTokens: Number(e.target.value) || 2048 } })}
           />
-        </div>
-        <div className="settings__row">
-          <label></label>
-          <div className="settings__test">
-            <button className="btn btn--primary" onClick={() => void testConnection()} disabled={testing || !settings.ai.apiKey}>
-              {testing ? <span className="spinner spinner--sm" /> : <Icons.zap size={14} />}
-              {testing ? ' Probando…' : ' Probar conexión'}
-            </button>
-            {testResult === 'ok' && <span className="settings__ok"><Icons.check size={13} /> Conexión correcta</span>}
-            {testResult === 'fail' && <span className="settings__fail"><Icons.warning size={13} /> Error de conexión</span>}
-          </div>
+        </Row>
+      </Group>
+      <Group title="Conexión">
+        <div className="settings__test">
+          <button className="btn btn--primary" onClick={() => void testConnection()} disabled={testing || !settings.ai.apiKey}>
+            {testing ? <span className="spinner spinner--sm" /> : <Icons.zap size={14} />}
+            {testing ? ' Probando…' : ' Probar conexión'}
+          </button>
+          {testResult === 'ok' && <span className="settings__ok"><Icons.check size={13} /> Conexión correcta</span>}
+          {testResult === 'fail' && <span className="settings__fail"><Icons.warning size={13} /> Error de conexión</span>}
         </div>
         <p className="settings__note">
           Tu clave se guarda solo en este navegador (localStorage) y se envía únicamente a la URL base configurada.
         </p>
-      </div>
+      </Group>
+    </>
+  )
+}
 
+// ---------------------------------------------------------------------------
+//  SISTEMA
+// ---------------------------------------------------------------------------
+
+function SystemTab() {
+  return (
+    <>
       <UpdatesSection />
-
-      <div className="settings__group">
-        <h4>Datos</h4>
-        <p className="settings__note">
-          Restablece ajustes, sesión y extensiones instaladas para empezar desde cero.
-        </p>
+      <Group title="Datos" subtitle="Restablece ajustes, sesión y extensiones">
         <div className="settings__row">
-          <label></label>
           <button
             className="btn btn--danger"
             onClick={() => {
@@ -241,29 +363,72 @@ export function SettingsPanel() {
             <Icons.trash size={14} /> Restablecer todos los datos
           </button>
         </div>
-      </div>
-
-      <div className="settings__group">
-        <h4>Acerca de</h4>
+      </Group>
+      <Group title="Acerca de">
         <div className="settings__about">
           <div className="settings__logo"><Icons.sparkles size={22} /></div>
           <div>
             <div className="settings__name">Nova Editor</div>
-            <div className="settings__version">Versión 1.2.0-alpha · Editor de código con IA</div>
+            <div className="settings__version">Versión 1.0.0 · Editor de código con IA</div>
           </div>
         </div>
+      </Group>
+    </>
+  )
+}
+
+// ---------------------------------------------------------------------------
+//  Componentes de apoyo
+// ---------------------------------------------------------------------------
+
+function Group({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+  return (
+    <div className="settings__group">
+      <div className="settings__group-head">
+        <h4>{title}</h4>
+        {subtitle && <span className="settings__group-sub">{subtitle}</span>}
       </div>
+      {children}
     </div>
   )
 }
 
-function ToggleRow({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="settings__row">
       <label>{label}</label>
-      <button className={`toggle${value ? ' toggle--on' : ''}`} onClick={() => onChange(!value)} role="switch" aria-checked={value}>
-        <span className="toggle__knob" />
-      </button>
+      <div className="settings__control">{children}</div>
+    </div>
+  )
+}
+
+function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button className={`toggle${value ? ' toggle--on' : ''}`} onClick={() => onChange(!value)} role="switch" aria-checked={value}>
+      <span className="toggle__knob" />
+    </button>
+  )
+}
+
+function Stepper({ value, min, max, step = 1, onChange, suffix }: { value: number; min: number; max: number; step?: number; onChange: (v: number) => void; suffix?: string }) {
+  const clamp = (v: number) => Math.max(min, Math.min(max, Math.round(v / step) * step))
+  return (
+    <div className="settings__stepper">
+      <button onClick={() => onChange(clamp(value - step))}>−</button>
+      <span className="mono">{value.toFixed(step < 1 ? 1 : 0)}{suffix ? ` ${suffix}` : ''}</span>
+      <button onClick={() => onChange(clamp(value + step))}>+</button>
+    </div>
+  )
+}
+
+function Segmented<T extends string>({ options, value, onChange }: { options: readonly { value: T; label: string }[]; value: T; onChange: (v: T) => void }) {
+  return (
+    <div className="settings__segmented">
+      {options.map((o) => (
+        <button key={o.value} className={value === o.value ? 'active' : ''} onClick={() => onChange(o.value)}>
+          {o.label}
+        </button>
+      ))}
     </div>
   )
 }

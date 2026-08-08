@@ -70,11 +70,29 @@ export interface AISettings {
 export interface EditorSettings {
   fontSize: number
   tabSize: number
+  lineHeight: number
   wordWrap: 'off' | 'on'
   minimap: boolean
   lineNumbers: 'on' | 'relative' | 'off'
   formatOnSave: boolean
+  formatOnPaste: boolean
   vimMode: boolean
+  autoSave: boolean
+  confirmBeforeClose: boolean
+  cursorBlinking: 'blink' | 'smooth' | 'phase' | 'expand' | 'solid'
+  cursorStyle: 'line' | 'block' | 'underline'
+  fontLigatures: boolean
+  renderWhitespace: 'none' | 'selection' | 'all'
+  smoothScrolling: boolean
+  stickyScroll: boolean
+  bracketPairColorization: boolean
+  indentGuides: boolean
+  scrollBeyondLastLine: boolean
+  autoClosingBrackets: boolean
+  mouseWheelZoom: boolean
+  wordBasedSuggestions: boolean
+  parameterHints: boolean
+  folding: boolean
   theme: ThemeSettings['mode']
   ai: AISettings
 }

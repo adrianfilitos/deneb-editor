@@ -19,6 +19,7 @@ export default function App() {
   const groups = useEditorStore((s) => s.groups)
   const settings = useEditorStore((s) => s.settings)
   const zenMode = useEditorStore((s) => s.zenMode)
+  const dirtyCount = useEditorStore((s) => s.openTabs.filter((t) => t.dirty).length)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
 
   useGlobalShortcuts()
@@ -30,6 +31,15 @@ export default function App() {
   useEffect(() => {
     document.body.style.fontSize = `${settings.fontSize - 3}px`
   }, [settings.fontSize])
+
+  // Auto-guardado: guarda las pestañas sucias tras un momento de inactividad
+  useEffect(() => {
+    if (!settings.autoSave || dirtyCount === 0) return
+    const t = setTimeout(() => {
+      void useEditorStore.getState().saveAll()
+    }, 1200)
+    return () => clearTimeout(t)
+  }, [dirtyCount, settings.autoSave])
 
   // Session restore + persist
   useEffect(() => {
