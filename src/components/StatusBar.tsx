@@ -51,8 +51,8 @@ export function StatusBar() {
       const detail = (e as CustomEvent).detail as typeof vimState
       if (detail) setVimState(detail)
     }
-    window.addEventListener('nova:vim-mode', onMode)
-    return () => window.removeEventListener('nova:vim-mode', onMode)
+    window.addEventListener('deneb:vim-mode', onMode)
+    return () => window.removeEventListener('deneb:vim-mode', onMode)
   }, [])
 
   const showVim = settings.vimMode && vimState !== 'OFF'

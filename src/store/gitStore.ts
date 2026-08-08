@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { isDesktop, type NovaDesktopGit } from '../lib/electronBridge'
+import { isDesktop, type DenebDesktopGit } from '../lib/electronBridge'
 import { useEditorStore } from './editorStore'
 import type { DesktopEntry } from '../types'
 
@@ -35,8 +35,8 @@ interface GitStore {
   openFile: (path: string) => Promise<void>
 }
 
-function gitApi(): NovaDesktopGit | null {
-  return isDesktop() ? window.novaDesktop!.git ?? null : null
+function gitApi(): DenebDesktopGit | null {
+  return isDesktop() ? window.denebDesktop!.git ?? null : null
 }
 
 const KIND_LABEL: Record<GitChangeKind, string> = {

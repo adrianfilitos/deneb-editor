@@ -53,14 +53,14 @@ export default function App() {
     useExtensionStore.getState().init()
   }, [])
 
-  // Mensajes de estado emitidos por extensiones (comando "nova:status")
+  // Mensajes de estado emitidos por extensiones (comando "deneb:status")
   useEffect(() => {
     const onStatus = (e: Event) => {
       const msg = (e as CustomEvent).detail as string | undefined
       if (msg) useEditorStore.getState().setStatus(msg, 2500)
     }
-    window.addEventListener('nova:status', onStatus)
-    return () => window.removeEventListener('nova:status', onStatus)
+    window.addEventListener('deneb:status', onStatus)
+    return () => window.removeEventListener('deneb:status', onStatus)
   }, [])
 
   useEffect(() => {
@@ -71,8 +71,8 @@ export default function App() {
   // Global listener for opening the shortcuts modal
   useEffect(() => {
     const onShortcuts = () => setShortcutsOpen((v) => !v)
-    window.addEventListener('nova:show-shortcuts', onShortcuts)
-    return () => window.removeEventListener('nova:show-shortcuts', onShortcuts)
+    window.addEventListener('deneb:show-shortcuts', onShortcuts)
+    return () => window.removeEventListener('deneb:show-shortcuts', onShortcuts)
   }, [])
 
   return (

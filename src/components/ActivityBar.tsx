@@ -1,7 +1,7 @@
 import { useEditorStore } from '../store/editorStore'
 import { useGitStore } from '../store/gitStore'
 import { Icons, type IconName } from './icons'
-import { NovaLogo } from './NovaLogo'
+import { DenebLogo } from './DenebLogo'
 import type { SidebarView } from '../types'
 
 const NAV: { view: SidebarView; icon: IconName; label: string; ai?: boolean }[] = [
@@ -28,8 +28,8 @@ export function ActivityBar() {
 
   return (
     <div className="activity-bar" role="navigation" aria-label="Barra de actividad">
-      <div className="activity-bar__logo" title="Nova — Editor de código">
-        <NovaLogo size={22} />
+      <div className="activity-bar__logo" title="Deneb — Editor de código">
+        <DenebLogo size={22} />
       </div>
       {NAV.map(({ view, icon, label, ai }) => {
         const Icon = Icons[icon]

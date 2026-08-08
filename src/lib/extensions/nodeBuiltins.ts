@@ -259,11 +259,11 @@ const osPolyfill = {
   arch: () => 'x64',
   homedir: () => 'C:/Users/Usuario',
   tmpdir: () => '/tmp',
-  cpus: () => [{ model: 'Nova CPU', speed: 3000, times: { user: 0, nice: 0, sys: 0, idle: 0, irq: 0 } }],
+  cpus: () => [{ model: 'Deneb CPU', speed: 3000, times: { user: 0, nice: 0, sys: 0, idle: 0, irq: 0 } }],
   totalmem: () => 16 * 1024 ** 3,
   freemem: () => 8 * 1024 ** 3,
-  hostname: () => 'nova',
-  userInfo: () => ({ username: 'nova', uid: 0, gid: 0, shell: null, homedir: 'C:/Users/Usuario' }),
+  hostname: () => 'deneb',
+  userInfo: () => ({ username: 'deneb', uid: 0, gid: 0, shell: null, homedir: 'C:/Users/Usuario' }),
   networkInterfaces: () => ({}),
   endianness: () => 'LE',
   loadavg: () => [0, 0, 0],
@@ -279,7 +279,7 @@ const cryptoPolyfill: Record<string, unknown> = {
   },
   randomUUID(): string {
     const c = globalThis.crypto as { randomUUID?: () => string } | undefined
-    return typeof c?.randomUUID === 'function' ? c.randomUUID() : 'nova-' + Math.random().toString(16).slice(2)
+    return typeof c?.randomUUID === 'function' ? c.randomUUID() : 'deneb-' + Math.random().toString(16).slice(2)
   },
   createHash: () => new Hash(),
   getHashes: () => ['sha256', 'sha1', 'md5'],
@@ -512,10 +512,10 @@ const fsPolyfill = {
         if (cb) cb(ev, d.path)
       }
     }
-    window.addEventListener('nova:fs-change', fn)
+    window.addEventListener('deneb:fs-change', fn)
     return {
       on: emitter.on.bind(emitter),
-      close: () => window.removeEventListener('nova:fs-change', fn),
+      close: () => window.removeEventListener('deneb:fs-change', fn),
       addListener: emitter.on.bind(emitter),
     }
   },
@@ -537,7 +537,7 @@ const processPolyfill: Record<string, unknown> = {
   off: () => {},
   listeners: () => [],
   removeListener: () => {},
-  title: 'nova',
+  title: 'deneb',
   pid: 1,
   uptime: () => 0,
   hrtime: (prev?: number[]) => {
@@ -563,7 +563,7 @@ const processPolyfill: Record<string, unknown> = {
 
 const childProcessPolyfill: Record<string, unknown> = {
   execSync: () => {
-    throw new Error('Nova: child_process no está disponible en el navegador. Usa la app de escritorio.')
+    throw new Error('Deneb: child_process no está disponible en el navegador. Usa la app de escritorio.')
   },
   spawnSync: () => ({ status: 1, stdout: '', stderr: 'child_process no disponible' }),
   exec: (_cmd: string, cb?: (err: any, stdout: string, stderr: string) => void) => {
@@ -575,10 +575,10 @@ const childProcessPolyfill: Record<string, unknown> = {
 const httpPolyfill: Record<string, unknown> = {
   createServer: () => new ServerStub(),
   request: () => {
-    throw new Error('Nova: http.request no está soportado en el navegador')
+    throw new Error('Deneb: http.request no está soportado en el navegador')
   },
   get: () => {
-    throw new Error('Nova: http.get no está soportado en el navegador')
+    throw new Error('Deneb: http.get no está soportado en el navegador')
   },
 }
 

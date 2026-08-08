@@ -12,26 +12,26 @@ export interface NativeExtDef {
   code?: string
 }
 
-const activeEditor = () => (window as unknown as { __novaEditor?: { executeEdits: (s: string, e: unknown[]) => void; getModel: () => { getLineMaxColumn: (l: number) => number } | null; getPosition: () => { lineNumber: number; column: number } | null; setPosition: (p: { lineNumber: number; column: number }) => void } }).__novaEditor
+const activeEditor = () => (window as unknown as { __denebEditor?: { executeEdits: (s: string, e: unknown[]) => void; getModel: () => { getLineMaxColumn: (l: number) => number } | null; getPosition: () => { lineNumber: number; column: number } | null; setPosition: (p: { lineNumber: number; column: number }) => void } }).__denebEditor
 
 function insertAtCursor(text: string) {
   const ed = activeEditor()
   if (!ed) return
   const pos = ed.getPosition()
   if (!pos) return
-  ed.executeEdits('nova-ext', [
+  ed.executeEdits('deneb-ext', [
     { range: { startLineNumber: pos.lineNumber, startColumn: pos.column, endLineNumber: pos.lineNumber, endColumn: pos.column }, text },
   ])
   ed.setPosition({ lineNumber: pos.lineNumber, column: pos.column + text.length })
 }
 
 function status(msg: string) {
-  window.dispatchEvent(new CustomEvent('nova:status', { detail: msg }))
+  window.dispatchEvent(new CustomEvent('deneb:status', { detail: msg }))
 }
 
 const toolsCommands: ExtCommandDef[] = [
   {
-    id: 'nova.tools.insertDate',
+    id: 'deneb.tools.insertDate',
     title: 'Herramientas: Insertar fecha y hora',
     category: 'Extensiones',
     run: () => {
@@ -42,7 +42,7 @@ const toolsCommands: ExtCommandDef[] = [
     },
   },
   {
-    id: 'nova.tools.guid',
+    id: 'deneb.tools.guid',
     title: 'Herramientas: Insertar GUID',
     category: 'Extensiones',
     run: () => {
@@ -56,7 +56,7 @@ const toolsCommands: ExtCommandDef[] = [
     },
   },
   {
-    id: 'nova.tools.lorem',
+    id: 'deneb.tools.lorem',
     title: 'Herramientas: Insertar párrafo Lorem',
     category: 'Extensiones',
     run: () => {
@@ -67,12 +67,12 @@ const toolsCommands: ExtCommandDef[] = [
 ]
 
 const toolsShortcuts: ExtShortcutDef[] = [
-  { id: 'nova.tools.shortcut.date', key: 'd', ctrl: true, shift: true, commandId: 'nova.tools.insertDate', run: toolsCommands[0].run },
+  { id: 'deneb.tools.shortcut.date', key: 'd', ctrl: true, shift: true, commandId: 'deneb.tools.insertDate', run: toolsCommands[0].run },
 ]
 
 const candyTheme = {
-  id: 'nova-theme-candy',
-  label: 'Nova Candy',
+  id: 'deneb-theme-candy',
+  label: 'Deneb Candy',
   base: 'vs-dark' as const,
   colors: {
     'editor.background': '#171020',
@@ -153,7 +153,7 @@ const jsSnippets = {
 
 export const NATIVE_EXTENSIONS: NativeExtDef[] = [
   {
-    id: 'nova.host-demo',
+    id: 'deneb.host-demo',
     name: 'Host Demo',
     version: '1.0.0',
     description: 'Demuestra el Extension Host: usa la API vscode real (comandos, mensajes, edición).',
@@ -163,7 +163,7 @@ export const NATIVE_EXTENSIONS: NativeExtDef[] = [
 
 function activate(context) {
   context.subscriptions.push(
-    vscode.commands.registerCommand('nova.host.hello', function () {
+    vscode.commands.registerCommand('deneb.host.hello', function () {
       vscode.window.showInformationMessage('¡Hola desde el Extension Host de VS Code!');
       const editor = vscode.window.activeTextEditor;
       if (editor) {
@@ -173,13 +173,13 @@ function activate(context) {
         });
       }
     }),
-    vscode.commands.registerCommand('nova.host.saludo', function (nombre) {
+    vscode.commands.registerCommand('deneb.host.saludo', function (nombre) {
       vscode.window.showInformationMessage('Hola, ' + (nombre || 'mundo'));
       return 'ok';
     }),
     vscode.languages.registerCompletionItemProvider('typescript', {
       provideCompletionItems: function (document, position) {
-        return [ new vscode.CompletionItem('nova-nativo', vscode.CompletionItemKind.Function) ];
+        return [ new vscode.CompletionItem('deneb-nativo', vscode.CompletionItemKind.Function) ];
       }
     })
   );
@@ -192,7 +192,7 @@ module.exports = { activate, deactivate };
 `,
   },
   {
-    id: 'nova.auto-format',
+    id: 'deneb.auto-format',
     name: 'Auto-Formato',
     version: '1.0.0',
     description: 'Formatea automáticamente el código al guardar.',
@@ -200,7 +200,7 @@ module.exports = { activate, deactivate };
     contrib: { settings: { formatOnSave: true } },
   },
   {
-    id: 'nova.minimap',
+    id: 'deneb.minimap',
     name: 'Minimapa Pro',
     version: '1.0.0',
     description: 'Activa el minimapa del editor.',
@@ -208,7 +208,7 @@ module.exports = { activate, deactivate };
     contrib: { settings: { minimap: true } },
   },
   {
-    id: 'nova.word-wrap',
+    id: 'deneb.word-wrap',
     name: 'Ajuste de Línea',
     version: '1.0.0',
     description: 'Envuelve automáticamente las líneas largas.',
@@ -216,7 +216,7 @@ module.exports = { activate, deactivate };
     contrib: { settings: { wordWrap: 'on' } },
   },
   {
-    id: 'nova.relative-lines',
+    id: 'deneb.relative-lines',
     name: 'Líneas Relativas',
     version: '1.0.0',
     description: 'Números de línea relativos, estilo Vim.',
@@ -224,7 +224,7 @@ module.exports = { activate, deactivate };
     contrib: { settings: { lineNumbers: 'relative' } },
   },
   {
-    id: 'nova.vim',
+    id: 'deneb.vim',
     name: 'Vim Keys',
     version: '1.0.0',
     description: 'Activa el modo Vim del editor.',
@@ -232,18 +232,18 @@ module.exports = { activate, deactivate };
     contrib: { settings: { vimMode: true } },
   },
   {
-    id: 'nova.theme-candy',
+    id: 'deneb.theme-candy',
     name: 'Tema Candy',
     version: '1.0.0',
     description: 'Tema oscuro vibrante con tonos de caramelo.',
     icon: '#f472b6',
     contrib: {
       themes: [candyTheme],
-      setTheme: { id: 'nova-theme-candy', themeId: 'nova-theme-candy', label: 'Candy' },
+      setTheme: { id: 'deneb-theme-candy', themeId: 'deneb-theme-candy', label: 'Candy' },
     },
   },
   {
-    id: 'nova.snippets-js',
+    id: 'deneb.snippets-js',
     name: 'Snippets JS/TS',
     version: '1.0.0',
     description: 'Atajos de código para JavaScript y TypeScript (log, fn, import…).',
@@ -251,7 +251,7 @@ module.exports = { activate, deactivate };
     contrib: { snippets: [jsSnippets] },
   },
   {
-    id: 'nova.tools',
+    id: 'deneb.tools',
     name: 'Herramientas',
     version: '1.0.0',
     description: 'Comandos útiles: fecha, GUID, Lorem. Atajo Ctrl+Shift+D.',

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useEditorStore } from '../store/editorStore'
-import { getTasks, loadTasks, runTask, openTasksFile, tasksPath, type NovaTask } from '../lib/tasks'
+import { getTasks, loadTasks, runTask, openTasksFile, tasksPath, type DenebTask } from '../lib/tasks'
 import { Icons } from './icons'
 
 export function TasksPanel() {
-  const [tasks, setTasks] = useState<NovaTask[]>([])
+  const [tasks, setTasks] = useState<DenebTask[]>([])
   const [running, setRunning] = useState<string | null>(null)
   const root = useEditorStore((s) => s.root)
 
@@ -18,14 +18,14 @@ export function TasksPanel() {
         if (alive) setTasks(list)
       })
     }
-    window.addEventListener('nova:fs-change', onFs)
+    window.addEventListener('deneb:fs-change', onFs)
     return () => {
       alive = false
-      window.removeEventListener('nova:fs-change', onFs)
+      window.removeEventListener('deneb:fs-change', onFs)
     }
   }, [root?.path])
 
-  async function onRun(t: NovaTask) {
+  async function onRun(t: DenebTask) {
     setRunning(t.label)
     await runTask(t)
     setRunning(null)

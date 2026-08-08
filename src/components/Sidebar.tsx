@@ -16,7 +16,7 @@ const TITLES: Record<string, { title: string; subtitle?: string }> = {
   explorer: { title: 'Explorador' },
   search: { title: 'Buscar', subtitle: 'en archivos' },
   git: { title: 'Control de código fuente', subtitle: 'Git' },
-  ai: { title: 'Asistente de IA', subtitle: 'Nova AI' },
+  ai: { title: 'Asistente de IA', subtitle: 'Deneb AI' },
   extensions: { title: 'Extensiones' },
   settings: { title: 'Ajustes' },
   outline: { title: 'Esquema', subtitle: 'símbolos' },

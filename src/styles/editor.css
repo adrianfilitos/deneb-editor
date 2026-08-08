@@ -18,7 +18,7 @@
 }
 
 /* ---------- Debug: breakpoints y línea actual ---------- */
-.nova-breakpoint-glyph {
+.deneb-breakpoint-glyph {
   background: #f7768e;
   border-radius: 50%;
   margin-left: 5px;
@@ -27,10 +27,10 @@
   height: 10px !important;
   cursor: pointer;
 }
-.monaco-editor .margin-view-overlays .cgmr.nova-breakpoint-glyph {
+.monaco-editor .margin-view-overlays .cgmr.deneb-breakpoint-glyph {
   background: #f7768e;
 }
-.nova-debug-current-line {
+.deneb-debug-current-line {
   background: rgba(158,206,106,.12);
   box-shadow: inset 2px 0 0 #9ece6a;
 }

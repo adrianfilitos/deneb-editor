@@ -1,6 +1,6 @@
 // Prueba con la extensión C# REAL del marketplace: se descarga el paquete de
 // Open VSX, se comprueba que contribuye el lenguaje csharp (.cs), se activa en
-// el Extension Host de Nova y se verifica el registro de comandos.
+// el Extension Host de Deneb y se verifica el registro de comandos.
 
 ;(globalThis as any).localStorage = (() => {
   const m = new Map<string, string>()
@@ -153,7 +153,7 @@ async function main() {
   console.log('\n=== 3) Detección de lenguaje ===')
   check('Index.cshtml → aspnetcorerazor (contribuido por la extensión)', lookupContributedLanguage('Pages/Index.cshtml') === 'aspnetcorerazor', lookupContributedLanguage('Pages/Index.cshtml'))
   check('MainWindow.xaml → xaml (contribuido por la extensión)', lookupContributedLanguage('MainWindow.xaml') === 'xaml', lookupContributedLanguage('MainWindow.xaml'))
-  check('Program.cs → csharp (lenguaje nativo de Nova)', languageFromPath('src/Program.cs') === 'csharp', languageFromPath('src/Program.cs'))
+  check('Program.cs → csharp (lenguaje nativo de Deneb)', languageFromPath('src/Program.cs') === 'csharp', languageFromPath('src/Program.cs'))
 
   // 4) Cargar el main y activar en el Extension Host
   const { getNodeBuiltins } = await import('../../src/lib/extensions/nodeBuiltins')
@@ -230,7 +230,7 @@ async function main() {
       asRelativePath: (p: string) => p,
       getWorkspaceFolder: () => ({ name: 'demo-project', uri: MockUri.file('demo-project'), index: 0 }),
     },
-    env: { appName: 'Nova', appRoot: '/', machineId: 'x', uriScheme: 'nova', language: 'es', shell: '', version: '1.0.0' },
+    env: { appName: 'Deneb', appRoot: '/', machineId: 'x', uriScheme: 'deneb', language: 'es', shell: '', version: '1.0.0' },
     languages: { getLanguages: () => [] },
   }
 

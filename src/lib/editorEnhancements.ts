@@ -123,7 +123,7 @@ function registerFormatCommand() {
     keybinding: 'Shift+Alt+F',
     icon: 'wand',
     run: () => {
-      const editor = (window as unknown as { __novaEditor?: { getAction?: (id: string) => { run?: () => Promise<void> } | undefined } | undefined }).__novaEditor
+      const editor = (window as unknown as { __denebEditor?: { getAction?: (id: string) => { run?: () => Promise<void> } | undefined } | undefined }).__denebEditor
       const action = editor?.getAction?.('editor.action.formatDocument')
       if (action?.run) void action.run()
     },

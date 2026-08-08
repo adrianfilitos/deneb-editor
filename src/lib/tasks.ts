@@ -2,7 +2,7 @@ import { useEditorStore } from '../store/editorStore'
 import { useExtUiStore } from '../store/extUiStore'
 import { readFileAt, currentBackend, type AnyHandle } from './fileSystem'
 
-export interface NovaTask {
+export interface DenebTask {
   label: string
   type: string
   command: string
@@ -14,13 +14,13 @@ export interface NovaTask {
 
 export interface TasksConfig {
   version?: string
-  tasks: NovaTask[]
+  tasks: DenebTask[]
 }
 
-let tasksCache: NovaTask[] = []
-const TASKS_PATH = '.nova/tasks.json'
+let tasksCache: DenebTask[] = []
+const TASKS_PATH = '.deneb/tasks.json'
 
-export async function loadTasks(): Promise<NovaTask[]> {
+export async function loadTasks(): Promise<DenebTask[]> {
   const root = useEditorStore.getState().root?.handle as AnyHandle | null
   if (!root) return tasksCache
   try {
@@ -35,7 +35,7 @@ export async function loadTasks(): Promise<NovaTask[]> {
   }
 }
 
-export function getTasks(): NovaTask[] {
+export function getTasks(): DenebTask[] {
   return tasksCache
 }
 
@@ -43,7 +43,7 @@ export function tasksPath(): string {
   return TASKS_PATH
 }
 
-export async function runTask(task: NovaTask): Promise<void> {
+export async function runTask(task: DenebTask): Promise<void> {
   const store = useEditorStore.getState()
   const ui = useExtUiStore.getState()
   const outputId = `task:${task.label}`

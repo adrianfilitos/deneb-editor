@@ -88,12 +88,12 @@ export async function startLivePreview(): Promise<void> {
   swScope = reg.scope
   await navigator.serviceWorker.ready
   postToSw({ type: 'map', entries: [...files.entries()] })
-  window.addEventListener('nova:fs-change', onFsChange)
-  window.open(swScope + '__nova_preview/', '_blank')
+  window.addEventListener('deneb:fs-change', onFsChange)
+  window.open(swScope + '__deneb_preview/', '_blank')
   st.setStatus('Vista previa abierta — se recarga al guardar', 3500)
 }
 
 export function stopLivePreview(): void {
-  window.removeEventListener('nova:fs-change', onFsChange)
+  window.removeEventListener('deneb:fs-change', onFsChange)
   postToSw({ type: 'close' })
 }

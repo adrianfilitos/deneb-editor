@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import Editor, { type Monaco, type OnMount } from '@monaco-editor/react'
 import type { editor as monacoEditor, languages as monacoLanguages, IDisposable } from 'monaco-editor'
 import { useEditorStore } from '../store/editorStore'
-import { defineNovaThemes, setEditorTheme } from '../lib/monaco'
+import { defineDenebThemes, setEditorTheme } from '../lib/monaco'
 import { VimMode } from '../lib/vim'
 import { useAIChatStore } from '../store/aiChatStore'
 import type { ChatMessage } from '../types'
@@ -14,7 +14,7 @@ import { handleGutterClick, updateBreakpointDecorations } from '../lib/debugger'
 
 let themesDefined = false
 
-type FocusTracker = { __novaFocusPath?: string; __novaEditor?: monacoEditor.IStandaloneCodeEditor }
+type FocusTracker = { __denebFocusPath?: string; __denebEditor?: monacoEditor.IStandaloneCodeEditor }
 const focusWindow = window as unknown as FocusTracker
 
 const editorMenuActions = new Map<monacoEditor.IStandaloneCodeEditor, IDisposable[]>()
@@ -73,7 +73,7 @@ export function EditorPane({ groupId }: { groupId: string }) {
 
   useEffect(() => {
     if (!themesDefined) {
-      defineNovaThemes()
+      defineDenebThemes()
       themesDefined = true
     }
     setEditorTheme(settings.theme)
@@ -125,8 +125,8 @@ export function EditorPane({ groupId }: { groupId: string }) {
 
   const handleMount: OnMount = (editor, monaco) => {
     editorRef.current = editor
-    focusWindow.__novaEditor = editor
-    if (activePath) focusWindow.__novaFocusPath = activePath
+    focusWindow.__denebEditor = editor
+    if (activePath) focusWindow.__denebFocusPath = activePath
     vimRef.current = new VimMode(editor)
     vimRef.current.setEnabled(settings.vimMode)
     registerWorkspaceLanguageProviders(monaco as typeof import('monaco-editor'))
@@ -134,20 +134,20 @@ export function EditorPane({ groupId }: { groupId: string }) {
     setupInlineCompletions(monaco)
     syncEditorContextMenu(editor, activePath)
     const onMenusChanged = () => syncEditorContextMenu(editor, activePath)
-    window.addEventListener('nova:ext-menus-changed', onMenusChanged)
+    window.addEventListener('deneb:ext-menus-changed', onMenusChanged)
     editor.onDidDispose(() => {
-      window.removeEventListener('nova:ext-menus-changed', onMenusChanged)
+      window.removeEventListener('deneb:ext-menus-changed', onMenusChanged)
       for (const d of editorMenuActions.get(editor) || []) d.dispose()
       editorMenuActions.delete(editor)
     })
     editor.onDidChangeCursorPosition((e) => {
       setCursor({ lineNumber: e.position.lineNumber, column: e.position.column })
-      window.dispatchEvent(new CustomEvent('nova:cursor-pos'))
+      window.dispatchEvent(new CustomEvent('deneb:cursor-pos'))
     })
     editor.onDidFocusEditorText(() => {
-      focusWindow.__novaEditor = editor
-      if (activePath) focusWindow.__novaFocusPath = activePath
-      window.dispatchEvent(new CustomEvent('nova:editor-active'))
+      focusWindow.__denebEditor = editor
+      if (activePath) focusWindow.__denebFocusPath = activePath
+      window.dispatchEvent(new CustomEvent('deneb:editor-active'))
       updateBreakpointDecorations()
     })
     editor.onMouseDown((e) => {
@@ -163,7 +163,7 @@ export function EditorPane({ groupId }: { groupId: string }) {
     (value?: string) => {
       if (activeTab && value !== undefined && pathRef.current === activeTab.path) {
         updateTabContent(activeTab.path, value)
-        window.dispatchEvent(new CustomEvent('nova:doc-change', { detail: { model: editorRef.current?.getModel() } }))
+        window.dispatchEvent(new CustomEvent('deneb:doc-change', { detail: { model: editorRef.current?.getModel() } }))
       }
     },
     [activeTab, updateTabContent],
@@ -181,7 +181,7 @@ export function EditorPane({ groupId }: { groupId: string }) {
     if (!editor || !activeTab) return
     const model = editor.getModel()
     if (model && model.getValue() !== activeTab.content) {
-      editor.executeEdits('nova-external', [{ range: model.getFullModelRange(), text: activeTab.content }])
+      editor.executeEdits('deneb-external', [{ range: model.getFullModelRange(), text: activeTab.content }])
     }
   }, [activeTab?.content, activeTab?.path])
 
@@ -206,8 +206,8 @@ export function EditorPane({ groupId }: { groupId: string }) {
         editor.focus()
       })
     }
-    window.addEventListener('nova:reveal-line', onReveal)
-    return () => window.removeEventListener('nova:reveal-line', onReveal)
+    window.addEventListener('deneb:reveal-line', onReveal)
+    return () => window.removeEventListener('deneb:reveal-line', onReveal)
   }, [activeTab?.path])
 
   return (
@@ -242,38 +242,38 @@ function monacoSetLanguage(model: monacoEditor.ITextModel, language: string) {
 
 function setupAIActions(editor: monacoEditor.IStandaloneCodeEditor, monaco: Monaco) {
   editor.addAction({
-    id: 'nova.ai.explain',
-    label: 'Nova AI: Explicar selección',
+    id: 'deneb.ai.explain',
+    label: 'Deneb AI: Explicar selección',
     contextMenuGroupId: 'z_commands',
     run: () => runAIFileCommand('explain'),
   })
   editor.addAction({
-    id: 'nova.ai.refactor',
-    label: 'Nova AI: Refactorizar selección',
+    id: 'deneb.ai.refactor',
+    label: 'Deneb AI: Refactorizar selección',
     contextMenuGroupId: 'z_commands',
     run: () => runAIFileCommand('refactor'),
   })
   editor.addAction({
-    id: 'nova.ai.bugs',
-    label: 'Nova AI: Buscar errores',
+    id: 'deneb.ai.bugs',
+    label: 'Deneb AI: Buscar errores',
     contextMenuGroupId: 'z_commands',
     run: () => runAIFileCommand('bugs'),
   })
   editor.addAction({
-    id: 'nova.ai.comments',
-    label: 'Nova AI: Añadir comentarios',
+    id: 'deneb.ai.comments',
+    label: 'Deneb AI: Añadir comentarios',
     contextMenuGroupId: 'z_commands',
     run: () => runAIFileCommand('comments'),
   })
   editor.addAction({
-    id: 'nova.ai.tests',
-    label: 'Nova AI: Generar tests',
+    id: 'deneb.ai.tests',
+    label: 'Deneb AI: Generar tests',
     contextMenuGroupId: 'z_commands',
     run: () => runAIFileCommand('tests'),
   })
   editor.addAction({
-    id: 'nova.ai.docs',
-    label: 'Nova AI: Documentar código',
+    id: 'deneb.ai.docs',
+    label: 'Deneb AI: Documentar código',
     contextMenuGroupId: 'z_commands',
     run: () => runAIFileCommand('docs'),
   })
@@ -310,7 +310,7 @@ function setupInlineCompletions(monaco: Monaco) {
   const provider: monacoLanguages.InlineCompletionsProvider = {
     provideInlineCompletions: async (model, position, _context, token) => {
       const store = useEditorStore.getState()
-      const focusPath = focusWindow.__novaFocusPath || store.activePath
+      const focusPath = focusWindow.__denebFocusPath || store.activePath
       const tab = store.openTabs.find((t) => t.path === focusPath)
       if (!tab) return null
       const { ai } = store.settings
@@ -418,7 +418,7 @@ async function requestInlineSuggestion(cfg: InlineReq, language: string, before:
 }
 
 // Attach event so command palette "Aplicar última sugerencia" works
-window.addEventListener('nova:ai-apply-last', () => applyLastAIAnswerToFile())
+window.addEventListener('deneb:ai-apply-last', () => applyLastAIAnswerToFile())
 
 export function applyLastAIAnswerToFile() {
   const store = useEditorStore.getState()

@@ -40,7 +40,7 @@ export function useGlobalShortcuts() {
         }
         if (e.ctrlKey && key === 's') {
           e.preventDefault()
-          window.dispatchEvent(new Event('nova:show-shortcuts'))
+          window.dispatchEvent(new Event('deneb:show-shortcuts'))
           return
         }
         // any other key cancels the chord
@@ -170,9 +170,9 @@ export function useGlobalShortcuts() {
       // F9 → toggle breakpoint
       if (e.key === 'F9') {
         e.preventDefault()
-        const editor = (window as unknown as { __novaEditor?: { getPosition?: () => { lineNumber: number } | null } | undefined }).__novaEditor
+        const editor = (window as unknown as { __denebEditor?: { getPosition?: () => { lineNumber: number } | null } | undefined }).__denebEditor
         const pos = editor?.getPosition?.()
-        const path = (window as unknown as { __novaFocusPath?: string }).__novaFocusPath
+        const path = (window as unknown as { __denebFocusPath?: string }).__denebFocusPath
         if (pos && path) {
           void import('../lib/debugger').then((m) => m.toggleBreakpoint(path, pos.lineNumber))
         }

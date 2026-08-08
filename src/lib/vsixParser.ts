@@ -42,7 +42,7 @@ function ruleColor(rules: ExtThemeDef['rules'], names: string[]): string | null 
   return null
 }
 
-/** Convierte un tema VS Code a una definición de tema Nova usable por Monaco. */
+/** Convierte un tema VS Code a una definición de tema Deneb usable por Monaco. */
 export function themeToExtTheme(id: string, label: string, themeJson: { type?: string; colors?: Record<string, string>; tokenColors?: VsCodeThemeToken[] }): ExtThemeDef {
   const dark = (themeJson.type || 'dark') !== 'light'
   const base: 'vs-dark' | 'vs' = dark ? 'vs-dark' : 'vs'
@@ -63,11 +63,11 @@ export function themeToExtTheme(id: string, label: string, themeJson: { type?: s
   if (!colors['editorCursor.foreground']) {
     colors['editorCursor.foreground'] = ruleColor(rules, ['keyword', 'storage']) || (dark ? '#82aaff' : '#2962ff')
   }
-  colors['nova.string'] = ruleColor(rules, ['string']) || (dark ? '#a5e075' : '#689f38')
-  colors['nova.number'] = ruleColor(rules, ['number']) || (dark ? '#f78c6c' : '#e65100')
-  colors['nova.keyword'] = ruleColor(rules, ['keyword', 'storage']) || (dark ? '#c792ea' : '#b072d1')
-  colors['nova.delimiter'] = ruleColor(rules, ['delimiter', 'operator']) || (dark ? '#89ddff' : '#00838f')
-  colors['nova.type'] = ruleColor(rules, ['type', 'support.type']) || (dark ? '#82aaff' : '#2962ff')
+  colors['deneb.string'] = ruleColor(rules, ['string']) || (dark ? '#a5e075' : '#689f38')
+  colors['deneb.number'] = ruleColor(rules, ['number']) || (dark ? '#f78c6c' : '#e65100')
+  colors['deneb.keyword'] = ruleColor(rules, ['keyword', 'storage']) || (dark ? '#c792ea' : '#b072d1')
+  colors['deneb.delimiter'] = ruleColor(rules, ['delimiter', 'operator']) || (dark ? '#89ddff' : '#00838f')
+  colors['deneb.type'] = ruleColor(rules, ['type', 'support.type']) || (dark ? '#82aaff' : '#2962ff')
 
   return { id, label, base, colors, rules }
 }

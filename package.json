@@ -1,13 +1,13 @@
 {
-  "name": "nova-code-editor",
+  "name": "deneb-code-editor",
   "private": true,
   "version": "1.0.0",
-  "description": "Nova â€” Editor de cÃ³digo con IA (web + escritorio)",
+  "description": "Deneb — Editor de código con IA (web + escritorio)",
   "type": "module",
   "main": "electron/main.cjs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/adrianfilitos/nova-editor.git"
+    "url": "https://github.com/adrianfilitos/deneb-editor.git"
   },
   "scripts": {
     "dev": "vite",
@@ -23,12 +23,12 @@
     "test:ext:debugger-dap": "node scripts/run-ext-test.mjs debugger-dap.ts",
     "test:ext:lsp": "node scripts/run-ext-test.mjs lsp.ts",
     "test:ext:electron-ls": "node scripts/ext-test/electron-liveserver.mjs",
-    "electron:dev": "concurrently -k \"npm:dev\" \"cross-env NOVA_DEV=1 electron .\"",
+    "electron:dev": "concurrently -k \"npm:dev\" \"cross-env DENEB_DEV=1 electron .\"",
     "electron:build": "npm run build && electron-builder",
     "electron:build:win": "npm run build && electron-builder --win",
     "electron:build:mac": "npm run build && electron-builder --mac",
     "electron:build:linux": "npm run build && electron-builder --linux",
-    "electron:start": "cross-env NOVA_DEV=0 electron .",
+    "electron:start": "cross-env DENEB_DEV=0 electron .",
     "dist": "electron-builder --publish never"
   },
   "dependencies": {
@@ -59,12 +59,12 @@
     "vite": "^5.4.11"
   },
   "build": {
-    "appId": "com.nova.editor",
-    "productName": "Nova",
+    "appId": "com.deneb.editor",
+    "productName": "Deneb",
     "publish": {
       "provider": "github",
       "owner": "adrianfilitos",
-      "repo": "nova-editor"
+      "repo": "deneb-editor"
     },
     "directories": {
       "output": "release"
@@ -89,7 +89,7 @@
       ],
       "category": "public.app-category.developer-tools",
       "icon": "build/icon.png",
-      "artifactName": "Nova-${version}-mac.${ext}"
+      "artifactName": "Deneb-${version}-mac.${ext}"
     },
     "linux": {
       "target": [
@@ -98,22 +98,22 @@
       ],
       "category": "Development",
       "icon": "build/icon.png",
-      "executableName": "nova",
+      "executableName": "deneb",
       "maintainer": "adrianfilitos <adrianfilitos@users.noreply.github.com>",
-      "artifactName": "Nova-${version}-linux.${ext}"
+      "artifactName": "Deneb-${version}-linux.${ext}"
     },
     "dmg": {
-      "artifactName": "Nova-${version}-mac.${ext}"
+      "artifactName": "Deneb-${version}-mac.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "include": "installer.nsh",
       "warningsAsErrors": false,
-      "artifactName": "Nova-Setup-${version}.${ext}"
+      "artifactName": "Deneb-Setup-${version}.${ext}"
     },
     "portable": {
-      "artifactName": "Nova-${version}.${ext}"
+      "artifactName": "Deneb-${version}.${ext}"
     }
   },
   "allowScripts": {

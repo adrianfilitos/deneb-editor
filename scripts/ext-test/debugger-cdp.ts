@@ -21,7 +21,7 @@ async function main() {
 
   console.log('=== Debugger DAP real: CDP sobre node --inspect-brk ===')
 
-  const dir = mkdtempSync(join(tmpdir(), 'nova-dbg-'))
+  const dir = mkdtempSync(join(tmpdir(), 'deneb-dbg-'))
   const script = join(dir, 'app.js')
   writeFileSync(script, `function greet(name) {
   const msg = 'Hola ' + name;

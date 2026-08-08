@@ -1,4 +1,4 @@
-// Prueba del motor de extensiones real de Nova: extracción VSIX + cargador
+// Prueba del motor de extensiones real de Deneb: extracción VSIX + cargador
 // CommonJS + polyfills de Node (fs/path) sobre el workspace + activación.
 // Corre en Node vía esbuild con stubs de monaco/zustand.
 
@@ -22,10 +22,10 @@ const FIXTURE: Record<string, string> = {
   'extension/package.json': JSON.stringify(
     {
       name: 'fixture-demo',
-      publisher: 'nova',
+      publisher: 'deneb',
       version: '1.0.0',
       displayName: 'Fixture Demo',
-      description: 'Extensión de prueba del Extension Host de Nova',
+      description: 'Extensión de prueba del Extension Host de Deneb',
       engines: { vscode: '^1.80.0' },
       main: 'main.js',
       contributes: {
@@ -108,7 +108,7 @@ async function main() {
     return
   }
   console.log('\n=== 1) VSIX extraído (parseVsix) ===')
-  check('id = nova.fixture-demo', parsed.id === 'nova.fixture-demo', parsed.id)
+  check('id = deneb.fixture-demo', parsed.id === 'deneb.fixture-demo', parsed.id)
   check('main = main.js', parsed.main === 'main.js')
   check('el árbol de archivos incluye helper.js', 'helper.js' in parsed.files)
   const cont = parsed.pkg.contributes
@@ -149,7 +149,7 @@ async function main() {
         return Promise.resolve(undefined)
       },
     },
-    env: { appName: 'Nova' },
+    env: { appName: 'Deneb' },
     workspace: {
       workspaceFolders: [{ name: 'demo-project', uri: { fsPath: 'demo-project' } }],
       getConfiguration: () => ({ get: () => undefined, has: () => false }),

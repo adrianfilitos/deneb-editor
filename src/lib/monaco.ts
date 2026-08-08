@@ -27,8 +27,8 @@ self.MonacoEnvironment = {
   },
 }
 
-export const NOVA_DARK: ThemeId = 'nova-dark'
-export const NOVA_LIGHT: ThemeId = 'nova-light'
+export const DENEB_DARK: ThemeId = 'deneb-dark'
+export const DENEB_LIGHT: ThemeId = 'deneb-light'
 
 interface ThemePalette {
   base: 'vs-dark' | 'vs'
@@ -67,7 +67,7 @@ interface ThemePalette {
 }
 
 export const THEME_PALETTES: Record<ThemeId, ThemePalette> = {
-  'nova-dark': {
+  'deneb-dark': {
     base: 'vs-dark',
     bg: '#0f111a',
     fg: '#d5d9e6',
@@ -102,7 +102,7 @@ export const THEME_PALETTES: Record<ThemeId, ThemePalette> = {
     scrollbarHover: '#3d456066',
     scrollbarActive: '#4a536e88',
   },
-  'nova-light': {
+  'deneb-light': {
     base: 'vs',
     bg: '#fbfbfd',
     fg: '#263238',
@@ -137,7 +137,7 @@ export const THEME_PALETTES: Record<ThemeId, ThemePalette> = {
     scrollbarHover: '#aeb4c280',
     scrollbarActive: '#939aa888',
   },
-  'nova-midnight': {
+  'deneb-midnight': {
     base: 'vs-dark',
     bg: '#0a0e1c',
     fg: '#dbe4ff',
@@ -172,7 +172,7 @@ export const THEME_PALETTES: Record<ThemeId, ThemePalette> = {
     scrollbarHover: '#4c5ba866',
     scrollbarActive: '#5a6ab888',
   },
-  'nova-ocean': {
+  'deneb-ocean': {
     base: 'vs-dark',
     bg: '#07151d',
     fg: '#d6f2ff',
@@ -207,7 +207,7 @@ export const THEME_PALETTES: Record<ThemeId, ThemePalette> = {
     scrollbarHover: '#46a0c266',
     scrollbarActive: '#56bcd966',
   },
-  'nova-forest': {
+  'deneb-forest': {
     base: 'vs-dark',
     bg: '#0d1510',
     fg: '#dcf5e4',
@@ -242,7 +242,7 @@ export const THEME_PALETTES: Record<ThemeId, ThemePalette> = {
     scrollbarHover: '#6cad8366',
     scrollbarActive: '#7ec29888',
   },
-  'nova-sunset': {
+  'deneb-sunset': {
     base: 'vs-dark',
     bg: '#170f0a',
     fg: '#fbe9d6',
@@ -277,7 +277,7 @@ export const THEME_PALETTES: Record<ThemeId, ThemePalette> = {
     scrollbarHover: '#c8936266',
     scrollbarActive: '#d9a57588',
   },
-  'nova-sakura': {
+  'deneb-sakura': {
     base: 'vs-dark',
     bg: '#180f16',
     fg: '#ffe4f0',
@@ -312,7 +312,7 @@ export const THEME_PALETTES: Record<ThemeId, ThemePalette> = {
     scrollbarHover: '#d67fb366',
     scrollbarActive: '#e690c288',
   },
-  'nova-mono': {
+  'deneb-mono': {
     base: 'vs-dark',
     bg: '#101010',
     fg: '#e5e5e5',
@@ -347,7 +347,7 @@ export const THEME_PALETTES: Record<ThemeId, ThemePalette> = {
     scrollbarHover: '#6d6d6d66',
     scrollbarActive: '#80808088',
   },
-  'nova-paper': {
+  'deneb-paper': {
     base: 'vs',
     bg: '#f6f1e7',
     fg: '#3b3a33',
@@ -388,7 +388,7 @@ export const THEME_IDS = Object.keys(THEME_PALETTES) as ThemeId[]
 
 let themesDefined = false
 
-function defineNovaTheme(id: ThemeId, p: ThemePalette) {
+function defineDenebTheme(id: ThemeId, p: ThemePalette) {
   monaco.editor.defineTheme(id, {
     base: p.base,
     inherit: true,
@@ -443,11 +443,11 @@ function defineNovaTheme(id: ThemeId, p: ThemePalette) {
   })
 }
 
-export function defineNovaThemes() {
+export function defineDenebThemes() {
   if (themesDefined) return
   themesDefined = true
   for (const id of THEME_IDS) {
-    defineNovaTheme(id, THEME_PALETTES[id])
+    defineDenebTheme(id, THEME_PALETTES[id])
   }
 }
 

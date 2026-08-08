@@ -43,7 +43,7 @@ function parseAnsi(text: string): React.ReactNode[] {
 }
 
 export function Terminal() {
-  return isDesktop() ? <PowerShellTerminal /> : <NovaShell />
+  return isDesktop() ? <PowerShellTerminal /> : <DenebShell />
 }
 
 function PowerShellTerminal() {
@@ -67,14 +67,14 @@ function PowerShellTerminal() {
     bufRef.current = ''
     setDead(false)
     try {
-      window.novaDesktop?.term.start(workspaceCwd()).catch(() => {})
+      window.denebDesktop?.term.start(workspaceCwd()).catch(() => {})
     } catch {
       /* sin IPC: la terminal no es funcional en este entorno */
     }
   }, [workspaceCwd])
 
   useEffect(() => {
-    const desktop = window.novaDesktop
+    const desktop = window.denebDesktop
     if (!desktop?.term) return
     const offData = desktop.term.onData((d) => pushChunk(d))
     const offExit = desktop.term.onExit(() => setDead(true))
@@ -104,7 +104,7 @@ function PowerShellTerminal() {
   }, [lines, input])
 
   function send(cmd: string) {
-    const desktop = window.novaDesktop
+    const desktop = window.denebDesktop
     if (dead) {
       if (!cmd.trim()) return
       start()
@@ -154,7 +154,7 @@ function PowerShellTerminal() {
         setInput(idx >= 0 ? history[idx] : '')
       }
     } else if (e.key === 'c' && e.ctrlKey) {
-      try { void window.novaDesktop?.term.write('\x03').catch(() => {}) } catch {}
+      try { void window.denebDesktop?.term.write('\x03').catch(() => {}) } catch {}
       setInput('')
       setLines((ls) => [...ls, { id: lineCounter++, text: '^C', isInput: true }])
     } else if (e.key === 'l' && e.ctrlKey) {
@@ -203,9 +203,9 @@ function PowerShellTerminal() {
   )
 }
 
-function NovaShell() {
+function DenebShell() {
   const [lines, setLines] = useState<Line[]>(() => [
-    { id: lineCounter++, text: '\u001b[1m\u001b[36mNova Shell\u001b[0m 1.0.0 — escribe \u001b[33mhelp\u001b[0m para ver los comandos' },
+    { id: lineCounter++, text: '\u001b[1m\u001b[36mDeneb Shell\u001b[0m 1.0.0 — escribe \u001b[33mhelp\u001b[0m para ver los comandos' },
     { id: lineCounter++, text: '' },
   ])
   const [cwd, setCwd] = useState('')
@@ -320,7 +320,7 @@ function NovaShell() {
   return (
     <div className="terminal" onClick={() => inputRef.current?.focus()}>
       <div className="terminal__header">
-        <span><Icons.terminalIcon size={12} /> nova</span>
+        <span><Icons.terminalIcon size={12} /> deneb</span>
         <button className="terminal__clear" title="Limpiar (Ctrl+L)" onClick={() => setLines([{ id: lineCounter++, text: '' }])}>
           <Icons.delete size={12} />
         </button>

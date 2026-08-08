@@ -387,7 +387,7 @@ export async function chatWithTools(
   onEvent({ done: true })
 }
 
-export const SYSTEM_PROMPT = `Eres Nova AI, el asistente de programación integrado en Nova, un editor de código con IA.
+export const SYSTEM_PROMPT = `Eres Deneb AI, el asistente de programación integrado en Deneb, un editor de código con IA.
 
 ## Tu rol
 - Eres un experto en desarrollo de software: escribes, corriges, explicas, refactorizas y revisas código en cualquier lenguaje.

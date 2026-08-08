@@ -48,7 +48,7 @@ export function ProblemsPanel() {
     void openFileByPath(item.path).then(() => {
       setTimeout(() => {
         window.dispatchEvent(
-          new CustomEvent('nova:reveal-line', {
+          new CustomEvent('deneb:reveal-line', {
             detail: { path: item.path, line: item.marker.startLineNumber, col: item.marker.startColumn },
           }),
         )

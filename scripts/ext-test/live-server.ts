@@ -1,5 +1,5 @@
 // Prueba con una extensión REAL del marketplace (Live Server) descargada de
-// Open VSX, activada en el Extension Host de Nova.
+// Open VSX, activada en el Extension Host de Deneb.
 
 ;(globalThis as any).localStorage = (() => {
   const m = new Map<string, string>()
@@ -157,7 +157,7 @@ async function main() {
       onDidSaveTextDocument: () => ({ dispose() {} }),
       asRelativePath: (p: string) => p,
     },
-    env: { appName: 'Nova', machineId: 'x', uriScheme: 'nova', language: 'es', shell: '', version: '1.0.0', openExternal: () => Promise.resolve(true) },
+    env: { appName: 'Deneb', machineId: 'x', uriScheme: 'deneb', language: 'es', shell: '', version: '1.0.0', openExternal: () => Promise.resolve(true) },
   }
 
   const builtins = getNodeBuiltins()

@@ -14,7 +14,7 @@ export function instrumentCode(code: string): InstrumentedSource {
     lineMap.set(i + 1, i + 1)
     const trimmed = lines[i].trim()
     if (trimmed && !trimmed.startsWith('//') && !trimmed.startsWith('/*') && !trimmed.startsWith('*')) {
-      out.push(`await __novaCheck(${i + 1});${lines[i]}`)
+      out.push(`await __denebCheck(${i + 1});${lines[i]}`)
     } else {
       out.push(lines[i])
     }
@@ -25,14 +25,14 @@ export function instrumentCode(code: string): InstrumentedSource {
 export function createWorkerSource(code: string, bpSet: number[], file: string): string {
   return `
 "use strict";
-var __novaBp = ${JSON.stringify(bpSet)};
-var __novaResolvers = [];
-var __novaStepBp = null;
+var __denebBp = ${JSON.stringify(bpSet)};
+var __denebResolvers = [];
+var __denebStepBp = null;
 
-function __novaVars() {
+function __denebVars() {
   var out = [];
   var keys = Object.keys(globalThis).filter(function (k) {
-    return /^[a-zA-Z_$]/.test(k) && !/^__nova/.test(k) && typeof globalThis[k] !== 'function';
+    return /^[a-zA-Z_$]/.test(k) && !/^__deneb/.test(k) && typeof globalThis[k] !== 'function';
   }).slice(0, 40);
   for (var i = 0; i < keys.length; i++) {
     var k = keys[i];
@@ -46,34 +46,34 @@ function __novaVars() {
   return out;
 }
 
-function __novaCheck(line) {
-  var isBp = __novaBp.indexOf(line) >= 0 || __novaStepBp === line;
-  __novaStepBp = null;
+function __denebCheck(line) {
+  var isBp = __denebBp.indexOf(line) >= 0 || __denebStepBp === line;
+  __denebStepBp = null;
   if (!isBp) return Promise.resolve();
-  self.postMessage({ type: 'breakpoint', line: line, file: ${JSON.stringify(file)}, vars: __novaVars(), frames: [{ line: line, name: 'top-level', file: ${JSON.stringify(file)} }] });
-  return new Promise(function (resolve) { __novaResolvers.push(resolve); });
+  self.postMessage({ type: 'breakpoint', line: line, file: ${JSON.stringify(file)}, vars: __denebVars(), frames: [{ line: line, name: 'top-level', file: ${JSON.stringify(file)} }] });
+  return new Promise(function (resolve) { __denebResolvers.push(resolve); });
 }
 
-var __novaOrigLog = console.log;
+var __denebOrigLog = console.log;
 console.log = function () {
   var args = Array.prototype.slice.call(arguments).map(String);
   self.postMessage({ type: 'console', text: args.join(' ') });
-  __novaOrigLog.apply(console, arguments);
+  __denebOrigLog.apply(console, arguments);
 };
-var __novaOrigErr = console.error;
+var __denebOrigErr = console.error;
 console.error = function () {
   var args = Array.prototype.slice.call(arguments).map(String);
   self.postMessage({ type: 'console', text: 'ERROR: ' + args.join(' ') });
-  __novaOrigErr.apply(console, arguments);
+  __denebOrigErr.apply(console, arguments);
 };
 
 self.onmessage = function (e) {
   if (!e.data) return;
   if (e.data.cmd === 'continue') {
-    while (__novaResolvers.length) __novaResolvers.shift()();
+    while (__denebResolvers.length) __denebResolvers.shift()();
   } else if (e.data.cmd === 'step' && typeof e.data.nextBreakpoint === 'number') {
-    __novaStepBp = e.data.nextBreakpoint;
-    while (__novaResolvers.length) __novaResolvers.shift()();
+    __denebStepBp = e.data.nextBreakpoint;
+    while (__denebResolvers.length) __denebResolvers.shift()();
   }
 };
 

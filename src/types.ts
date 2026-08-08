@@ -42,15 +42,15 @@ export interface OpenTab {
 }
 
 export type ThemeId =
-  | 'nova-dark'
-  | 'nova-light'
-  | 'nova-midnight'
-  | 'nova-ocean'
-  | 'nova-forest'
-  | 'nova-sunset'
-  | 'nova-sakura'
-  | 'nova-mono'
-  | 'nova-paper'
+  | 'deneb-dark'
+  | 'deneb-light'
+  | 'deneb-midnight'
+  | 'deneb-ocean'
+  | 'deneb-forest'
+  | 'deneb-sunset'
+  | 'deneb-sakura'
+  | 'deneb-mono'
+  | 'deneb-paper'
 
 export interface ThemeSettings {
   mode: ThemeId

@@ -43,7 +43,7 @@ connection.onInitialize((params) => {
       documentFormattingProvider: true,
       documentHighlightProvider: true,
     },
-    serverInfo: { name: 'nova-lsp', version: '1.0.0' },
+    serverInfo: { name: 'deneb-lsp', version: '1.0.0' },
   }
 })
 
@@ -65,7 +65,7 @@ function toDoc(e: TextDocumentChangeEvent<TextDocument>) {
 }
 
 // workspace: cargar todos los archivos del workspace al abrir
-connection.onNotification('nova/workspaceFiles', (params: { files: Record<string, string> }) => {
+connection.onNotification('deneb/workspaceFiles', (params: { files: Record<string, string> }) => {
   const files = params.files || {}
   for (const [path, text] of Object.entries(files)) {
     const uri = path.startsWith('file:') ? path : 'file://' + path

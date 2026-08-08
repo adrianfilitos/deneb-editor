@@ -103,13 +103,13 @@ async function runTool(name: string, argsJson: string): Promise<ToolResult> {
         if (!base || !dFs) return unavailable
         const target = joinRel(base, String(args.path ?? ''))
         const content = String(args.content ?? '')
-        const ok = window.confirm(`Nova AI quiere escribir el archivo:\n${args.path}\n\n¿Permitirlo?`)
+        const ok = window.confirm(`Deneb AI quiere escribir el archivo:\n${args.path}\n\n¿Permitirlo?`)
         if (!ok) return { ok: false, output: 'El usuario rechazó escribir el archivo.' }
         await dFs.writeFile(target, content)
         return { ok: true, output: `Archivo escrito: ${args.path} (${content.length} caracteres)` }
       }
       case 'run_command': {
-        const ok = window.confirm(`Nova AI quiere ejecutar el comando:\n${args.command}\n\n¿Permitirlo?`)
+        const ok = window.confirm(`Deneb AI quiere ejecutar el comando:\n${args.command}\n\n¿Permitirlo?`)
         if (!ok) return { ok: false, output: 'El usuario rechazó ejecutar el comando.' }
         if (!dFs) return unavailable
         const out = await dFs.exec(needRoot() || undefined, String(args.command ?? ''))

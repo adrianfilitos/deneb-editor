@@ -18,11 +18,11 @@ export function isHostRunning(id: string): boolean {
 }
 
 function status(msg: string) {
-  window.dispatchEvent(new CustomEvent('nova:status', { detail: msg }))
+  window.dispatchEvent(new CustomEvent('deneb:status', { detail: msg }))
 }
 
 /**
- * Ejecuta el main de la extensión con el cargador CommonJS de Nova:
+ * Ejecuta el main de la extensión con el cargador CommonJS de Deneb:
  * resuelve require('vscode') contra el shim, los builtins de Node contra los
  * polyfills (fs sobre el workspace real) y las rutas relativas dentro del .vsix.
  */

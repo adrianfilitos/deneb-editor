@@ -4,7 +4,7 @@ export interface DesktopFsEntry {
   absPath: string
 }
 
-export interface NovaDesktopFs {
+export interface DenebDesktopFs {
   openWorkspace: () => Promise<string | null>
   setWorkspace: (absPath: string) => Promise<boolean>
   list: (absPath: string) => Promise<DesktopFsEntry[]>
@@ -18,7 +18,7 @@ export interface NovaDesktopFs {
   exec: (cwd: string | undefined, command: string) => Promise<string>
 }
 
-export interface NovaDesktopTerm {
+export interface DenebDesktopTerm {
   start: (cwd?: string) => Promise<boolean>
   write: (data: string) => Promise<boolean>
   kill: () => Promise<boolean>
@@ -26,14 +26,14 @@ export interface NovaDesktopTerm {
   onExit: (cb: () => void) => () => void
 }
 
-export interface NovaDesktopWindow {
+export interface DenebDesktopWindow {
   minimize: () => void
   toggleMaximize: () => void
   close: () => void
   onMaximized: (cb: (maximized: boolean) => void) => () => void
 }
 
-export interface NovaDesktopMenu {
+export interface DenebDesktopMenu {
   undo: () => void
   redo: () => void
   cut: () => void
@@ -76,7 +76,7 @@ export interface GitDiffResult {
   error?: string
 }
 
-export interface NovaDesktopGit {
+export interface DenebDesktopGit {
   available: () => Promise<boolean>
   status: () => Promise<GitStatusResult>
   add: (paths: string[]) => Promise<GitResult>
@@ -92,14 +92,14 @@ export interface NovaDesktopGit {
   log: () => Promise<{ ok: boolean; log: string; error?: string }>
 }
 
-export interface NovaDesktopExt {
+export interface DenebDesktopExt {
   install: (url: string, filename: string) => Promise<{ ok: boolean; path?: string; size?: number; error?: string }>
   save: (filename: string, data: Uint8Array) => Promise<{ ok: boolean; path?: string; size?: number; error?: string }>
   installed: () => Promise<{ file: string; size: number }[]>
   dir: () => Promise<string>
 }
 
-export interface NovaDesktopLiveServer {
+export interface DenebDesktopLiveServer {
   start: (port: number, root: string) => Promise<{ ok: boolean; port?: number; url?: string; error?: string }>
   stop: () => Promise<{ ok: boolean }>
   status: () => Promise<{ running: boolean; port?: number; root?: string; url?: string }>
@@ -122,20 +122,20 @@ export interface UpdateVersionInfo {
   packaged: boolean
 }
 
-export interface NovaDesktopUpdates {
+export interface DenebDesktopUpdates {
   version: () => Promise<UpdateVersionInfo>
   check: () => void
   install: () => void
   onStatus: (cb: (data: UpdateStatusPayload) => void) => () => void
 }
 
-export interface NovaDesktopDebugConfig {
+export interface DenebDesktopDebugConfig {
   program: string
   args?: string[]
   env?: Record<string, string>
 }
 
-export interface NovaDesktopDebugEvent {
+export interface DenebDesktopDebugEvent {
   type: string
   data: {
     reason?: string
@@ -144,8 +144,8 @@ export interface NovaDesktopDebugEvent {
   }
 }
 
-export interface NovaDesktopDebug {
-  start: (cfg: NovaDesktopDebugConfig) => Promise<{ ok: boolean; error?: string }>
+export interface DenebDesktopDebug {
+  start: (cfg: DenebDesktopDebugConfig) => Promise<{ ok: boolean; error?: string }>
   setBreakpoints: (lines: number[], filePath: string) => Promise<{ verified: boolean; line: number; id?: string }[]>
   continue: () => Promise<unknown>
   next: () => Promise<unknown>
@@ -155,78 +155,78 @@ export interface NovaDesktopDebug {
   stackTrace: (threadId: number) => Promise<{ stackFrames: { id: number; name: string; line: number; column: number; source?: { name?: string; path?: string } }[] }>
   evaluate: (expression: string, frameId?: number) => Promise<{ result: string; variablesReference: number }>
   disconnect: () => Promise<boolean>
-  onEvent: (cb: (ev: NovaDesktopDebugEvent) => void) => () => void
+  onEvent: (cb: (ev: DenebDesktopDebugEvent) => void) => () => void
   onConsole: (cb: (data: { channel: string; text: string }) => void) => () => void
 }
 
-export interface NovaDesktopBridge {
+export interface DenebDesktopBridge {
   isDesktop: boolean
   platform?: string
   on: (channel: string, cb: (data?: unknown) => void) => () => void
-  fs: NovaDesktopFs
-  term: NovaDesktopTerm
-  debug?: NovaDesktopDebug
-  windowControls: NovaDesktopWindow
-  menu: NovaDesktopMenu
-  git?: NovaDesktopGit
-  ext?: NovaDesktopExt
-  liveServer?: NovaDesktopLiveServer
-  updates?: NovaDesktopUpdates
+  fs: DenebDesktopFs
+  term: DenebDesktopTerm
+  debug?: DenebDesktopDebug
+  windowControls: DenebDesktopWindow
+  menu: DenebDesktopMenu
+  git?: DenebDesktopGit
+  ext?: DenebDesktopExt
+  liveServer?: DenebDesktopLiveServer
+  updates?: DenebDesktopUpdates
 }
 
 declare global {
   interface Window {
-    novaDesktop?: NovaDesktopBridge
+    denebDesktop?: DenebDesktopBridge
   }
 }
 
 export function isDesktop(): boolean {
-  return typeof window !== 'undefined' && !!window.novaDesktop?.isDesktop
+  return typeof window !== 'undefined' && !!window.denebDesktop?.isDesktop
 }
 
 export function desktopPlatform(): string {
-  return window.novaDesktop?.platform || 'web'
+  return window.denebDesktop?.platform || 'web'
 }
 
-export function desktopFs(): NovaDesktopFs | null {
-  return window.novaDesktop?.fs ?? null
+export function desktopFs(): DenebDesktopFs | null {
+  return window.denebDesktop?.fs ?? null
 }
 
-export function desktopLiveServer(): NovaDesktopLiveServer | null {
-  return window.novaDesktop?.liveServer ?? null
+export function desktopLiveServer(): DenebDesktopLiveServer | null {
+  return window.denebDesktop?.liveServer ?? null
 }
 
-export function desktopDebug(): NovaDesktopDebug | null {
-  return window.novaDesktop?.debug ?? null
+export function desktopDebug(): DenebDesktopDebug | null {
+  return window.denebDesktop?.debug ?? null
 }
 
 export function setupElectronBridge() {
   if (!isDesktop()) return
-  if ((window as unknown as { __novaBridge?: boolean }).__novaBridge) return
-  ;(window as unknown as { __novaBridge?: boolean }).__novaBridge = true
-  const bridge = window.novaDesktop!
+  if ((window as unknown as { __denebBridge?: boolean }).__denebBridge) return
+  ;(window as unknown as { __denebBridge?: boolean }).__denebBridge = true
+  const bridge = window.denebDesktop!
   const store = () => import('../store/editorStore')
 
-  bridge.on('nova:open-workspace', () => void store().then((s) => s.useEditorStore.getState().openWorkspace()))
-  bridge.on('nova:save', () => void store().then((s) => s.useEditorStore.getState().saveTab()))
-  bridge.on('nova:save-all', () => void store().then((s) => s.useEditorStore.getState().saveAll()))
-  bridge.on('nova:toggle-sidebar', () => void store().then((s) => s.useEditorStore.getState().toggleSidebar()))
-  bridge.on('nova:toggle-terminal', () =>
+  bridge.on('deneb:open-workspace', () => void store().then((s) => s.useEditorStore.getState().openWorkspace()))
+  bridge.on('deneb:save', () => void store().then((s) => s.useEditorStore.getState().saveTab()))
+  bridge.on('deneb:save-all', () => void store().then((s) => s.useEditorStore.getState().saveAll()))
+  bridge.on('deneb:toggle-sidebar', () => void store().then((s) => s.useEditorStore.getState().toggleSidebar()))
+  bridge.on('deneb:toggle-terminal', () =>
     void store().then((s) => {
       const st = s.useEditorStore.getState()
       st.setBottomView(st.bottomView === 'terminal' ? null : 'terminal')
     }),
   )
-  bridge.on('nova:toggle-problems', () =>
+  bridge.on('deneb:toggle-problems', () =>
     void store().then((s) => {
       const st = s.useEditorStore.getState()
       st.setBottomView(st.bottomView === 'problems' ? null : 'problems')
     }),
   )
-  bridge.on('nova:show-ai', () => void store().then((s) => s.useEditorStore.getState().setSidebarView('ai')))
-  bridge.on('nova:toggle-zen', () => void store().then((s) => s.useEditorStore.getState().toggleZen()))
-  bridge.on('nova:show-shortcuts', () => window.dispatchEvent(new Event('nova:show-shortcuts')))
-  bridge.on('nova:open-path', (data) => {
+  bridge.on('deneb:show-ai', () => void store().then((s) => s.useEditorStore.getState().setSidebarView('ai')))
+  bridge.on('deneb:toggle-zen', () => void store().then((s) => s.useEditorStore.getState().toggleZen()))
+  bridge.on('deneb:show-shortcuts', () => window.dispatchEvent(new Event('deneb:show-shortcuts')))
+  bridge.on('deneb:open-path', (data) => {
     void store().then((s) => {
       const st = s.useEditorStore
       const d = data as { abs: string; kind: 'directory' | 'file' } | undefined

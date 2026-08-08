@@ -4,7 +4,7 @@ import { isDesktop, type UpdateStatusType } from '../lib/electronBridge'
 export type UpdateStatus = UpdateStatusType | 'idle'
 
 if (typeof window !== 'undefined') {
-  window.addEventListener('nova:update:check', () => {
+  window.addEventListener('deneb:update:check', () => {
     useUpdateStore.getState().check()
   })
 }
@@ -34,18 +34,18 @@ export const useUpdateStore = create<UpdateStore>((set, get) => ({
   error: null,
 
   check: () => {
-    if (!isDesktop() || !window.novaDesktop?.updates) return
+    if (!isDesktop() || !window.denebDesktop?.updates) return
     set({ status: 'checking', error: null })
-    window.novaDesktop.updates.check()
+    window.denebDesktop.updates.check()
   },
 
   install: () => {
-    if (!isDesktop() || !window.novaDesktop?.updates) return
-    window.novaDesktop.updates.install()
+    if (!isDesktop() || !window.denebDesktop?.updates) return
+    window.denebDesktop.updates.install()
   },
 
   init: async () => {
-    const updates = window.novaDesktop?.updates
+    const updates = window.denebDesktop?.updates
     if (!isDesktop() || !updates) {
       set({ supported: false })
       return

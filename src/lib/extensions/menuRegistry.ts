@@ -140,5 +140,5 @@ export function allContributedMenus(): MenuLocation[] {
 
 /** Notifica a la UI (menús del editor/explorador) que debe re-renderizarse. */
 export function notifyMenusChanged() {
-  window.dispatchEvent(new CustomEvent('nova:ext-menus-changed'))
+  window.dispatchEvent(new CustomEvent('deneb:ext-menus-changed'))
 }

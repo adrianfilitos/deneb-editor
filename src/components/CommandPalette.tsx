@@ -191,7 +191,7 @@ export function CommandPalette() {
           )}
         </div>
         <div className="palette__footer">
-          <span><Icons.sparkles size={12} /> Nova AI</span>
+          <span><Icons.sparkles size={12} /> Deneb AI</span>
           <span><kbd>↑</kbd><kbd>↓</kbd> navegar</span>
           <span><kbd>↵</kbd> ejecutar</span>
           <span><kbd>Esc</kbd> cerrar</span>

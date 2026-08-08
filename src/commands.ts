@@ -157,9 +157,9 @@ export function commands(): CommandDef[] {
       keybinding: 'F9',
       icon: 'circle',
       run: () => {
-        const editor = (window as unknown as { __novaEditor?: { getPosition?: () => { lineNumber: number } | null } | undefined }).__novaEditor
+        const editor = (window as unknown as { __denebEditor?: { getPosition?: () => { lineNumber: number } | null } | undefined }).__denebEditor
         const pos = editor?.getPosition?.()
-        const path = (window as unknown as { __novaFocusPath?: string }).__novaFocusPath
+        const path = (window as unknown as { __denebFocusPath?: string }).__denebFocusPath
         if (pos && path) {
           void import('./lib/debugger').then((m) => m.toggleBreakpoint(path, pos.lineNumber))
         }
@@ -197,7 +197,7 @@ export function commands(): CommandDef[] {
       category: 'Preferencias',
       keybinding: 'Ctrl+K Ctrl+S',
       icon: 'command',
-      run: () => window.dispatchEvent(new Event('nova:show-shortcuts')),
+      run: () => window.dispatchEvent(new Event('deneb:show-shortcuts')),
     },
     {
       id: 'workbench.action.toggleSidebar',
@@ -233,7 +233,7 @@ export function commands(): CommandDef[] {
       run: () => {
         const store = useEditorStore.getState()
         store.setSidebarView('settings')
-        window.dispatchEvent(new CustomEvent('nova:update:check'))
+        window.dispatchEvent(new CustomEvent('deneb:update:check'))
       },
     },
     {
@@ -295,7 +295,7 @@ export function commands(): CommandDef[] {
       category: 'IA',
       keybinding: 'Ctrl+Shift+I',
       icon: 'spark',
-      run: () => window.dispatchEvent(new CustomEvent('nova:ai-apply-last')),
+      run: () => window.dispatchEvent(new CustomEvent('deneb:ai-apply-last')),
     },
     ...getDynamicCommands(),
   ]

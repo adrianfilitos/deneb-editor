@@ -7,7 +7,7 @@ let backendKind: 'native' | 'virtual' | 'desktop' = 'native'
 
 /** Notifica a watchers (fs.watch de las extensiones) que algo cambió en el workspace. */
 export function emitFsChange(kind: 'created' | 'changed' | 'deleted', path: string) {
-  window.dispatchEvent(new CustomEvent('nova:fs-change', { detail: { kind, path } }))
+  window.dispatchEvent(new CustomEvent('deneb:fs-change', { detail: { kind, path } }))
 }
 
 export function fsSupported(): boolean {
@@ -118,7 +118,7 @@ export function Button({ label, onClick, variant = 'primary' }: ButtonProps) {
 export function Header() {
   return (
     <header className="app-header">
-      <h1>Bienvenido a Nova</h1>
+      <h1>Bienvenido a Deneb</h1>
     </header>
   )
 }
@@ -131,7 +131,7 @@ export default function App() {
   return (
     <main className="app">
       <Header />
-      <Button label="Haz clic" onClick={() => alert('Hola desde Nova!')} />
+      <Button label="Haz clic" onClick={() => alert('Hola desde Deneb!')} />
     </main>
   )
 }
@@ -172,7 +172,7 @@ createRoot(document.getElementById('root')!).render(<App />)
 `)
   file(root, 'README.md', `# Proyecto Demo
 
-Este es un proyecto de ejemplo creado por **Nova**.
+Este es un proyecto de ejemplo creado por **Deneb**.
 
 Para probar el editor con tus propios archivos, abre una carpeta real
 con el botón "Abrir carpeta" del panel de exploración.

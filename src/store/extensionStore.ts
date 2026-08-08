@@ -10,7 +10,7 @@ import {
 } from '../lib/vsixParser'
 import { putVsix, deleteVsix } from '../lib/extensions/blobStore'
 
-const STORAGE_KEY = 'nova.extensions.installed.v2'
+const STORAGE_KEY = 'deneb.extensions.installed.v2'
 
 function loadInstalled(): Record<string, InstalledExt> {
   try {

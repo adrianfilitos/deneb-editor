@@ -82,7 +82,7 @@ export class VimMode {
   }
 
   private emit() {
-    window.dispatchEvent(new CustomEvent('nova:vim-mode', { detail: this.mode }))
+    window.dispatchEvent(new CustomEvent('deneb:vim-mode', { detail: this.mode }))
   }
 
   private setMode(m: VimState) {

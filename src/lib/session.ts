@@ -1,8 +1,8 @@
 import { useEditorStore, type EditorGroup } from '../store/editorStore'
 import { nodeFromHandle, readText, resolvePath, requestPermission, setBackend, type AnyHandle } from './fileSystem'
 
-const SESSION_KEY = 'nova.session.v1'
-const DB_NAME = 'nova-db'
+const SESSION_KEY = 'deneb.session.v1'
+const DB_NAME = 'deneb-db'
 const DB_STORE = 'handles'
 
 interface StoredTab {

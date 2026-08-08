@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { isDesktop } from '../lib/electronBridge'
-import { NovaLogo } from './NovaLogo'
+import { DenebLogo } from './DenebLogo'
 import { Icons } from './icons'
 import { MenuBar } from './MenuBar'
 
@@ -9,18 +9,18 @@ export function TitleBar() {
 
   useEffect(() => {
     if (!isDesktop()) return
-    const off = window.novaDesktop?.windowControls.onMaximized(setMaximized)
+    const off = window.denebDesktop?.windowControls.onMaximized(setMaximized)
     return () => off?.()
   }, [])
 
   if (!isDesktop()) return null
-  const wc = window.novaDesktop?.windowControls
+  const wc = window.denebDesktop?.windowControls
 
   return (
     <div className="titlebar" onDoubleClick={() => wc?.toggleMaximize()}>
       <div className="titlebar__brand">
-        <NovaLogo size={16} />
-        <span>Nova</span>
+        <DenebLogo size={16} />
+        <span>Deneb</span>
       </div>
       <MenuBar />
       <div className="titlebar__drag" />

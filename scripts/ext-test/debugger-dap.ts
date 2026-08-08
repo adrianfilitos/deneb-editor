@@ -23,7 +23,7 @@ async function main() {
 
   console.log('=== Adaptador DAP real: CDP ===')
 
-  const dir = mkdtempSync(join(tmpdir(), 'nova-dap-'))
+  const dir = mkdtempSync(join(tmpdir(), 'deneb-dap-'))
   const script = join(dir, 'app.js')
   writeFileSync(script, `function add(a, b) {
   const total = a + b;

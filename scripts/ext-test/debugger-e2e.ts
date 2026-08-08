@@ -78,8 +78,8 @@ var z = x + y;
 }
 const r = add(1, 2);
 `)
-  check('instrumenta función', src.instrumented.includes('await __novaCheck(1);function add(a, b)'))
-  check('instrumenta cuerpo', src.instrumented.includes('await __novaCheck(2);  return a + b;'))
+  check('instrumenta función', src.instrumented.includes('await __denebCheck(1);function add(a, b)'))
+  check('instrumenta cuerpo', src.instrumented.includes('await __denebCheck(2);  return a + b;'))
 
   console.log(`\n=== RESULTADO: ${pass} PASS, ${fail} FAIL ===`)
   process.exit(fail === 0 ? 0 : 1)

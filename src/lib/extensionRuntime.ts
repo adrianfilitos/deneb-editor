@@ -47,10 +47,10 @@ function buildThemeStyle(t: ExtThemeDef): HTMLStyleElement | null {
   const accent = c['editorCursor.foreground'] || (dark ? '#82aaff' : '#2962ff')
   const red = c['editorError.foreground'] || (dark ? '#f7768e' : '#d32f2f')
   const cyan = c['editorInfo.foreground'] || (dark ? '#7dcfff' : '#00838f')
-  const green = c['nova.string'] || (dark ? '#a5e075' : '#689f38')
-  const number = c['nova.number'] || (dark ? '#f78c6c' : '#e65100')
-  const purple = c['nova.keyword'] || accent
-  const delim = c['nova.delimiter'] || cyan
+  const green = c['deneb.string'] || (dark ? '#a5e075' : '#689f38')
+  const number = c['deneb.number'] || (dark ? '#f78c6c' : '#e65100')
+  const purple = c['deneb.keyword'] || accent
+  const delim = c['deneb.delimiter'] || cyan
 
   const bgRaised = lighten(bg, 0.035)
   const bgHover = lighten(bg, 0.05)
@@ -93,7 +93,7 @@ function buildThemeStyle(t: ExtThemeDef): HTMLStyleElement | null {
 }`
 
   const el = document.createElement('style')
-  el.setAttribute('data-nova-ext-theme', t.id)
+  el.setAttribute('data-deneb-ext-theme', t.id)
   el.textContent = css
   return el
 }

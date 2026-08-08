@@ -41,7 +41,7 @@ export function OutlinePanel() {
 
   function go(sym: SymbolInfo) {
     window.dispatchEvent(
-      new CustomEvent('nova:reveal-line', {
+      new CustomEvent('deneb:reveal-line', {
         detail: { path: tab.path, line: sym.line, col: 1 },
       }),
     )

@@ -17,8 +17,8 @@ export interface UserConfigFile {
 let lastSettings: Record<string, unknown> = {}
 let lastKeybindings: UserKeybinding[] = []
 
-// Paths dentro del workspace (.nova/ para no tocar el código del usuario)
-const CONFIG_DIR = '.nova'
+// Paths dentro del workspace (.deneb/ para no tocar el código del usuario)
+const CONFIG_DIR = '.deneb'
 const SETTINGS_PATH = `${CONFIG_DIR}/settings.json`
 const KEYBINDINGS_PATH = `${CONFIG_DIR}/keybindings.json`
 
@@ -148,7 +148,7 @@ export function applyUserKeybindings(file: UserConfigFile | null) {
       run: () => {
         const def = commandById(kb.command)
         if (def) def.run()
-        else window.dispatchEvent(new CustomEvent('nova:run-command', { detail: kb.command }))
+        else window.dispatchEvent(new CustomEvent('deneb:run-command', { detail: kb.command }))
       },
     })
   }
@@ -172,7 +172,7 @@ function parseKeybinding(key: string): { key: string; ctrl?: boolean; shift?: bo
 }
 
 // ---------------------------------------------------------------------------
-// Snippets de usuario desde .nova/snippets.json
+// Snippets de usuario desde .deneb/snippets.json
 // ---------------------------------------------------------------------------
 
 export async function loadUserSnippets(): Promise<void> {
@@ -203,7 +203,7 @@ export function openConfigInEditor(kind: 'settings' | 'keybindings') {
 }
 
 export function configSchemeId(): string {
-  return 'nova-config'
+  return 'deneb-config'
 }
 
 // Reexport para compatibilidad con SettingsPanel

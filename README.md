@@ -1,19 +1,19 @@
-# Nova — Editor de código con IA
+# Deneb — Editor de código con IA
 
 Editor de código moderno con IA integrada, hecho con **Electron, React, Monaco y Vite**. Multiplataforma: **Windows, macOS y Linux**.
 
-- **Landing page** (GitHub Pages): https://adrianfilitos.github.io/nova-editor/
+- **Landing page** (GitHub Pages): https://adrianfilitos.github.io/deneb-editor/
 - **Editor web (demo)**: disponible en `/app` de la landing.
-- **Escritorio**: instaladores para Windows, macOS y Linux en [Releases](https://github.com/adrianfilitos/nova-editor/releases).
+- **Escritorio**: instaladores para Windows, macOS y Linux en [Releases](https://github.com/adrianfilitos/deneb-editor/releases).
 
 ## Características
 
 **Editor**
 - Editor **Monaco**: sintaxis, minimapa, multi-cursor, plegado, breadcrumbs, esquema de símbolos y atajos tipo VS Code.
 - **LSP real**: servidor Language Server Protocol (JSON-RPC) que ejecuta el **Language Service de TypeScript** en un Worker (el mismo motor que `tsserver`/VS Code): completado con resolución, hover, ir a definición, referencias, rename, firma, símbolos, folding, formato y resaltado — **entre archivos** del workspace.
-- **Emmet** integrado (HTML/CSS/JSX) y **snippets de usuario** (`.nova/snippets.json`).
+- **Emmet** integrado (HTML/CSS/JSX) y **snippets de usuario** (`.deneb/snippets.json`).
 - **Formato de documento** (`Shift+Alt+F`) y *format on save*.
-- **Configuración por archivos**: `settings.json` y `keybindings.json` en `.nova/` con prioridad sobre la UI.
+- **Configuración por archivos**: `settings.json` y `keybindings.json` en `.deneb/` con prioridad sobre la UI.
 
 **Depuración**
 - **Debugger real (DAP + CDP)**: en el escritorio lanza `node --inspect-brk` y lo controla por **Chrome DevTools Protocol** vía WebSocket, implementando el **Debug Adapter Protocol** como VS Code (`js-debug`). Breakpoints verificados, stack de llamadas, variables del scope, paso a paso (F10) y consola real.
@@ -27,7 +27,7 @@ Editor de código moderno con IA integrada, hecho con **Electron, React, Monaco 
 - **Explorador de archivos**, búsqueda global con reemplazo, panel de problemas y salida.
 - **Git con UI dedicada**: estado, staging, commits, ramas, historial, diffs, push/pull/fetch.
 - **Terminal real**: PowerShell en Windows, zsh en macOS y bash en Linux.
-- **Tareas (tasks.json)**: `.nova/tasks.json` con ejecución en la terminal o panel de salida.
+- **Tareas (tasks.json)**: `.deneb/tasks.json` con ejecución en la terminal o panel de salida.
 - **Live Server real** (Electron) y vista previa por Service Worker (web) con recarga automática.
 - **Asistente de IA con herramientas**: lee/lista/busca/escribe archivos y ejecuta comandos con tu aprobación. Proveedores: **DeepSeek (recomendado)**, OpenAI, Anthropic y servidor local.
 - 9 temas, modo Vim, modo Zen, editor dividido, atajos personalizables, actualizaciones automáticas.
@@ -36,25 +36,25 @@ Editor de código moderno con IA integrada, hecho con **Electron, React, Monaco 
 
 ### Escritorio
 
-Descarga el instalador de tu plataforma desde **Releases**. El instalador añade los comandos `nova` y `nova-ai` a tu PATH:
+Descarga el instalador de tu plataforma desde **Releases**. El instalador añade los comandos `deneb` y `deneb-ai` a tu PATH:
 
 ```bash
-nova            # abre el editor
-nova .          # abre la carpeta actual
-nova archivo.ts # abre un archivo
-nova-ai .       # abre el editor con el asistente de IA
+deneb            # abre el editor
+deneb .          # abre la carpeta actual
+deneb archivo.ts # abre un archivo
+deneb-ai .       # abre el editor con el asistente de IA
 ```
 
 ### Web
 
-Abre https://adrianfilitos.github.io/nova-editor/app/ y usa "Abrir carpeta" o el proyecto demo.
+Abre https://adrianfilitos.github.io/deneb-editor/app/ y usa "Abrir carpeta" o el proyecto demo.
 
-## Configuración por archivos (.nova/)
+## Configuración por archivos (.deneb/)
 
 En la raíz de tu espacio de trabajo:
 
 ```jsonc
-// .nova/settings.json — ajustes con prioridad sobre la interfaz
+// .deneb/settings.json — ajustes con prioridad sobre la interfaz
 {
   "fontSize": 16,
   "wordWrap": "on",
@@ -63,7 +63,7 @@ En la raíz de tu espacio de trabajo:
 ```
 
 ```jsonc
-// .nova/keybindings.json — atajos personalizados
+// .deneb/keybindings.json — atajos personalizados
 [
   { "key": "ctrl+shift+s", "command": "workbench.action.files.saveAll" },
   { "key": "f6", "command": "workbench.action.debug.start" }
@@ -71,14 +71,14 @@ En la raíz de tu espacio de trabajo:
 ```
 
 ```jsonc
-// .nova/snippets.json — autocompletado personalizado
+// .deneb/snippets.json — autocompletado personalizado
 {
   "log": { "prefix": "log", "body": "console.log('$1', $2)" }
 }
 ```
 
 ```jsonc
-// .nova/tasks.json — tareas ejecutables
+// .deneb/tasks.json — tareas ejecutables
 {
   "version": "2.0.0",
   "tasks": [

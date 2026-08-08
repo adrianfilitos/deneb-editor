@@ -1,4 +1,4 @@
-const DB_NAME = 'nova-ext-store'
+const DB_NAME = 'deneb-ext-store'
 const STORE = 'vsix'
 const VERSION = 1
 

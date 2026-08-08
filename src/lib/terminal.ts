@@ -21,7 +21,7 @@ export interface TermResult {
 export const COMMANDS = [
   'help', 'clear', 'cls', 'pwd', 'ls', 'cd', 'cat', 'echo', 'mkdir', 'touch', 'rm', 'rmdir',
   'tree', 'cp', 'grep', 'open', 'code', 'find', 'wc', 'head', 'tail', 'whoami', 'date', 'hostname',
-  'version', 'nova', 'color', 'exit',
+  'version', 'deneb', 'color', 'exit',
 ]
 
 function join(root: string, p: string): string {
@@ -64,7 +64,7 @@ export async function executeCommand(rootHandle: AnyHandle, cwd: string, raw: st
   switch (cmd) {
     case 'help': {
       out.push('')
-      out.push('\u001b[1m\u001b[36mComandos disponibles en Nova Shell\u001b[0m')
+      out.push('\u001b[1m\u001b[36mComandos disponibles en Deneb Shell\u001b[0m')
       out.push('')
       const rows: [string, string][] = [
         ['help', 'Muestra esta ayuda'],
@@ -87,7 +87,7 @@ export async function executeCommand(rootHandle: AnyHandle, cwd: string, raw: st
         ['tail [-n N] <archivo>', 'Últimas líneas'],
         ['open <archivo>', 'Abre el archivo en el editor'],
         ['whoami | date | hostname', 'Información del sistema'],
-        ['version | nova', 'Información de Nova'],
+        ['version | deneb', 'Información de Deneb'],
         ['color', 'Imprime una muestra de colores'],
         ['exit', 'Cierra la terminal'],
       ]
@@ -293,7 +293,7 @@ export async function executeCommand(rootHandle: AnyHandle, cwd: string, raw: st
     }
 
     case 'whoami':
-      out.push('usuario@nova')
+      out.push('usuario@deneb')
       break
 
     case 'date':
@@ -301,12 +301,12 @@ export async function executeCommand(rootHandle: AnyHandle, cwd: string, raw: st
       break
 
     case 'hostname':
-      out.push('nova-workspace')
+      out.push('deneb-workspace')
       break
 
     case 'version':
-    case 'nova':
-      out.push('\u001b[1m\u001b[36mNova Shell\u001b[0m 1.0.0')
+    case 'deneb':
+      out.push('\u001b[1m\u001b[36mDeneb Shell\u001b[0m 1.0.0')
       out.push('Editor de código con IA · powered by Monaco')
       break
 

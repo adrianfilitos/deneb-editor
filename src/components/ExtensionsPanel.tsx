@@ -99,8 +99,8 @@ function ExploreTab({
       const res = await fetch(url)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const buf = new Uint8Array(await res.arrayBuffer())
-      if (isDesktop() && window.novaDesktop?.ext) {
-        await window.novaDesktop.ext.save(extFileName(ext), buf)
+      if (isDesktop() && window.denebDesktop?.ext) {
+        await window.denebDesktop.ext.save(extFileName(ext), buf)
       }
       const parsedId = installVsixFromBytes(buf, extDisplayName(ext))
       if (!parsedId) throw new Error('No se pudo leer el .vsix (formato no compatible)')
@@ -199,7 +199,7 @@ function ExploreTab({
 }
 
 // ---------------------------------------------------------------------------
-//  NATIVAS — extensiones de Nova que sí funcionan
+//  NATIVAS — extensiones de Deneb que sí funcionan
 // ---------------------------------------------------------------------------
 
 function NativeTab() {
@@ -210,7 +210,7 @@ function NativeTab() {
 
   return (
     <>
-      <div className="extensions__section-title">Extensiones de Nova</div>
+      <div className="extensions__section-title">Extensiones de Deneb</div>
       <div className="extensions__list">
         {NATIVE_EXTENSIONS.map((ext) => {
           const meta = installed[ext.id]
@@ -221,7 +221,7 @@ function NativeTab() {
               </div>
               <div className="ext-card__body">
                 <div className="ext-card__name">{ext.name}</div>
-                <div className="ext-card__meta">Nova Labs · v{ext.version}</div>
+                <div className="ext-card__meta">Deneb Labs · v{ext.version}</div>
                 <div className="ext-card__desc">{ext.description}</div>
                 <div className="ext-card__stats">
                   <span>Nativa</span>
@@ -273,7 +273,7 @@ function InstalledTab({ onStatus }: { onStatus: (msg: string, timeout?: number) 
           <p>No hay extensiones instaladas.</p>
           <p className="extensions__hint">Prueba las nativas o instala una del marketplace de Open VSX.</p>
         </div>
-        <div className="extensions__footer">Nova aplica los temas, snippets y ajustes de las extensiones activas.</div>
+        <div className="extensions__footer">Deneb aplica los temas, snippets y ajustes de las extensiones activas.</div>
       </>
     )
   }

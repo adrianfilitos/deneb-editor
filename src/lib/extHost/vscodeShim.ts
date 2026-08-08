@@ -23,10 +23,10 @@ import { languageFromPath } from '../languages'
 // Utilidades compartidas
 // ---------------------------------------------------------------------------
 
-const status = (msg: string) => window.dispatchEvent(new CustomEvent('nova:status', { detail: msg }))
+const status = (msg: string) => window.dispatchEvent(new CustomEvent('deneb:status', { detail: msg }))
 
 function activeEditor(): monaco.editor.IStandaloneCodeEditor | null {
-  const e = (window as unknown as { __novaEditor?: monaco.editor.IStandaloneCodeEditor }).__novaEditor
+  const e = (window as unknown as { __denebEditor?: monaco.editor.IStandaloneCodeEditor }).__denebEditor
   return e || null
 }
 
@@ -67,7 +67,7 @@ function rootName(): string {
 /** Ruta relativa al workspace desde una Uri/fsPath de la extensión. */
 function toRel(uriOrPath: any): string {
   const raw = typeof uriOrPath === 'string' ? uriOrPath : uriOrPath?.fsPath || uriOrPath?.path || ''
-  let rel = String(raw).replace(/^file:\/\/\//, '').replace(/^file:\/\//, '').replace(/^nova:\/\//, '')
+  let rel = String(raw).replace(/^file:\/\/\//, '').replace(/^file:\/\//, '').replace(/^deneb:\/\//, '')
   rel = normalizeRelPath(rel)
   const root = rootName()
   if (root && rel.startsWith(root + '/')) rel = rel.slice(root.length + 1)
@@ -146,11 +146,11 @@ function decorationCssClass(renderOptions: Record<string, unknown>, key: string)
   add('border-width', renderOptions.borderWidth)
   add('border-style', renderOptions.borderStyle)
   if (!rules.length) return undefined
-  const cls = `nova-dec-${key}-${decCounter++}`
+  const cls = `deneb-dec-${key}-${decCounter++}`
   let el = decStyles.get(key)
   if (!el) {
     el = document.createElement('style')
-    el.setAttribute('data-nova-dec', key)
+    el.setAttribute('data-deneb-dec', key)
     document.head.appendChild(el)
     decStyles.set(key, el)
   }
@@ -191,7 +191,7 @@ class TextEditorDecorationType {
   private collections = new Map<monaco.editor.IStandaloneCodeEditor, monaco.editor.IEditorDecorationsCollection>()
   constructor(renderOptions: Record<string, unknown>) {
     this.renderOptions = renderOptions
-    this.key = nextId('nova-dec-type')
+    this.key = nextId('deneb-dec-type')
     this.baseOptions = buildMonacoDecoration(renderOptions, this.key)
   }
   apply(editor: monaco.editor.IStandaloneCodeEditor, decorations: monaco.editor.IModelDeltaDecoration[]) {
@@ -234,10 +234,10 @@ if (typeof monaco !== 'undefined' && monaco.editor) {
   })
 }
 
-/** Ejecuta un comando registrado por cualquier extensión (o uno propio de Nova). */
+/** Ejecuta un comando registrado por cualquier extensión (o uno propio de Deneb). */
 const commandOverrides = new Map<string, (...a: any[]) => any>()
 
-/** Permite a Nova interceptar el comportamiento de un comando de una extensión. */
+/** Permite a Deneb interceptar el comportamiento de un comando de una extensión. */
 export function overrideExtensionCommand(id: string, fn: (...a: any[]) => any) {
   commandOverrides.set(id, fn)
 }
@@ -748,11 +748,11 @@ export function createVscodeApi(extId: string, pkg: { id: string; version: strin
         else if (d.kind === 'deleted' && !this.ignoreDeleteEvents) this.onDidDelete.fire(uri)
         else if (d.kind === 'changed' && !this.ignoreChangeEvents) this.onDidChange.fire(uri)
       }
-      window.addEventListener('nova:fs-change', this.handler)
+      window.addEventListener('deneb:fs-change', this.handler)
     }
     dispose() {
       this.disposed = true
-      window.removeEventListener('nova:fs-change', this.handler)
+      window.removeEventListener('deneb:fs-change', this.handler)
     }
   }
 
@@ -962,18 +962,18 @@ export function createVscodeApi(extId: string, pkg: { id: string; version: strin
   const onDidCloseTextDocument = new EventEmitter<any>()
   const onDidChangeDiagnostics = new EventEmitter<{ uris: Uri[] }>()
 
-  window.addEventListener('nova:editor-active', () => {
+  window.addEventListener('deneb:editor-active', () => {
     const model = activeEditor()?.getModel()
     onDidChangeActiveTextEditor.fire(model ? new TextEditor(model) : undefined)
     if (model) onDidOpenTextDocument.fire(new TextDocument(model))
   })
-  window.addEventListener('nova:cursor-pos', () => {
+  window.addEventListener('deneb:cursor-pos', () => {
     const model = activeEditor()?.getModel()
     if (!model) return
     const ed = new TextEditor(model)
     onDidChangeTextEditorSelection.fire({ textEditor: ed, selections: ed.selections })
   })
-  window.addEventListener('nova:doc-change', (e) => {
+  window.addEventListener('deneb:doc-change', (e) => {
     const detail = (e as CustomEvent).detail as { model: any }
     if (!detail?.model) return
     onDidChangeTextDocument.fire({
@@ -981,7 +981,7 @@ export function createVscodeApi(extId: string, pkg: { id: string; version: strin
       contentChanges: [{ text: detail.model.getValue(), range: new Range(0, 0, detail.model.getLineCount() - 1, detail.model.getLineMaxColumn(detail.model.getLineCount()) - 1) }],
     })
   })
-  window.addEventListener('nova:fs-change', (e) => {
+  window.addEventListener('deneb:fs-change', (e) => {
     const d = (e as CustomEvent).detail as { kind: string; path: string } | undefined
     if (!d) return
     if (d.kind === 'changed') {
@@ -1633,7 +1633,7 @@ export function createVscodeApi(extId: string, pkg: { id: string; version: strin
   const stateStore = (ns: string) => ({
     get: <T = any>(k: string): T | undefined => {
       try {
-        const raw = localStorage.getItem(`nova.extstate.${ns}.${k}`)
+        const raw = localStorage.getItem(`deneb.extstate.${ns}.${k}`)
         return raw ? (JSON.parse(raw) as T) : undefined
       } catch {
         return undefined
@@ -1641,7 +1641,7 @@ export function createVscodeApi(extId: string, pkg: { id: string; version: strin
     },
     set: (k: string, v: unknown) => {
       try {
-        localStorage.setItem(`nova.extstate.${ns}.${k}`, JSON.stringify(v))
+        localStorage.setItem(`deneb.extstate.${ns}.${k}`, JSON.stringify(v))
       } catch {
         // ignore
       }
@@ -1649,7 +1649,7 @@ export function createVscodeApi(extId: string, pkg: { id: string; version: strin
     },
     update: async (k: string, v: unknown) => {
       try {
-        localStorage.setItem(`nova.extstate.${ns}.${k}`, JSON.stringify(v))
+        localStorage.setItem(`deneb.extstate.${ns}.${k}`, JSON.stringify(v))
       } catch {
         // ignore
       }
@@ -1659,22 +1659,22 @@ export function createVscodeApi(extId: string, pkg: { id: string; version: strin
   const context = {
     subscriptions: disposables,
     extensionPath: '/',
-    extensionUri: Uri.parse(`nova://${extId}`),
+    extensionUri: Uri.parse(`deneb://${extId}`),
     extensionMode: 1,
     globalState: stateStore(extId + '.global'),
     workspaceState: stateStore(extId + '.workspace'),
     secrets: {
       store: (k: string, v: string) => {
         try {
-          localStorage.setItem(`nova.extsecret.${extId}.${k}`, v)
+          localStorage.setItem(`deneb.extsecret.${extId}.${k}`, v)
         } catch {
           // ignore
         }
         return Promise.resolve()
       },
-      get: (k: string) => Promise.resolve(localStorage.getItem(`nova.extsecret.${extId}.${k}`)),
+      get: (k: string) => Promise.resolve(localStorage.getItem(`deneb.extsecret.${extId}.${k}`)),
       delete: (k: string) => {
-        localStorage.removeItem(`nova.extsecret.${extId}.${k}`)
+        localStorage.removeItem(`deneb.extsecret.${extId}.${k}`)
         return Promise.resolve()
       },
     },
@@ -1682,8 +1682,8 @@ export function createVscodeApi(extId: string, pkg: { id: string; version: strin
       appendLine: (l: string) => console.log(`[ext:${extId}]`, l),
       show: () => {},
     },
-    storageUri: Uri.parse(`nova://${extId}/storage`),
-    globalStorageUri: Uri.parse(`nova://${extId}/globalStorage`),
+    storageUri: Uri.parse(`deneb://${extId}/storage`),
+    globalStorageUri: Uri.parse(`deneb://${extId}/globalStorage`),
   }
 
   const StatusBarAlignment = { Left: 1, Right: 2 }
@@ -1868,7 +1868,7 @@ export function createVscodeApi(extId: string, pkg: { id: string; version: strin
         asWebviewUri: (uri: Uri) => uri,
         onDidReceiveMessage: receive.event,
         postMessage: (msg: any) => {
-          window.dispatchEvent(new CustomEvent('nova:webview-post', { detail: { id, msg } }))
+          window.dispatchEvent(new CustomEvent('deneb:webview-post', { detail: { id, msg } }))
           return Promise.resolve(true)
         },
       },
@@ -2048,13 +2048,13 @@ export function createVscodeApi(extId: string, pkg: { id: string; version: strin
       state: {
         get(key: string) {
           try {
-            return JSON.parse(localStorage.getItem(`nova.windowstate.${key}`) || 'null')
+            return JSON.parse(localStorage.getItem(`deneb.windowstate.${key}`) || 'null')
           } catch {
             return null
           }
         },
         update(key: string, value: unknown) {
-          localStorage.setItem(`nova.windowstate.${key}`, JSON.stringify(value))
+          localStorage.setItem(`deneb.windowstate.${key}`, JSON.stringify(value))
         },
       },
     },
@@ -2147,12 +2147,12 @@ export function createVscodeApi(extId: string, pkg: { id: string; version: strin
     },
 
     env: {
-      appName: 'Nova',
+      appName: 'Deneb',
       appRoot: '/',
       language: 'es',
-      uriScheme: 'nova',
+      uriScheme: 'deneb',
       version: '1.0.0',
-      machineId: 'nova-desktop',
+      machineId: 'deneb-desktop',
       shell: 'powershell',
       uiTheme: 'vs-dark',
       isNewAppInstall: false,
@@ -2180,14 +2180,14 @@ export function createVscodeApi(extId: string, pkg: { id: string; version: strin
           version: e.version,
           packageJSON: { name: e.name, version: e.version },
           extensionPath: '/',
-          extensionUri: Uri.parse(`nova://${e.id}`),
+          extensionUri: Uri.parse(`deneb://${e.id}`),
           isActive: true,
           exports: undefined,
         })),
       getExtension: (id: string) => {
         const e = useExtensionStore.getState().installed[id]
         return e
-          ? { id: e.id, version: e.version, packageJSON: { name: e.name, version: e.version }, extensionPath: '/', extensionUri: Uri.parse(`nova://${e.id}`), isActive: true, exports: undefined }
+          ? { id: e.id, version: e.version, packageJSON: { name: e.name, version: e.version }, extensionPath: '/', extensionUri: Uri.parse(`deneb://${e.id}`), isActive: true, exports: undefined }
           : undefined
       },
       onDidChange: () => ({ dispose() {} }),

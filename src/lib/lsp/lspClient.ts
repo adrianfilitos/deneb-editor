@@ -83,7 +83,7 @@ export async function syncWorkspaceFiles(): Promise<void> {
   }
   for (const en of entries) files[en.path] = en.text
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await connection?.sendNotification('nova/workspaceFiles' as any, { files } as never).catch(() => {})
+  await connection?.sendNotification('deneb/workspaceFiles' as any, { files } as never).catch(() => {})
 }
 
 // ---------------------------------------------------------------------------
@@ -346,7 +346,7 @@ function toHighlights(r: unknown) {
 // La documentación del worker usa didOpen/didChange vía TextDocuments del
 // servidor; aquí simplemente disparamos el init cuando hay workspace.
 export function setupLspLifecycle() {
-  window.addEventListener('nova:workspace-opened', () => {
+  window.addEventListener('deneb:workspace-opened', () => {
     void initLsp().then(() => syncWorkspaceFiles())
   })
 }

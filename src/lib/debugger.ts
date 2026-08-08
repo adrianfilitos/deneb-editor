@@ -2,7 +2,7 @@ import * as monaco from 'monaco-editor'
 import { useEditorStore } from '../store/editorStore'
 import { useExtUiStore } from '../store/extUiStore'
 import { instrumentCode, createWorkerSource } from './debuggerInstrumentation'
-import { desktopDebug, type NovaDesktopDebug } from './electronBridge'
+import { desktopDebug, type DenebDesktopDebug } from './electronBridge'
 
 // Estado del depurador
 interface Breakpoint {
@@ -93,7 +93,7 @@ function syncBreakpointsDesktop() {
   const store = useEditorStore.getState()
   const root = store.root?.handle as { absPath?: string } | undefined
   if (!debugApi || !root?.absPath || !state.running) return
-  const activePath = (window as unknown as { __novaFocusPath?: string }).__novaFocusPath
+  const activePath = (window as unknown as { __denebFocusPath?: string }).__denebFocusPath
   if (!activePath) return
   const fileAbs = joinAbs(root.absPath, activePath)
   const bps = breakpointsFor(activePath)
@@ -107,8 +107,8 @@ export function breakpointsFor(path: string): number[] {
 // Decoraciones de breakpoint en el editor activo
 let bpDecorations: string[] = []
 export function updateBreakpointDecorations() {
-  const editor = (window as unknown as { __novaEditor?: monaco.editor.IStandaloneCodeEditor | undefined }).__novaEditor
-  const path = (window as unknown as { __novaFocusPath?: string | undefined }).__novaFocusPath
+  const editor = (window as unknown as { __denebEditor?: monaco.editor.IStandaloneCodeEditor | undefined }).__denebEditor
+  const path = (window as unknown as { __denebFocusPath?: string | undefined }).__denebFocusPath
   if (!editor || !path) return
   const lines = breakpointsFor(path)
   const model = editor.getModel()
@@ -117,7 +117,7 @@ export function updateBreakpointDecorations() {
     ...lines.map((line) => ({
       range: new monaco.Range(line, 1, line, 1),
       options: {
-        glyphMarginClassName: 'nova-breakpoint-glyph',
+        glyphMarginClassName: 'deneb-breakpoint-glyph',
         stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
       },
     })),
@@ -126,7 +126,7 @@ export function updateBreakpointDecorations() {
           range: new monaco.Range(state.currentLine, 1, state.currentLine, 1),
           options: {
             isWholeLine: true,
-            className: 'nova-debug-current-line',
+            className: 'deneb-debug-current-line',
             stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
           },
         }]
@@ -136,7 +136,7 @@ export function updateBreakpointDecorations() {
 
 // Click en el gutter para añadir/quitar breakpoint
 export function handleGutterClick(line: number): void {
-  const path = (window as unknown as { __novaFocusPath?: string | undefined }).__novaFocusPath
+  const path = (window as unknown as { __denebFocusPath?: string | undefined }).__denebFocusPath
   if (path) toggleBreakpoint(path, line)
 }
 
@@ -173,7 +173,7 @@ export async function startDebug(): Promise<void> {
   await startDebugWeb(code, tab)
 }
 
-async function startDebugDesktop(api: NovaDesktopDebug, tabPath: string, absRoot: string) {
+async function startDebugDesktop(api: DenebDesktopDebug, tabPath: string, absRoot: string) {
   runId++
   const myRun = runId
   const fileAbs = joinAbs(absRoot, tabPath)

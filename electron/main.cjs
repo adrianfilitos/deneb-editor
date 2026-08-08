@@ -7,7 +7,7 @@ const { autoUpdater } = require('electron-updater')
 const liveServer = require('./liveServer.cjs')
 const { CDPDebugAdapter } = require('./debugAdapter.cjs')
 
-const isDev = process.env.NOVA_DEV === '1'
+const isDev = process.env.DENEB_DEV === '1'
 const DEV_URL = 'http://127.0.0.1:5173'
 
 // Portapapel portable: electron-builder fija PORTABLE_EXECUTABLE_FILE solo en la build portable
@@ -61,34 +61,34 @@ function setupAutoUpdater() {
   }
 
   try {
-    autoUpdater.setFeedURL({ provider: 'github', owner: 'adrianfilitos', repo: 'nova-editor' })
+    autoUpdater.setFeedURL({ provider: 'github', owner: 'adrianfilitos', repo: 'deneb-editor' })
   } catch (e) {
-    sendToWindow('nova:update:status', { type: 'error', message: String(e.message || e) })
+    sendToWindow('deneb:update:status', { type: 'error', message: String(e.message || e) })
     return
   }
 
   autoUpdater.on('checking-for-update', () => {
-    sendToWindow('nova:update:status', { type: 'checking' })
+    sendToWindow('deneb:update:status', { type: 'checking' })
   })
 
   autoUpdater.on('update-available', (info) => {
-    sendToWindow('nova:update:status', { type: 'available', version: info.version })
+    sendToWindow('deneb:update:status', { type: 'available', version: info.version })
   })
 
   autoUpdater.on('update-not-available', (info) => {
-    sendToWindow('nova:update:status', { type: 'not-available', version: info.version })
+    sendToWindow('deneb:update:status', { type: 'not-available', version: info.version })
   })
 
   autoUpdater.on('download-progress', (p) => {
-    sendToWindow('nova:update:status', { type: 'downloading', percent: Math.round(p.percent || 0) })
+    sendToWindow('deneb:update:status', { type: 'downloading', percent: Math.round(p.percent || 0) })
   })
 
   autoUpdater.on('update-downloaded', (info) => {
-    sendToWindow('nova:update:status', { type: 'downloaded', version: info.version })
+    sendToWindow('deneb:update:status', { type: 'downloaded', version: info.version })
   })
 
   autoUpdater.on('error', (err) => {
-    sendToWindow('nova:update:status', { type: 'error', message: String((err && err.message) || err) })
+    sendToWindow('deneb:update:status', { type: 'error', message: String((err && err.message) || err) })
   })
 
   // Comprobación silenciosa al arrancar (una vez la ventana está lista)
@@ -104,16 +104,16 @@ function setupAutoUpdater() {
 }
 
 function registerUpdateHandlers() {
-  ipcMain.handle('nova:update:version', () => ({
+  ipcMain.handle('deneb:update:version', () => ({
     version: app.getVersion(),
     supported: updatesSupported,
     portable: isPortable,
     packaged: app.isPackaged,
   }))
 
-  ipcMain.on('nova:update:check', () => {
+  ipcMain.on('deneb:update:check', () => {
     if (!updatesSupported) {
-      sendToWindow('nova:update:status', {
+      sendToWindow('deneb:update:status', {
         type: 'error',
         message: isPortable
           ? 'La versión portable no se actualiza automáticamente. Descarga la nueva versión desde GitHub Releases.'
@@ -128,7 +128,7 @@ function registerUpdateHandlers() {
     }
   })
 
-  ipcMain.on('nova:update:install', () => {
+  ipcMain.on('deneb:update:install', () => {
     if (!updatesSupported) return
     try {
       autoUpdater.quitAndInstall(false, true)
@@ -163,89 +163,89 @@ function startTerminal(cwd) {
     proc.stdout.setEncoding('utf8')
     proc.stderr.setEncoding('utf8')
     proc.stdout.on('data', (d) => {
-      if (id === termId) sendToWindow('nova:term:data', d)
+      if (id === termId) sendToWindow('deneb:term:data', d)
     })
     proc.stderr.on('data', (d) => {
-      if (id === termId) sendToWindow('nova:term:data', d)
+      if (id === termId) sendToWindow('deneb:term:data', d)
     })
     proc.on('error', (e) => {
       if (id === termId) {
-        sendToWindow('nova:term:data', `\r\n[Error al iniciar ${shell.name}: ${e.message}]\r\n`)
+        sendToWindow('deneb:term:data', `\r\n[Error al iniciar ${shell.name}: ${e.message}]\r\n`)
       }
     })
     proc.on('exit', () => {
       if (id === termId) {
         termProc = null
-        sendToWindow('nova:term:exit')
+        sendToWindow('deneb:term:exit')
       }
     })
     if (proc.stdin && proc.stdin.writable && shell.init) {
       proc.stdin.write(shell.init)
     }
   } catch (e) {
-    sendToWindow('nova:term:data', `\r\n[Error: ${e.message}]\r\n`)
+    sendToWindow('deneb:term:data', `\r\n[Error: ${e.message}]\r\n`)
   }
 }
 
 function registerWindowHandlers() {
-  ipcMain.on('nova:window:minimize', () => {
+  ipcMain.on('deneb:window:minimize', () => {
     if (mainWindow) mainWindow.minimize()
   })
-  ipcMain.on('nova:window:toggle-maximize', () => {
+  ipcMain.on('deneb:window:toggle-maximize', () => {
     if (!mainWindow) return
     if (mainWindow.isMaximized()) mainWindow.unmaximize()
     else mainWindow.maximize()
   })
-  ipcMain.on('nova:window:close', () => {
+  ipcMain.on('deneb:window:close', () => {
     if (mainWindow) mainWindow.close()
   })
 }
 
 function registerMenuHandlers() {
   const wc = () => mainWindow?.webContents
-  ipcMain.on('nova:menu:undo', () => wc()?.undo())
-  ipcMain.on('nova:menu:redo', () => wc()?.redo())
-  ipcMain.on('nova:menu:cut', () => wc()?.cut())
-  ipcMain.on('nova:menu:copy', () => wc()?.copy())
-  ipcMain.on('nova:menu:paste', () => wc()?.paste())
-  ipcMain.on('nova:menu:select-all', () => wc()?.selectAll())
-  ipcMain.on('nova:menu:reload', () => wc()?.reload())
-  ipcMain.on('nova:menu:devtools', () => wc()?.toggleDevTools())
-  ipcMain.on('nova:menu:zoom-in', () => {
+  ipcMain.on('deneb:menu:undo', () => wc()?.undo())
+  ipcMain.on('deneb:menu:redo', () => wc()?.redo())
+  ipcMain.on('deneb:menu:cut', () => wc()?.cut())
+  ipcMain.on('deneb:menu:copy', () => wc()?.copy())
+  ipcMain.on('deneb:menu:paste', () => wc()?.paste())
+  ipcMain.on('deneb:menu:select-all', () => wc()?.selectAll())
+  ipcMain.on('deneb:menu:reload', () => wc()?.reload())
+  ipcMain.on('deneb:menu:devtools', () => wc()?.toggleDevTools())
+  ipcMain.on('deneb:menu:zoom-in', () => {
     const w = mainWindow
     if (w) w.webContents.setZoomLevel((w.webContents.getZoomLevel() || 0) + 0.5)
   })
-  ipcMain.on('nova:menu:zoom-out', () => {
+  ipcMain.on('deneb:menu:zoom-out', () => {
     const w = mainWindow
     if (w) w.webContents.setZoomLevel((w.webContents.getZoomLevel() || 0) - 0.5)
   })
-  ipcMain.on('nova:menu:zoom-reset', () => mainWindow?.webContents.setZoomLevel(0))
-  ipcMain.on('nova:menu:fullscreen', () => {
+  ipcMain.on('deneb:menu:zoom-reset', () => mainWindow?.webContents.setZoomLevel(0))
+  ipcMain.on('deneb:menu:fullscreen', () => {
     if (mainWindow) mainWindow.setFullScreen(!mainWindow.isFullScreen())
   })
-  ipcMain.on('nova:menu:about', () => {
+  ipcMain.on('deneb:menu:about', () => {
     if (!mainWindow) return
     dialog.showMessageBox(mainWindow, {
       type: 'info',
-      title: 'Nova',
-      message: 'Nova Editor 1.0.0',
+      title: 'Deneb',
+      message: 'Deneb Editor 1.0.0',
       detail: 'Editor de código con IA integrada.\nHecho con Electron, React, Monaco y Vite.',
     })
   })
 }
 
 function registerTerminalHandlers() {
-  ipcMain.handle('nova:term:start', (_e, cwd) => {
+  ipcMain.handle('deneb:term:start', (_e, cwd) => {
     startTerminal(cwd)
     return true
   })
-  ipcMain.handle('nova:term:write', (_e, data) => {
+  ipcMain.handle('deneb:term:write', (_e, data) => {
     if (termProc && termProc.stdin && termProc.stdin.writable) {
       termProc.stdin.write(data)
     }
     return true
   })
-  ipcMain.handle('nova:term:kill', () => {
+  ipcMain.handle('deneb:term:kill', () => {
     if (termProc) {
       try { termProc.kill() } catch {}
       termProc = null
@@ -283,7 +283,7 @@ function runGit(args, opts = {}) {
 }
 
 function registerGitHandlers() {
-  ipcMain.handle('nova:git:available', async () => {
+  ipcMain.handle('deneb:git:available', async () => {
     if (!workspaceRoot) return false
     try {
       const r = await runGit(['rev-parse', '--is-inside-work-tree'])
@@ -293,7 +293,7 @@ function registerGitHandlers() {
     }
   })
 
-  ipcMain.handle('nova:git:status', async () => {
+  ipcMain.handle('deneb:git:status', async () => {
     const [st, br, lg] = await Promise.all([
       runGit(['status', '--porcelain=v1', '-uall', '-b']),
       runGit(['rev-parse', '--abbrev-ref', 'HEAD']),
@@ -308,25 +308,25 @@ function registerGitHandlers() {
     }
   })
 
-  ipcMain.handle('nova:git:add', async (_e, paths) => {
+  ipcMain.handle('deneb:git:add', async (_e, paths) => {
     const list = Array.isArray(paths) ? paths : [paths]
     const r = await runGit(['add', '--', ...list])
     return { ok: r.ok, out: r.out, error: r.err }
   })
 
-  ipcMain.handle('nova:git:reset', async (_e, paths) => {
+  ipcMain.handle('deneb:git:reset', async (_e, paths) => {
     const list = Array.isArray(paths) ? paths : [paths]
     const r = await runGit(['reset', '--', ...list])
     return { ok: r.ok, out: r.out, error: r.err }
   })
 
-  ipcMain.handle('nova:git:commit', async (_e, msg) => {
+  ipcMain.handle('deneb:git:commit', async (_e, msg) => {
     if (!msg || !msg.trim()) return { ok: false, out: '', error: 'El mensaje del commit no puede estar vacío' }
     const r = await runGit(['commit', '-m', msg.trim()])
     return { ok: r.ok, out: r.out, error: r.err }
   })
 
-  ipcMain.handle('nova:git:branches', async () => {
+  ipcMain.handle('deneb:git:branches', async () => {
     const [list, cur] = await Promise.all([
       runGit(['branch', '-a']),
       runGit(['rev-parse', '--abbrev-ref', 'HEAD']),
@@ -342,19 +342,19 @@ function registerGitHandlers() {
     }
   })
 
-  ipcMain.handle('nova:git:checkout', async (_e, name) => {
+  ipcMain.handle('deneb:git:checkout', async (_e, name) => {
     const r = await runGit(['checkout', String(name)])
     return { ok: r.ok, out: r.out, error: r.err }
   })
 
-  ipcMain.handle('nova:git:create-branch', async (_e, name) => {
+  ipcMain.handle('deneb:git:create-branch', async (_e, name) => {
     const n = String(name || '').trim()
     if (!n) return { ok: false, out: '', error: 'Nombre de rama vacío' }
     const r = await runGit(['checkout', '-b', n])
     return { ok: r.ok, out: r.out, error: r.err }
   })
 
-  ipcMain.handle('nova:git:diff', async (_e, file, staged) => {
+  ipcMain.handle('deneb:git:diff', async (_e, file, staged) => {
     const args = ['diff', '--no-color', '-M', '--ignore-space-at-eol']
     if (staged) args.push('--cached')
     args.push('--', String(file))
@@ -362,22 +362,22 @@ function registerGitHandlers() {
     return { ok: r.ok, diff: r.out, error: r.err }
   })
 
-  ipcMain.handle('nova:git:push', async () => {
+  ipcMain.handle('deneb:git:push', async () => {
     const r = await runGit(['push'])
     return { ok: r.ok, out: r.out, error: r.err }
   })
 
-  ipcMain.handle('nova:git:pull', async () => {
+  ipcMain.handle('deneb:git:pull', async () => {
     const r = await runGit(['pull'])
     return { ok: r.ok, out: r.out, error: r.err }
   })
 
-  ipcMain.handle('nova:git:fetch', async () => {
+  ipcMain.handle('deneb:git:fetch', async () => {
     const r = await runGit(['fetch'])
     return { ok: r.ok, out: r.out, error: r.err }
   })
 
-  ipcMain.handle('nova:git:log', async () => {
+  ipcMain.handle('deneb:git:log', async () => {
     const r = await runGit(['log', '--oneline', '-15'])
     return { ok: r.ok, log: r.out, error: r.err }
   })
@@ -386,7 +386,7 @@ function registerGitHandlers() {
 function registerExtHandlers() {
   const extDir = () => path.join(app.getPath('userData'), 'extensions')
 
-  ipcMain.handle('nova:ext:install', async (_e, downloadUrl, filename) => {
+  ipcMain.handle('deneb:ext:install', async (_e, downloadUrl, filename) => {
     try {
       const dir = extDir()
       fs.mkdirSync(dir, { recursive: true })
@@ -402,7 +402,7 @@ function registerExtHandlers() {
     }
   })
 
-  ipcMain.handle('nova:ext:save', async (_e, filename, data) => {
+  ipcMain.handle('deneb:ext:save', async (_e, filename, data) => {
     try {
       const dir = extDir()
       fs.mkdirSync(dir, { recursive: true })
@@ -416,7 +416,7 @@ function registerExtHandlers() {
     }
   })
 
-  ipcMain.handle('nova:ext:installed', async () => {
+  ipcMain.handle('deneb:ext:installed', async () => {
     try {
       const dir = extDir()
       if (!fs.existsSync(dir)) return []
@@ -429,29 +429,29 @@ function registerExtHandlers() {
     }
   })
 
-  ipcMain.handle('nova:ext:dir', () => extDir())
+  ipcMain.handle('deneb:ext:dir', () => extDir())
 }
 
 function registerLiveServerHandlers() {
-  ipcMain.handle('nova:liveserver:start', async (_e, port, rootAbs) => {
+  ipcMain.handle('deneb:liveserver:start', async (_e, port, rootAbs) => {
     const r = await liveServer.start(Number(port) || 5500, String(rootAbs))
-    if (r.ok) sendToWindow('nova:liveserver:status', liveServer.status())
+    if (r.ok) sendToWindow('deneb:liveserver:status', liveServer.status())
     return r
   })
-  ipcMain.handle('nova:liveserver:stop', () => {
+  ipcMain.handle('deneb:liveserver:stop', () => {
     const r = liveServer.stop()
-    sendToWindow('nova:liveserver:status', { running: false })
+    sendToWindow('deneb:liveserver:status', { running: false })
     return r
   })
-  ipcMain.handle('nova:liveserver:status', () => liveServer.status())
+  ipcMain.handle('deneb:liveserver:status', () => liveServer.status())
 }
 
 function registerDebugHandlers() {
   const adapter = new CDPDebugAdapter()
-  adapter.onEvent = (type, data) => sendToWindow('nova:debug:event', { type, data })
-  adapter.onConsole = (channel, text) => sendToWindow('nova:debug:console', { channel, text })
+  adapter.onEvent = (type, data) => sendToWindow('deneb:debug:event', { type, data })
+  adapter.onConsole = (channel, text) => sendToWindow('deneb:debug:console', { channel, text })
 
-  ipcMain.handle('nova:debug:start', async (_e, cfg) => {
+  ipcMain.handle('deneb:debug:start', async (_e, cfg) => {
     try {
       await adapter.start(cfg)
       return { ok: true }
@@ -459,21 +459,21 @@ function registerDebugHandlers() {
       return { ok: false, error: e.message }
     }
   })
-  ipcMain.handle('nova:debug:setBreakpoints', (_e, lines, filePath) =>
+  ipcMain.handle('deneb:debug:setBreakpoints', (_e, lines, filePath) =>
     adapter.setBreakpoints(lines || [], filePath || ''),
   )
-  ipcMain.handle('nova:debug:continue', () => adapter.continue_())
-  ipcMain.handle('nova:debug:next', () => adapter.next())
-  ipcMain.handle('nova:debug:stepIn', () => adapter.stepIn())
-  ipcMain.handle('nova:debug:stepOut', () => adapter.stepOut())
-  ipcMain.handle('nova:debug:pause', () => adapter.pause())
-  ipcMain.handle('nova:debug:stackTrace', (_e, threadId) => adapter.stackTrace(threadId))
-  ipcMain.handle('nova:debug:evaluate', (_e, expression, frameId) => adapter.evaluate(expression, frameId))
-  ipcMain.handle('nova:debug:disconnect', () => adapter.disconnect())
+  ipcMain.handle('deneb:debug:continue', () => adapter.continue_())
+  ipcMain.handle('deneb:debug:next', () => adapter.next())
+  ipcMain.handle('deneb:debug:stepIn', () => adapter.stepIn())
+  ipcMain.handle('deneb:debug:stepOut', () => adapter.stepOut())
+  ipcMain.handle('deneb:debug:pause', () => adapter.pause())
+  ipcMain.handle('deneb:debug:stackTrace', (_e, threadId) => adapter.stackTrace(threadId))
+  ipcMain.handle('deneb:debug:evaluate', (_e, expression, frameId) => adapter.evaluate(expression, frameId))
+  ipcMain.handle('deneb:debug:disconnect', () => adapter.disconnect())
 }
 
 function registerFsHandlers() {
-  ipcMain.handle('nova:fs:open-workspace', async () => {
+  ipcMain.handle('deneb:fs:open-workspace', async () => {
     const res = await dialog.showOpenDialog(mainWindow, {
       title: 'Abrir carpeta',
       properties: ['openDirectory', 'createDirectory'],
@@ -483,7 +483,7 @@ function registerFsHandlers() {
     return workspaceRoot
   })
 
-  ipcMain.handle('nova:fs:set-workspace', (_e, abs) => {
+  ipcMain.handle('deneb:fs:set-workspace', (_e, abs) => {
     try {
       if (typeof abs === 'string' && fs.existsSync(abs) && fs.statSync(abs).isDirectory()) {
         workspaceRoot = abs
@@ -495,7 +495,7 @@ function registerFsHandlers() {
     return false
   })
 
-  ipcMain.handle('nova:fs:list', async (_e, absPath) => {
+  ipcMain.handle('deneb:fs:list', async (_e, absPath) => {
     const dir = guard(absPath)
     const entries = await fs.promises.readdir(dir, { withFileTypes: true })
     return entries.map((en) => ({
@@ -505,7 +505,7 @@ function registerFsHandlers() {
     }))
   })
 
-  ipcMain.handle('nova:fs:stat', async (_e, absPath) => {
+  ipcMain.handle('deneb:fs:stat', async (_e, absPath) => {
     const target = guard(absPath)
     try {
       const st = await fs.promises.stat(target)
@@ -519,18 +519,18 @@ function registerFsHandlers() {
     }
   })
 
-  ipcMain.handle('nova:fs:read-file', async (_e, absPath) => {
+  ipcMain.handle('deneb:fs:read-file', async (_e, absPath) => {
     const file = guard(absPath)
     return await fs.promises.readFile(file, 'utf8')
   })
 
-  ipcMain.handle('nova:fs:write-file', async (_e, absPath, content) => {
+  ipcMain.handle('deneb:fs:write-file', async (_e, absPath, content) => {
     const file = guard(absPath)
     await fs.promises.writeFile(file, content, 'utf8')
     return true
   })
 
-  ipcMain.handle('nova:fs:create', async (_e, parentAbs, name, kind) => {
+  ipcMain.handle('deneb:fs:create', async (_e, parentAbs, name, kind) => {
     const parent = guard(parentAbs)
     const target = path.join(parent, name)
     if (kind === 'file') await fs.promises.writeFile(target, '', 'utf8')
@@ -538,19 +538,19 @@ function registerFsHandlers() {
     return { name, kind, absPath: target }
   })
 
-  ipcMain.handle('nova:fs:remove', async (_e, absPath) => {
+  ipcMain.handle('deneb:fs:remove', async (_e, absPath) => {
     const target = guard(absPath)
     await fs.promises.rm(target, { recursive: true, force: false })
     return true
   })
 
-  ipcMain.handle('nova:fs:rename', async (_e, parentAbs, oldName, newName) => {
+  ipcMain.handle('deneb:fs:rename', async (_e, parentAbs, oldName, newName) => {
     const parent = guard(parentAbs)
     await fs.promises.rename(path.join(parent, oldName), path.join(parent, newName))
     return true
   })
 
-  ipcMain.handle('nova:fs:walk', async (_e, absPath) => {
+  ipcMain.handle('deneb:fs:walk', async (_e, absPath) => {
     const root = guard(absPath)
     const out = []
     const stack = [root]
@@ -570,7 +570,7 @@ function registerFsHandlers() {
     }
     return out
   })
-  ipcMain.handle('nova:fs:exec', async (_e, cwd, command) => {
+  ipcMain.handle('deneb:fs:exec', async (_e, cwd, command) => {
     const dir = cwd && typeof cwd === 'string' && fs.existsSync(cwd) ? cwd : workspaceRoot || os.homedir()
     return await new Promise((resolve) => {
       const winShell = process.platform === 'win32'
@@ -606,7 +606,7 @@ function buildMenu(win) {
         {
           label: 'Abrir carpeta…',
           accelerator: 'CmdOrCtrl+O',
-          click: () => sendToWindow('nova:open-workspace'),
+          click: () => sendToWindow('deneb:open-workspace'),
         },
         { type: 'separator' },
         isDev
@@ -634,23 +634,23 @@ function buildMenu(win) {
       submenu: [
         {
           label: 'Alternar barra lateral',
-          click: () => sendToWindow('nova:toggle-sidebar'),
+          click: () => sendToWindow('deneb:toggle-sidebar'),
         },
         {
           label: 'Terminal',
-          click: () => sendToWindow('nova:toggle-terminal'),
+          click: () => sendToWindow('deneb:toggle-terminal'),
         },
         {
           label: 'Problemas',
-          click: () => sendToWindow('nova:toggle-problems'),
+          click: () => sendToWindow('deneb:toggle-problems'),
         },
         {
           label: 'Asistente de IA',
-          click: () => sendToWindow('nova:show-ai'),
+          click: () => sendToWindow('deneb:show-ai'),
         },
         {
           label: 'Modo Zen',
-          click: () => sendToWindow('nova:toggle-zen'),
+          click: () => sendToWindow('deneb:toggle-zen'),
         },
         { type: 'separator' },
         { role: 'resetZoom', label: 'Restablecer zoom' },
@@ -678,29 +678,29 @@ function buildMenu(win) {
             if (!updatesSupported) {
               dialog.showMessageBox(win, {
                 type: 'info',
-                title: 'Nova',
+                title: 'Deneb',
                 message: isPortable
                   ? 'La versión portable no se actualiza automáticamente.'
                   : 'Las actualizaciones automáticas solo están disponibles en la versión instalada.',
-                detail: 'Descarga la nueva versión desde GitHub Releases: https://github.com/adrianfilitos/nova-editor/releases',
+                detail: 'Descarga la nueva versión desde GitHub Releases: https://github.com/adrianfilitos/deneb-editor/releases',
               })
               return
             }
-            sendToWindow('nova:update:check')
+            sendToWindow('deneb:update:check')
           },
         },
         {
           label: 'Referencia de atajos',
-          click: () => sendToWindow('nova:show-shortcuts'),
+          click: () => sendToWindow('deneb:show-shortcuts'),
         },
         { type: 'separator' },
         {
-          label: 'Acerca de Nova',
+          label: 'Acerca de Deneb',
           click: () => {
             dialog.showMessageBox(win, {
               type: 'info',
-              title: 'Nova',
-              message: `Nova Editor ${app.getVersion()}`,
+              title: 'Deneb',
+              message: `Deneb Editor ${app.getVersion()}`,
               detail: 'Editor de código con IA integrada.\nHecho con Electron, React, Monaco y Vite.',
             })
           },
@@ -718,7 +718,7 @@ function createWindow() {
     minWidth: 860,
     minHeight: 540,
     backgroundColor: '#0f111a',
-    title: 'Nova',
+    title: 'Deneb',
     frame: false,
     autoHideMenuBar: true,
     icon: path.join(__dirname, '..', 'public', 'icon.png'),
@@ -730,8 +730,8 @@ function createWindow() {
     },
   })
 
-  mainWindow.on('maximize', () => sendToWindow('nova:window:maximized', true))
-  mainWindow.on('unmaximize', () => sendToWindow('nova:window:maximized', false))
+  mainWindow.on('maximize', () => sendToWindow('deneb:window:maximized', true))
+  mainWindow.on('unmaximize', () => sendToWindow('deneb:window:maximized', false))
 
   buildMenu(mainWindow)
 
@@ -754,13 +754,13 @@ function createWindow() {
       const msg = `Falta la compilación:\n${indexPath}\n\nEjecuta primero "npm run build" o usa "npm run electron:dev".`
       dialog.showMessageBox(mainWindow, {
         type: 'warning',
-        title: 'Nova',
+        title: 'Deneb',
         message: 'No se encontró la compilación de la aplicación.',
         detail: msg,
       })
       mainWindow.loadURL(
         `data:text/html;charset=utf-8,${encodeURIComponent(
-          `<!doctype html><html><body style="background:#0f111a;color:#d5d9e6;font-family:Segoe UI,sans-serif;padding:40px"><h2>Nova</h2><p>${msg.replace(/\n/g, '<br/>')}</p></body></html>`,
+          `<!doctype html><html><body style="background:#0f111a;color:#d5d9e6;font-family:Segoe UI,sans-serif;padding:40px"><h2>Deneb</h2><p>${msg.replace(/\n/g, '<br/>')}</p></body></html>`,
         )}`,
       )
       return
@@ -770,8 +770,8 @@ function createWindow() {
 
   if (pendingLaunch.openAi || pendingLaunch.target) {
     mainWindow.webContents.once('did-finish-load', () => {
-      if (pendingLaunch.openAi) sendToWindow('nova:show-ai')
-      if (pendingLaunch.target) sendToWindow('nova:open-path', pendingLaunch.target)
+      if (pendingLaunch.openAi) sendToWindow('deneb:show-ai')
+      if (pendingLaunch.target) sendToWindow('deneb:open-path', pendingLaunch.target)
     })
   }
 

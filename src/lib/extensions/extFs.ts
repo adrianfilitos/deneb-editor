@@ -328,7 +328,7 @@ export class ExtFs {
       const fp = this.key(d.path)
       if (fp === rel || fp.startsWith(rel + '/')) cb(d.kind as 'created' | 'changed' | 'deleted', fp)
     }
-    window.addEventListener('nova:fs-change', handler)
+    window.addEventListener('deneb:fs-change', handler)
     // recargar del backend si venimos de un guardado externo
     this.refreshEntry(rel).catch(() => {})
   }

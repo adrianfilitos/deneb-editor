@@ -41,7 +41,7 @@ export function GitPanel() {
   }, [store.branch])
 
   async function loadBranches() {
-    const api = window.novaDesktop?.git
+    const api = window.denebDesktop?.git
     if (!api) return
     const r = await api.branches()
     if (r.ok) setBranchList(r.branches)
@@ -82,8 +82,8 @@ export function GitPanel() {
       <div className="git">
         <div className="git__empty">
           <Icons.git size={28} />
-          <p>El control de código fuente solo está disponible en la <strong>versión de escritorio</strong> de Nova.</p>
-          <p className="git__hint">Abre una carpeta y Nova detectará automáticamente el repositorio Git.</p>
+          <p>El control de código fuente solo está disponible en la <strong>versión de escritorio</strong> de Deneb.</p>
+          <p className="git__hint">Abre una carpeta y Deneb detectará automáticamente el repositorio Git.</p>
         </div>
       </div>
     )

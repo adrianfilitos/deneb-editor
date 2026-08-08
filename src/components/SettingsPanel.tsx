@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import { AI_PROVIDERS, providerPreset } from '../lib/ai'
-import { clearNovaData } from '../lib/storageReset'
+import { clearDenebData } from '../lib/storageReset'
 import { THEME_PALETTES, THEME_IDS } from '../lib/monaco'
 import { UpdatesSection } from './UpdatesSection'
 import { getContributedConfigSections, type ContributedConfigProp } from '../lib/extensions/configRegistry'
@@ -10,15 +10,15 @@ import { Icons } from './icons'
 import { getConfigPath, openConfigInEditor, isNativeBackend } from '../lib/userConfig'
 
 const THEME_NAMES: Record<ThemeId, string> = {
-  'nova-dark': 'Nova Dark',
-  'nova-light': 'Nova Light',
-  'nova-midnight': 'Midnight',
-  'nova-ocean': 'Ocean',
-  'nova-forest': 'Forest',
-  'nova-sunset': 'Sunset',
-  'nova-sakura': 'Sakura',
-  'nova-mono': 'Mono',
-  'nova-paper': 'Paper',
+  'deneb-dark': 'Deneb Dark',
+  'deneb-light': 'Deneb Light',
+  'deneb-midnight': 'Midnight',
+  'deneb-ocean': 'Ocean',
+  'deneb-forest': 'Forest',
+  'deneb-sunset': 'Sunset',
+  'deneb-sakura': 'Sakura',
+  'deneb-mono': 'Mono',
+  'deneb-paper': 'Paper',
 }
 
 type SettingsTab = 'apariencia' | 'editor' | 'ia' | 'sistema' | 'extensiones' | 'archivos'
@@ -73,7 +73,7 @@ function AppearanceTab() {
   const update = useEditorStore((s) => s.updateSettings)
   return (
     <>
-      <Group title="Tema" subtitle="El aspecto global de Nova">
+      <Group title="Tema" subtitle="El aspecto global de Deneb">
         <div className="settings__themes">
           {THEME_IDS.map((id) => {
             const p = THEME_PALETTES[id]
@@ -361,8 +361,8 @@ function SystemTab() {
           <button
             className="btn btn--danger"
             onClick={() => {
-              if (window.confirm('¿Borrar todos los datos de Nova (ajustes, sesión y extensiones) y empezar de nuevo?')) {
-                void clearNovaData().then(() => window.location.reload())
+              if (window.confirm('¿Borrar todos los datos de Deneb (ajustes, sesión y extensiones) y empezar de nuevo?')) {
+                void clearDenebData().then(() => window.location.reload())
               }
             }}
           >
@@ -374,7 +374,7 @@ function SystemTab() {
         <div className="settings__about">
           <div className="settings__logo"><Icons.sparkles size={22} /></div>
           <div>
-            <div className="settings__name">Nova Editor</div>
+            <div className="settings__name">Deneb Editor</div>
             <div className="settings__version">Versión 1.0.0 · Editor de código con IA</div>
           </div>
         </div>
@@ -472,9 +472,9 @@ function ConfigFilesTab() {
 
   return (
     <>
-      <Group title="Archivos de configuración" subtitle="Ajustes y atajos en el espacio de trabajo (.nova/)">
+      <Group title="Archivos de configuración" subtitle="Ajustes y atajos en el espacio de trabajo (.deneb/)">
         <p className="settings__note">
-          Los ajustes y atajos se pueden definir como archivos JSON en la carpeta <span className="mono">.nova/</span>
+          Los ajustes y atajos se pueden definir como archivos JSON en la carpeta <span className="mono">.deneb/</span>
           de tu espacio de trabajo. Tienen prioridad sobre la interfaz.
         </p>
         {!hasRoot ? (
@@ -508,7 +508,7 @@ function ConfigFilesTab() {
 
       <Group title="Snippets de usuario" subtitle="Autocompletado personalizado">
         <p className="settings__note">
-          Crea un archivo <span className="mono">.nova/snippets.json</span> con snippets como:
+          Crea un archivo <span className="mono">.deneb/snippets.json</span> con snippets como:
         </p>
         <pre className="settings__code">{`{
   "log": {

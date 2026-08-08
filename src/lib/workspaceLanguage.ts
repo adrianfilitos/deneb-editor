@@ -68,7 +68,7 @@ export async function indexWorkspace(root: AnyHandle | null): Promise<void> {
   const jobs: Promise<void>[] = []
   walkFiles(root, (path, handle) => {
     const lang = languageOf(path)
-    if (!lang || isBinaryName(path.split('/').pop() || '') || path.includes('/.nova/') || path.includes('/node_modules/')) return
+    if (!lang || isBinaryName(path.split('/').pop() || '') || path.includes('/.deneb/') || path.includes('/node_modules/')) return
     if (seen.has(path)) return
     seen.add(path)
     jobs.push(
@@ -79,7 +79,7 @@ export async function indexWorkspace(root: AnyHandle | null): Promise<void> {
     )
   }).then(() => Promise.all(jobs)).then(() => {
     indexing = false
-    window.dispatchEvent(new CustomEvent('nova:index-ready'))
+    window.dispatchEvent(new CustomEvent('deneb:index-ready'))
   }).catch(() => {
     indexing = false
   })
@@ -261,11 +261,11 @@ function docSymbolKind(kind: string): monaco.languages.SymbolKind {
 
 // Hook: reindexar cuando cambia un archivo o se abre workspace
 export function setupIndexHooks() {
-  window.addEventListener('nova:workspace-opened', () => {
+  window.addEventListener('deneb:workspace-opened', () => {
     const root = useEditorStore.getState().root?.handle as AnyHandle | null
     void indexWorkspace(root)
   })
-  window.addEventListener('nova:fs-change', (e) => {
+  window.addEventListener('deneb:fs-change', (e) => {
     const detail = (e as CustomEvent<{ kind: string; path: string }>).detail
     if (!detail) return
     const root = indexedRoot || (useEditorStore.getState().root?.handle as AnyHandle | null)

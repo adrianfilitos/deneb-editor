@@ -1,4 +1,4 @@
-// Live Server real para Nova (escritorio): servidor HTTP en Node que sirve la
+// Live Server real para Deneb (escritorio): servidor HTTP en Node que sirve la
 // carpeta del workspace y recarga el navegador al guardar (SSE + fs.watch).
 
 const http = require('http')
@@ -31,7 +31,7 @@ const MIME = {
 
 const RELOAD_CLIENT = `<script>
 (function () {
-  var es = new EventSource('/__nova_reload');
+  var es = new EventSource('/__deneb_reload');
   es.addEventListener('reload', function () { location.reload(); });
   es.addEventListener('close', function () { es.close(); });
   window.addEventListener('beforeunload', function () { es.close(); });
@@ -58,7 +58,7 @@ function broadcast(event, data) {
 function handleRequest(req, res) {
   const url = decodeURIComponent((req.url || '/').split('?')[0])
 
-  if (url === '/__nova_reload') {
+  if (url === '/__deneb_reload') {
     const srv = server
     if (!srv) {
       res.writeHead(500)
@@ -109,7 +109,7 @@ function handleRequest(req, res) {
       let body = data
       if (ext === '.html' || ext === '.htm') {
         const html = data.toString('utf8')
-        if (!html.includes('__nova_reload')) {
+        if (!html.includes('__deneb_reload')) {
           body = Buffer.from(html.replace('</body>', RELOAD_CLIENT + '</body>'))
         }
       }

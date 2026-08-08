@@ -7,9 +7,9 @@ import { request as httpRequest } from 'node:http'
 const require = createRequire(import.meta.url)
 const liveServer = require('../../electron/liveServer.cjs')
 
-const dir = mkdtempSync(join(tmpdir(), 'nova-ls-'))
+const dir = mkdtempSync(join(tmpdir(), 'deneb-ls-'))
 mkdirSync(join(dir, 'css'), { recursive: true })
-writeFileSync(join(dir, 'index.html'), '<!doctype html><html><head><title>Demo</title></head><body><h1>Hola Nova</h1></body></html>')
+writeFileSync(join(dir, 'index.html'), '<!doctype html><html><head><title>Demo</title></head><body><h1>Hola Deneb</h1></body></html>')
 writeFileSync(join(dir, 'css', 'style.css'), 'h1 { color: tomato; }')
 
 let pass = 0
@@ -29,7 +29,7 @@ if (!started.ok) {
 const page = await fetch('http://127.0.0.1:5555/')
 const html = await page.text()
 check('GET / sirve index.html (200)', page.status === 200)
-check('inyecta el cliente de recarga (__nova_reload)', html.includes('__nova_reload'))
+check('inyecta el cliente de recarga (__deneb_reload)', html.includes('__deneb_reload'))
 
 const css = await fetch('http://127.0.0.1:5555/css/style.css')
 const cssText = await css.text()
@@ -40,7 +40,7 @@ check('404 para archivos inexistentes', missing.status === 404)
 
 // SSE: abrir la conexión de recarga, leer el primer chunk y cerrarla limpiamente
 const sseText = await new Promise((resolve, reject) => {
-  const req = httpRequest('http://127.0.0.1:5555/__nova_reload', (res) => {
+  const req = httpRequest('http://127.0.0.1:5555/__deneb_reload', (res) => {
     let data = ''
     res.on('data', (d) => {
       data += d.toString()

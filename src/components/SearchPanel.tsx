@@ -120,7 +120,7 @@ export function SearchPanel() {
     void openFileByPath(path).then(() => {
       setTimeout(() => {
         window.dispatchEvent(
-          new CustomEvent('nova:reveal-line', { detail: { path, line: match.line, col: match.start + 1 } }),
+          new CustomEvent('deneb:reveal-line', { detail: { path, line: match.line, col: match.start + 1 } }),
         )
       }, 60)
     })

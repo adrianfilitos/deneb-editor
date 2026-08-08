@@ -1,5 +1,5 @@
 import { useEditorStore } from '../store/editorStore'
-import { NovaLogo } from './NovaLogo'
+import { DenebLogo } from './DenebLogo'
 import { Icons } from './icons'
 
 export function WelcomeScreen({ compact }: { compact?: boolean }) {
@@ -13,9 +13,9 @@ export function WelcomeScreen({ compact }: { compact?: boolean }) {
       <div className="welcome welcome--compact">
         <div className="welcome__center">
           <div className="welcome__logo welcome__logo--sm">
-            <NovaLogo size={30} />
+            <DenebLogo size={30} />
           </div>
-          <h1 className="welcome__title">Nova</h1>
+          <h1 className="welcome__title">Deneb</h1>
           <p className="welcome__subtitle">Editor con IA integrada</p>
           <div className="welcome__cards welcome__cards--stack">
             <button className="welcome__card" onClick={() => void openWorkspace()}>
@@ -46,9 +46,9 @@ export function WelcomeScreen({ compact }: { compact?: boolean }) {
     <div className="welcome">
       <div className="welcome__center">
         <div className="welcome__logo">
-          <NovaLogo size={46} />
+          <DenebLogo size={46} />
         </div>
-        <h1 className="welcome__title">Nova</h1>
+        <h1 className="welcome__title">Deneb</h1>
         <p className="welcome__subtitle">Editor de código con IA integrada</p>
 
         <div className="welcome__cards">

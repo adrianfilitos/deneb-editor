@@ -16,7 +16,7 @@ import { DEFAULT_AI_SETTINGS } from '../lib/ai'
 import { isBinaryName } from '../lib/fileIcons'
 import { setBackend } from '../lib/fileSystem'
 
-const SETTINGS_KEY = 'nova.settings.v1'
+const SETTINGS_KEY = 'deneb.settings.v1'
 
 export interface EditorGroup {
   id: string
@@ -115,7 +115,7 @@ function loadSettings(): EditorSettings {
           wordBasedSuggestions: true,
           parameterHints: true,
           folding: true,
-          theme: 'nova-dark' as const,
+          theme: 'deneb-dark' as const,
           ai: DEFAULT_AI_SETTINGS,
         },
         ...parsed,
@@ -151,7 +151,7 @@ function loadSettings(): EditorSettings {
     wordBasedSuggestions: true,
     parameterHints: true,
     folding: true,
-    theme: 'nova-dark',
+    theme: 'deneb-dark',
     ai: DEFAULT_AI_SETTINGS,
   }
 }
@@ -248,7 +248,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         set({ root, demoMode: demo, busy: false, sidebarVisible: true, sidebarView: 'explorer' })
         void get().expandNode(root)
         await applyWorkspaceConfig()
-        window.dispatchEvent(new CustomEvent('nova:workspace-opened'))
+        window.dispatchEvent(new CustomEvent('deneb:workspace-opened'))
         get().setStatus(demo ? 'Espacio de demostración abierto' : 'Carpeta abierta', 2500)
       } catch (e) {
         set({ busy: false })
@@ -265,7 +265,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         set({ root, demoMode: demo, busy: false, sidebarVisible: true, sidebarView: 'explorer' })
         void get().expandNode(root)
         await applyWorkspaceConfig()
-        window.dispatchEvent(new CustomEvent('nova:workspace-opened'))
+        window.dispatchEvent(new CustomEvent('deneb:workspace-opened'))
         get().setStatus('Carpeta abierta', 2500)
       } catch (e) {
         set({ busy: false })
@@ -465,7 +465,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         get().setStatus('No se pudo localizar el archivo en disco', 2500)
         return
       }
-      const editor = (window as unknown as { __novaEditor?: { getAction?: (id: string) => { run?: () => Promise<void> } | undefined } }).__novaEditor
+      const editor = (window as unknown as { __denebEditor?: { getAction?: (id: string) => { run?: () => Promise<void> } | undefined } }).__denebEditor
       if (editor && get().settings.formatOnSave) {
         try {
           const formatAction = editor.getAction?.('editor.action.formatDocument')

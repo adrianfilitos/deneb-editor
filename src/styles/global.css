@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-:root[data-theme='nova-dark'] {
+:root[data-theme='deneb-dark'] {
   --bg-base: #0f111a;
   --bg-raised: #141722;
   --bg-panel: #11141e;
@@ -30,7 +30,7 @@
   --toast-bg: #1c2130;
 }
 
-:root[data-theme='nova-light'] {
+:root[data-theme='deneb-light'] {
   --bg-base: #fafbfe;
   --bg-raised: #ffffff;
   --bg-panel: #f4f6fb;
@@ -60,7 +60,7 @@
   --toast-bg: #ffffff;
 }
 
-:root[data-theme='nova-midnight'] {
+:root[data-theme='deneb-midnight'] {
   --bg-base: #0a0e1c;
   --bg-raised: #0e1424;
   --bg-panel: #0b1120;
@@ -90,7 +90,7 @@
   --toast-bg: #101a30;
 }
 
-:root[data-theme='nova-ocean'] {
+:root[data-theme='deneb-ocean'] {
   --bg-base: #07151d;
   --bg-raised: #0a1c27;
   --bg-panel: #081820;
@@ -120,7 +120,7 @@
   --toast-bg: #0a1c27;
 }
 
-:root[data-theme='nova-forest'] {
+:root[data-theme='deneb-forest'] {
   --bg-base: #0d1510;
   --bg-raised: #111c15;
   --bg-panel: #0e1812;
@@ -150,7 +150,7 @@
   --toast-bg: #111c15;
 }
 
-:root[data-theme='nova-sunset'] {
+:root[data-theme='deneb-sunset'] {
   --bg-base: #170f0a;
   --bg-raised: #1d140d;
   --bg-panel: #19110b;
@@ -180,7 +180,7 @@
   --toast-bg: #1d140d;
 }
 
-:root[data-theme='nova-sakura'] {
+:root[data-theme='deneb-sakura'] {
   --bg-base: #180f16;
   --bg-raised: #20151f;
   --bg-panel: #1a1119;
@@ -210,7 +210,7 @@
   --toast-bg: #20151f;
 }
 
-:root[data-theme='nova-mono'] {
+:root[data-theme='deneb-mono'] {
   --bg-base: #101010;
   --bg-raised: #161616;
   --bg-panel: #121212;
@@ -240,7 +240,7 @@
   --toast-bg: #1c1c1c;
 }
 
-:root[data-theme='nova-paper'] {
+:root[data-theme='deneb-paper'] {
   --bg-base: #f6f1e7;
   --bg-raised: #fdfaf3;
   --bg-panel: #f2ecdf;

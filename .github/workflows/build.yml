@@ -1,4 +1,4 @@
-name: Build Nova (Windows / macOS / Linux)
+name: Build Deneb (Windows / macOS / Linux)
 
 on:
   workflow_dispatch:
@@ -14,13 +14,13 @@ jobs:
         include:
           - os: windows-latest
             target: --win
-            artifact: Nova-*.exe
+            artifact: Deneb-*.exe
           - os: macos-latest
             target: --mac
-            artifact: Nova-*.dmg
+            artifact: Deneb-*.dmg
           - os: ubuntu-latest
             target: --linux
-            artifact: Nova-*.AppImage
+            artifact: Deneb-*.AppImage
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -52,7 +52,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: nova-${{ matrix.os }}
+          name: deneb-${{ matrix.os }}
           path: |
             release/${{ matrix.artifact }}
             release/latest*.yml

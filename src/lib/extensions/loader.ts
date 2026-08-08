@@ -137,14 +137,14 @@ export class CommonJsLoader {
         // Así los guards del tipo `if (mod)` de las extensiones funcionan.
         if (!spec.startsWith('.')) return undefined
         throw new Error(
-          `Nova: no se pudo resolver "${spec}" (desde ${resolved}). El módulo no está empaquetado en la extensión.`,
+          `Deneb: no se pudo resolver "${spec}" (desde ${resolved}). El módulo no está empaquetado en la extensión.`,
         )
       }
       return this.load(r).exports
     }
 
     const code = this.str(resolved)
-    if (code == null) throw new Error(`Nova: no existe ${resolved}`)
+    if (code == null) throw new Error(`Deneb: no existe ${resolved}`)
     if (resolved.endsWith('.json')) {
       moduleObj.exports = JSON.parse(code)
       this.cache.set(resolved, moduleObj)
@@ -182,7 +182,7 @@ export class CommonJsLoader {
   /** Carga la entrada principal de la extensión y devuelve su exports. */
   loadMain(mainPath: string): any {
     const resolved = this.resolvePath(mainPath)
-    if (!resolved) throw new Error(`Nova: no se encontró el main "${mainPath}"`)
+    if (!resolved) throw new Error(`Deneb: no se encontró el main "${mainPath}"`)
     return this.load(resolved).exports
   }
 }
