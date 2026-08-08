@@ -526,7 +526,7 @@ const processPolyfill: Record<string, unknown> = {
   env: {} as Record<string, string>,
   platform: 'win32',
   version: 'v18.0.0',
-  versions: { node: '18.0.0' },
+  versions: { node: '18.0.0', electron: '33.0.0', v8: '12.4.254', native: '0.0.0' },
   nextTick: (cb: (...a: any[]) => void, ...args: any[]) => queueMicrotask(() => cb(...args)),
   cwd: () => '/',
   chdir: () => {},
