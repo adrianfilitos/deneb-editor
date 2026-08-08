@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useEditorStore } from './store/editorStore'
+import { useExtensionStore } from './store/extensionStore'
 import { ActivityBar } from './components/ActivityBar'
 import { Sidebar } from './components/Sidebar'
 import { Breadcrumbs } from './components/Breadcrumbs'
@@ -33,6 +34,21 @@ export default function App() {
   // Session restore + persist
   useEffect(() => {
     void restoreSession()
+  }, [])
+
+  // Aplicar extensiones habilitadas al arrancar
+  useEffect(() => {
+    useExtensionStore.getState().init()
+  }, [])
+
+  // Mensajes de estado emitidos por extensiones (comando "nova:status")
+  useEffect(() => {
+    const onStatus = (e: Event) => {
+      const msg = (e as CustomEvent).detail as string | undefined
+      if (msg) useEditorStore.getState().setStatus(msg, 2500)
+    }
+    window.addEventListener('nova:status', onStatus)
+    return () => window.removeEventListener('nova:status', onStatus)
   }, [])
 
   useEffect(() => {

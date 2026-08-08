@@ -94,6 +94,7 @@ export interface NovaDesktopGit {
 
 export interface NovaDesktopExt {
   install: (url: string, filename: string) => Promise<{ ok: boolean; path?: string; size?: number; error?: string }>
+  save: (filename: string, data: Uint8Array) => Promise<{ ok: boolean; path?: string; size?: number; error?: string }>
   installed: () => Promise<{ file: string; size: number }[]>
   dir: () => Promise<string>
 }

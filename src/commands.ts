@@ -1,5 +1,6 @@
 import { useEditorStore } from './store/editorStore'
 import { useAIChatStore } from './store/aiChatStore'
+import { getDynamicCommands } from './lib/commandRegistry'
 
 export interface CommandDef {
   id: string
@@ -255,6 +256,7 @@ export function commands(): CommandDef[] {
       icon: 'spark',
       run: () => window.dispatchEvent(new CustomEvent('nova:ai-apply-last')),
     },
+    ...getDynamicCommands(),
   ]
 }
 

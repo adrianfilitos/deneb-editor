@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import { useAIChatStore } from '../store/aiChatStore'
+import { getDynamicShortcuts } from '../lib/shortcutRegistry'
 
 function isModKey(e: KeyboardEvent): boolean {
   return (e.ctrlKey || e.metaKey) && !e.altKey
@@ -137,6 +138,16 @@ export function useGlobalShortcuts() {
         e.preventDefault()
         store.splitGroup()
         return
+      }
+      // Atajos aportados por extensiones
+      if (isModKey(e)) {
+        for (const sc of getDynamicShortcuts()) {
+          if (e.shiftKey === !!sc.shift && key === sc.key) {
+            e.preventDefault()
+            sc.run()
+            return
+          }
+        }
       }
     }
 

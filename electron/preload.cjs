@@ -38,6 +38,7 @@ contextBridge.exposeInMainWorld('novaDesktop', {
   },
   ext: {
     install: (url, filename) => ipcRenderer.invoke('nova:ext:install', url, filename),
+    save: (filename, data) => ipcRenderer.invoke('nova:ext:save', filename, data),
     installed: () => ipcRenderer.invoke('nova:ext:installed'),
     dir: () => ipcRenderer.invoke('nova:ext:dir'),
   },

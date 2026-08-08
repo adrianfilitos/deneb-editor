@@ -391,6 +391,20 @@ function registerExtHandlers() {
     }
   })
 
+  ipcMain.handle('nova:ext:save', async (_e, filename, data) => {
+    try {
+      const dir = extDir()
+      fs.mkdirSync(dir, { recursive: true })
+      const safe = String(filename).replace(/[^a-zA-Z0-9._-]/g, '_')
+      const target = path.join(dir, safe)
+      const buf = Buffer.from(data)
+      fs.writeFileSync(target, buf)
+      return { ok: true, path: target, size: buf.length }
+    } catch (e) {
+      return { ok: false, error: e && e.message ? e.message : String(e) }
+    }
+  })
+
   ipcMain.handle('nova:ext:installed', async () => {
     try {
       const dir = extDir()
