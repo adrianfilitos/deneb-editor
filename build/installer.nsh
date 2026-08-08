@@ -1,9 +1,9 @@
-; Nova — instalador: añade comandos CLI (nova, nova-ai) y el directorio al PATH del usuario.
+; Deneb — instalador: añade comandos CLI (deneb, deneb-ai) y el directorio al PATH del usuario.
 
 !macro customInstall
   SetOutPath "$INSTDIR"
-  File /oname=nova.cmd "${BUILD_RESOURCES_DIR}\cli\nova.cmd"
-  File /oname=nova-ai.cmd "${BUILD_RESOURCES_DIR}\cli\nova-ai.cmd"
+  File /oname=deneb.cmd "${BUILD_RESOURCES_DIR}\cli\deneb.cmd"
+  File /oname=deneb-ai.cmd "${BUILD_RESOURCES_DIR}\cli\deneb-ai.cmd"
 
   ; Añade $INSTDIR al PATH del usuario si no está ya presente
   ReadRegStr $R0 HKCU "Environment" "Path"

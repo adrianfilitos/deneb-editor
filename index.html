@@ -5,7 +5,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark light" />
-    <title>Nova — Editor de Código con IA</title>
+    <title>Deneb — Editor de Código con IA</title>
     <script>
       ;(function () {
         try {
@@ -15,12 +15,12 @@
               var keys = []
               for (var i = 0; i < localStorage.length; i++) {
                 var k = localStorage.key(i)
-                if (k && k.indexOf('nova.') === 0) keys.push(k)
+                if (k && k.indexOf('deneb.') === 0) keys.push(k)
               }
               for (var j = 0; j < keys.length; j++) localStorage.removeItem(keys[j])
             } catch (e) {}
             try {
-              indexedDB.deleteDatabase('nova-db')
+              indexedDB.deleteDatabase('deneb-db')
             } catch (e) {}
             var url = new URL(window.location.href)
             url.searchParams.delete('reset')
