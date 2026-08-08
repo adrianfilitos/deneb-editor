@@ -10,13 +10,14 @@ Editor de código moderno con IA integrada, hecho con **Electron, React, Monaco 
 
 **Editor**
 - Editor **Monaco**: sintaxis, minimapa, multi-cursor, plegado, breadcrumbs, esquema de símbolos y atajos tipo VS Code.
-- **IntelliSense entre archivos**: `go to definition`, *references* y *rename* en todo el workspace (JS/TS y más).
+- **LSP real**: servidor Language Server Protocol (JSON-RPC) que ejecuta el **Language Service de TypeScript** en un Worker (el mismo motor que `tsserver`/VS Code): completado con resolución, hover, ir a definición, referencias, rename, firma, símbolos, folding, formato y resaltado — **entre archivos** del workspace.
 - **Emmet** integrado (HTML/CSS/JSX) y **snippets de usuario** (`.nova/snippets.json`).
 - **Formato de documento** (`Shift+Alt+F`) y *format on save*.
 - **Configuración por archivos**: `settings.json` y `keybindings.json` en `.nova/` con prioridad sobre la UI.
 
 **Depuración**
-- **Depurador JS/TS integrado**: breakpoints en el margen del editor (F9), paso a paso (F10), continuar (F5), variables y pila de llamadas. Ejecuta en un Worker aislado.
+- **Debugger real (DAP + CDP)**: en el escritorio lanza `node --inspect-brk` y lo controla por **Chrome DevTools Protocol** vía WebSocket, implementando el **Debug Adapter Protocol** como VS Code (`js-debug`). Breakpoints verificados, stack de llamadas, variables del scope, paso a paso (F10) y consola real.
+- En la web, un fallback por Worker permite breakpoints y variables para archivos JS/TS simples.
 
 **Extensiones**
 - **Extension Host de VS Code**: ejecuta el código JavaScript real de las extensiones (comandos, autocompletado, hover, webviews, tree views, menús contextuales).
@@ -109,9 +110,12 @@ npm run electron:build:linux   # AppImage/deb Linux (en Linux)
 ### Tests
 
 ```bash
-npm run test:ext              # motor de extensiones + when + paths
-npm run test:ext:debugger     # instrumentación del depurador
-npm run test:ext:electron-ls  # servidor Live Server real (Electron)
+npm run test:ext               # motor de extensiones + when + paths
+npm run test:ext:lsp           # LSP real (núcleo TypeScript)
+npm run test:ext:debugger      # instrumentación del fallback web
+npm run test:ext:debugger-cdp  # depurador CDP real sobre node --inspect
+npm run test:ext:debugger-dap  # adaptador DAP real
+npm run test:ext:electron-ls   # servidor Live Server real (Electron)
 ```
 
 El CI (GitHub Actions) empaqueta las 3 plataformas en cada tag `v*`.

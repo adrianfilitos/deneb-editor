@@ -2,6 +2,7 @@ import * as monaco from 'monaco-editor'
 import { useEditorStore } from '../store/editorStore'
 import { useExtUiStore } from '../store/extUiStore'
 import { instrumentCode, createWorkerSource } from './debuggerInstrumentation'
+import { desktopDebug, type NovaDesktopDebug } from './electronBridge'
 
 // Estado del depurador
 interface Breakpoint {
@@ -14,6 +15,7 @@ interface Frame {
   line: number
   name: string
   file: string
+  source?: { path?: string }
 }
 
 export interface DebuggerState {
@@ -47,6 +49,7 @@ let worker: Worker | null = null
 let resolveStep: (() => void) | null = null
 let runId = 0
 let bpLineMap = new Map<number, number>() // línea instrumentada → línea original
+let desktopSubscribed = false
 
 export function getDebuggerState(): DebuggerState {
   return state
@@ -74,12 +77,27 @@ export function toggleBreakpoint(path: string, line: number): void {
   else state.breakpoints.push({ path, line, enabled: true })
   emit()
   updateBreakpointDecorations()
+  syncBreakpointsDesktop()
 }
 
 export function clearBreakpoints(): void {
   state.breakpoints = []
   emit()
   updateBreakpointDecorations()
+  syncBreakpointsDesktop()
+}
+
+// En escritorio, sincroniza los breakpoints con el adaptador DAP
+function syncBreakpointsDesktop() {
+  const debugApi = desktopDebug()
+  const store = useEditorStore.getState()
+  const root = store.root?.handle as { absPath?: string } | undefined
+  if (!debugApi || !root?.absPath || !state.running) return
+  const activePath = (window as unknown as { __novaFocusPath?: string }).__novaFocusPath
+  if (!activePath) return
+  const fileAbs = joinAbs(root.absPath, activePath)
+  const bps = breakpointsFor(activePath)
+  void debugApi.setBreakpoints(bps, fileAbs).catch(() => {})
 }
 
 export function breakpointsFor(path: string): number[] {
@@ -144,6 +162,88 @@ export async function startDebug(): Promise<void> {
     return
   }
 
+  // En escritorio usamos el adaptador DAP/CDP REAL (node --inspect)
+  const debugApi = desktopDebug()
+  const absPath = (root as { absPath?: string } | undefined)?.absPath
+  if (debugApi && absPath) {
+    await startDebugDesktop(debugApi, tab.path, absPath)
+    return
+  }
+
+  await startDebugWeb(code, tab)
+}
+
+async function startDebugDesktop(api: NovaDesktopDebug, tabPath: string, absRoot: string) {
+  runId++
+  const myRun = runId
+  const fileAbs = joinAbs(absRoot, tabPath)
+  state = {
+    ...state,
+    running: true,
+    paused: false,
+    stopped: false,
+    currentLine: null,
+    currentFile: tabPath,
+    frames: [],
+    variables: [],
+    error: null,
+  }
+  emit()
+  openDebugView()
+
+  // Suscribirse a eventos del adaptador (solo una vez)
+  if (!desktopSubscribed) {
+    desktopSubscribed = true
+    api.onEvent((ev) => {
+      if (myRun !== runId) return
+      if (ev.type === 'stopped') {
+        const data = ev.data as { frames?: typeof state.frames; reason?: string }
+        state.paused = true
+        state.frames = data.frames || []
+        state.currentLine = state.frames[0]?.line ?? null
+        state.currentFile = state.frames[0]?.source?.path ? state.frames[0].source.path.replace(/^.*[\\/]/, '') : tabPath
+        emit()
+        updateBreakpointDecorations()
+      } else if (ev.type === 'exited') {
+        state.running = false
+        state.stopped = true
+        state.paused = false
+        emit()
+        updateBreakpointDecorations()
+      } else if (ev.type === 'continued') {
+        state.paused = false
+        state.currentLine = null
+        emit()
+      }
+    })
+    api.onConsole((data) => {
+      if (myRun !== runId) return
+      useExtUiStore.getState().appendOutput('debug', `[${data.channel === 'stderr' || data.channel === 'error' ? 'stderr' : 'debug'}] ${data.text}\n`, true)
+    })
+  }
+
+  // Configurar breakpoints del archivo activo
+  const bps = breakpointsFor(tabPath)
+  if (bps.length) {
+    const res = await api.setBreakpoints(bps, fileAbs)
+    const failed = res.filter((r) => !r.verified)
+    if (failed.length && failed.length === bps.length) {
+      state.error = `No se pudieron verificar los breakpoints (¿el archivo existe en disco?)`
+      emit()
+    }
+  }
+
+  // Lanzar
+  const res = await api.start({ program: fileAbs })
+  if (!res.ok) {
+    state.error = res.error || 'Error al iniciar la depuración'
+    state.running = false
+    state.stopped = true
+    emit()
+  }
+}
+
+async function startDebugWeb(code: string, tab: { path: string; language: string }) {
   runId++
   const myRun = runId
   state = {
@@ -190,6 +290,10 @@ export async function startDebug(): Promise<void> {
   }
 }
 
+function joinAbs(root: string, rel: string): string {
+  return root.replace(/[\\/]+$/, '') + '/' + rel.replace(/\\/g, '/')
+}
+
 export function stopDebug(): void {
   runId++
   if (worker) {
@@ -199,6 +303,10 @@ export function stopDebug(): void {
   if (resolveStep) {
     resolveStep()
     resolveStep = null
+  }
+  const debugApi = desktopDebug()
+  if (debugApi) {
+    void debugApi.disconnect().catch(() => {})
   }
   state = {
     ...state,
@@ -215,7 +323,15 @@ export function stopDebug(): void {
 }
 
 export function continueDebug(): void {
-  if (!state.paused || !resolveStep) return
+  if (!state.paused) return
+  const debugApi = desktopDebug()
+  if (debugApi) {
+    state.paused = false
+    emit()
+    void debugApi.continue().catch(() => {})
+    return
+  }
+  if (!resolveStep) return
   state.paused = false
   emit()
   resolveStep()
@@ -224,6 +340,13 @@ export function continueDebug(): void {
 
 export function stepOver(): void {
   if (!state.paused) return
+  const debugApi = desktopDebug()
+  if (debugApi) {
+    state.paused = false
+    emit()
+    void debugApi.next().catch(() => {})
+    return
+  }
   const workerMsg = worker
   if (!workerMsg) return
   // El worker ya está pausado en un breakpoint; un "step" se hace enviando un

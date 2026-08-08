@@ -24,6 +24,7 @@ await build({
     'monaco-editor': join(here, 'ext-test', 'stubs/monaco.ts'),
     zustand: join(here, 'ext-test', 'stubs/zustand.ts'),
   },
+  external: ['typescript', 'ws'],
   logLevel: 'warning',
 })
 

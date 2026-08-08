@@ -5,6 +5,7 @@ const os = require('os')
 const { spawn } = require('child_process')
 const { autoUpdater } = require('electron-updater')
 const liveServer = require('./liveServer.cjs')
+const { CDPDebugAdapter } = require('./debugAdapter.cjs')
 
 const isDev = process.env.NOVA_DEV === '1'
 const DEV_URL = 'http://127.0.0.1:5173'
@@ -445,6 +446,32 @@ function registerLiveServerHandlers() {
   ipcMain.handle('nova:liveserver:status', () => liveServer.status())
 }
 
+function registerDebugHandlers() {
+  const adapter = new CDPDebugAdapter()
+  adapter.onEvent = (type, data) => sendToWindow('nova:debug:event', { type, data })
+  adapter.onConsole = (channel, text) => sendToWindow('nova:debug:console', { channel, text })
+
+  ipcMain.handle('nova:debug:start', async (_e, cfg) => {
+    try {
+      await adapter.start(cfg)
+      return { ok: true }
+    } catch (e) {
+      return { ok: false, error: e.message }
+    }
+  })
+  ipcMain.handle('nova:debug:setBreakpoints', (_e, lines, filePath) =>
+    adapter.setBreakpoints(lines || [], filePath || ''),
+  )
+  ipcMain.handle('nova:debug:continue', () => adapter.continue_())
+  ipcMain.handle('nova:debug:next', () => adapter.next())
+  ipcMain.handle('nova:debug:stepIn', () => adapter.stepIn())
+  ipcMain.handle('nova:debug:stepOut', () => adapter.stepOut())
+  ipcMain.handle('nova:debug:pause', () => adapter.pause())
+  ipcMain.handle('nova:debug:stackTrace', (_e, threadId) => adapter.stackTrace(threadId))
+  ipcMain.handle('nova:debug:evaluate', (_e, expression, frameId) => adapter.evaluate(expression, frameId))
+  ipcMain.handle('nova:debug:disconnect', () => adapter.disconnect())
+}
+
 function registerFsHandlers() {
   ipcMain.handle('nova:fs:open-workspace', async () => {
     const res = await dialog.showOpenDialog(mainWindow, {
@@ -762,6 +789,7 @@ app.whenReady().then(() => {
   registerWindowHandlers()
   registerMenuHandlers()
   registerLiveServerHandlers()
+  registerDebugHandlers()
   createWindow()
   setupAutoUpdater()
   app.on('activate', () => {

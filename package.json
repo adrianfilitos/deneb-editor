@@ -19,6 +19,9 @@
     "test:ext:csharp": "node scripts/run-ext-test.mjs csharp.ts",
     "test:ext:debugger": "node scripts/run-ext-test.mjs debugger.ts",
     "test:ext:debugger-e2e": "node scripts/run-ext-test.mjs debugger-e2e.ts",
+    "test:ext:debugger-cdp": "node scripts/run-ext-test.mjs debugger-cdp.ts",
+    "test:ext:debugger-dap": "node scripts/run-ext-test.mjs debugger-dap.ts",
+    "test:ext:lsp": "node scripts/run-ext-test.mjs lsp.ts",
     "test:ext:electron-ls": "node scripts/ext-test/electron-liveserver.mjs",
     "electron:dev": "concurrently -k \"npm:dev\" \"cross-env NOVA_DEV=1 electron .\"",
     "electron:build": "npm run build && electron-builder",
@@ -30,12 +33,18 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
+    "@types/ws": "^8.18.1",
     "electron-updater": "^6.8.9",
     "emmet-monaco-es": "^5.7.0",
     "fflate": "^0.8.3",
     "monaco-editor": "^0.52.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "vscode-jsonrpc": "^9.0.1",
+    "vscode-languageserver": "^10.1.0",
+    "vscode-languageserver-protocol": "^3.18.2",
+    "vscode-languageserver-textdocument": "^1.0.12",
+    "ws": "^8.21.3",
     "zustand": "^4.5.5"
   },
   "devDependencies": {
@@ -46,7 +55,7 @@
     "cross-env": "^7.0.3",
     "electron": "^33.2.0",
     "electron-builder": "^25.1.8",
-    "typescript": "^5.6.3",
+    "typescript": "^5.9.3",
     "vite": "^5.4.11"
   },
   "build": {

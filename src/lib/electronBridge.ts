@@ -129,12 +129,43 @@ export interface NovaDesktopUpdates {
   onStatus: (cb: (data: UpdateStatusPayload) => void) => () => void
 }
 
+export interface NovaDesktopDebugConfig {
+  program: string
+  args?: string[]
+  env?: Record<string, string>
+}
+
+export interface NovaDesktopDebugEvent {
+  type: string
+  data: {
+    reason?: string
+    threadId?: number
+    frames?: { id: number; name: string; line: number; column: number; source?: { path?: string }; callFrameId?: string }[]
+  }
+}
+
+export interface NovaDesktopDebug {
+  start: (cfg: NovaDesktopDebugConfig) => Promise<{ ok: boolean; error?: string }>
+  setBreakpoints: (lines: number[], filePath: string) => Promise<{ verified: boolean; line: number; id?: string }[]>
+  continue: () => Promise<unknown>
+  next: () => Promise<unknown>
+  stepIn: () => Promise<unknown>
+  stepOut: () => Promise<unknown>
+  pause: () => Promise<unknown>
+  stackTrace: (threadId: number) => Promise<{ stackFrames: { id: number; name: string; line: number; column: number; source?: { name?: string; path?: string } }[] }>
+  evaluate: (expression: string, frameId?: number) => Promise<{ result: string; variablesReference: number }>
+  disconnect: () => Promise<boolean>
+  onEvent: (cb: (ev: NovaDesktopDebugEvent) => void) => () => void
+  onConsole: (cb: (data: { channel: string; text: string }) => void) => () => void
+}
+
 export interface NovaDesktopBridge {
   isDesktop: boolean
   platform?: string
   on: (channel: string, cb: (data?: unknown) => void) => () => void
   fs: NovaDesktopFs
   term: NovaDesktopTerm
+  debug?: NovaDesktopDebug
   windowControls: NovaDesktopWindow
   menu: NovaDesktopMenu
   git?: NovaDesktopGit
@@ -163,6 +194,10 @@ export function desktopFs(): NovaDesktopFs | null {
 
 export function desktopLiveServer(): NovaDesktopLiveServer | null {
   return window.novaDesktop?.liveServer ?? null
+}
+
+export function desktopDebug(): NovaDesktopDebug | null {
+  return window.novaDesktop?.debug ?? null
 }
 
 export function setupElectronBridge() {

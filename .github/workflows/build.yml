@@ -39,6 +39,9 @@ jobs:
           node scripts/run-ext-test.mjs
           node scripts/run-ext-test.mjs debugger.ts
           node scripts/run-ext-test.mjs debugger-e2e.ts
+          node scripts/run-ext-test.mjs debugger-cdp.ts
+          node scripts/run-ext-test.mjs debugger-dap.ts
+          node scripts/run-ext-test.mjs lsp.ts
 
       - name: Build app
         run: npm run build

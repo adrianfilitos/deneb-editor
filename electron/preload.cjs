@@ -78,6 +78,28 @@ contextBridge.exposeInMainWorld('novaDesktop', {
       return () => ipcRenderer.removeListener('nova:term:exit', handler)
     },
   },
+  debug: {
+    start: (cfg) => ipcRenderer.invoke('nova:debug:start', cfg),
+    setBreakpoints: (lines, filePath) => ipcRenderer.invoke('nova:debug:setBreakpoints', lines, filePath),
+    continue: () => ipcRenderer.invoke('nova:debug:continue'),
+    next: () => ipcRenderer.invoke('nova:debug:next'),
+    stepIn: () => ipcRenderer.invoke('nova:debug:stepIn'),
+    stepOut: () => ipcRenderer.invoke('nova:debug:stepOut'),
+    pause: () => ipcRenderer.invoke('nova:debug:pause'),
+    stackTrace: (threadId) => ipcRenderer.invoke('nova:debug:stackTrace', threadId),
+    evaluate: (expression, frameId) => ipcRenderer.invoke('nova:debug:evaluate', expression, frameId),
+    disconnect: () => ipcRenderer.invoke('nova:debug:disconnect'),
+    onEvent: (cb) => {
+      const handler = (_e, data) => cb(data)
+      ipcRenderer.on('nova:debug:event', handler)
+      return () => ipcRenderer.removeListener('nova:debug:event', handler)
+    },
+    onConsole: (cb) => {
+      const handler = (_e, data) => cb(data)
+      ipcRenderer.on('nova:debug:console', handler)
+      return () => ipcRenderer.removeListener('nova:debug:console', handler)
+    },
+  },
   windowControls: {
     minimize: () => ipcRenderer.send('nova:window:minimize'),
     toggleMaximize: () => ipcRenderer.send('nova:window:toggle-maximize'),

@@ -25,11 +25,13 @@ import { useExtensionStore } from './store/extensionStore'
 import { setupLiveServerCommands } from './lib/extensions/liveServer'
 import { initEditorEnhancements } from './lib/editorEnhancements'
 import { setupIndexHooks } from './lib/workspaceLanguage'
+import { setupLspLifecycle } from './lib/lsp/lspClient'
 
 setupElectronBridge()
 setupLiveServerCommands()
 initEditorEnhancements()
 setupIndexHooks()
+setupLspLifecycle()
 void useExtensionStore.getState().init()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
