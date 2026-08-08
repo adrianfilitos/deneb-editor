@@ -4,8 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#0b0d14" />
 <title>Nova — Editor de código con IA integrada</title>
-<meta name="description" content="Nova es un editor de código moderno con IA integrada: edita con Monaco, usa el asistente con herramientas reales, terminal PowerShell y más." />
+<meta name="description" content="Nova es un editor de código moderno con IA integrada: edita con Monaco, usa el asistente con herramientas reales, terminal PowerShell, Git, extensiones y más." />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -34,9 +35,10 @@
     overflow-x: hidden;
   }
   a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
   .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
 
-  /* glow background */
+  /* ---------- glow + orbs ---------- */
   .bg-glow {
     position: fixed; inset: 0; z-index: -1; pointer-events: none;
     background:
@@ -44,8 +46,20 @@
       radial-gradient(700px 500px at 88% 8%, rgba(199,146,234,.14), transparent 60%),
       radial-gradient(800px 600px at 50% 110%, rgba(94,234,212,.10), transparent 60%);
   }
+  .orb {
+    position: fixed; border-radius: 50%; filter: blur(60px); opacity: .35; z-index: -1;
+    pointer-events: none; animation: drift 22s ease-in-out infinite;
+  }
+  .orb-1 { width: 340px; height: 340px; left: -80px; top: 12%; background: rgba(130,170,255,.5); }
+  .orb-2 { width: 300px; height: 300px; right: -90px; top: 42%; background: rgba(199,146,234,.45); animation-delay: -8s; }
+  .orb-3 { width: 260px; height: 260px; left: 38%; bottom: -80px; background: rgba(94,234,212,.4); animation-delay: -15s; }
+  @keyframes drift {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(30px,-24px) scale(1.08); }
+    66% { transform: translate(-22px,18px) scale(.94); }
+  }
 
-  /* nav */
+  /* ---------- nav ---------- */
   nav {
     position: sticky; top: 0; z-index: 50;
     backdrop-filter: blur(12px);
@@ -54,46 +68,91 @@
   }
   nav .container { display: flex; align-items: center; justify-content: space-between; height: 62px; }
   .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17px; letter-spacing: .3px; }
+  .brand svg { transition: transform .4s cubic-bezier(.34,1.56,.64,1); }
+  .brand:hover svg { transform: rotate(-8deg) scale(1.08); }
   .nav-links { display: flex; align-items: center; gap: 26px; }
-  .nav-links a { color: var(--muted); font-size: 14px; font-weight: 500; }
-  .nav-links a:hover { color: var(--fg); }
+  .nav-links a:not(.btn) { color: var(--muted); font-size: 14px; font-weight: 500; position: relative; transition: color .2s; }
+  .nav-links a:not(.btn)::after {
+    content: ''; position: absolute; left: 0; right: 100%; bottom: -5px; height: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--purple)); border-radius: 2px;
+    transition: right .25s ease;
+  }
+  .nav-links a:not(.btn):hover { color: var(--fg); }
+  .nav-links a:not(.btn):hover::after { right: 0; }
+
+  /* ---------- buttons ---------- */
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     padding: 10px 18px; border-radius: 10px; font-weight: 600; font-size: 14px;
-    border: 1px solid transparent; cursor: pointer; transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+    border: 1px solid transparent; cursor: pointer; position: relative; overflow: hidden;
+    transition: transform .15s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
   }
-  .btn:hover { transform: translateY(-1px); }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(0) scale(.97); }
   .btn-primary {
     background: linear-gradient(135deg, var(--blue), var(--purple));
     color: #0b0d14; box-shadow: 0 8px 24px rgba(130,170,255,.25);
   }
+  .btn-primary:hover { box-shadow: 0 12px 34px rgba(130,170,255,.4); }
   .btn-ghost { border-color: var(--border); color: var(--fg); background: transparent; }
-  .btn-ghost:hover { background: var(--bg2); }
+  .btn-ghost:hover { background: var(--bg2); border-color: #33405c; }
   .btn-teal {
     background: linear-gradient(135deg, var(--teal), var(--blue));
     color: #0b0d14; box-shadow: 0 8px 24px rgba(94,234,212,.22);
   }
+  .btn-teal:hover { box-shadow: 0 12px 34px rgba(94,234,212,.38); }
+  .btn::after {  /* shine sweep */
+    content: ''; position: absolute; top: 0; left: -70%; width: 40%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,.5), transparent);
+    transform: skewX(-20deg); transition: left .5s ease;
+  }
+  .btn:hover::after { left: 130%; }
 
-  /* hero */
-  .hero { padding: 90px 0 70px; text-align: center; }
-  .hero .logo { width: 92px; height: 92px; margin: 0 auto 26px; border-radius: 24px; box-shadow: 0 18px 50px rgba(130,170,255,.35); }
+  /* ---------- hero ---------- */
+  .hero { padding: 96px 0 60px; text-align: center; position: relative; }
+  .hero .logo-wrap { position: relative; width: 96px; height: 96px; margin: 0 auto 26px; }
+  .hero .logo { width: 96px; height: 96px; border-radius: 24px; position: relative; z-index: 2;
+    box-shadow: 0 18px 50px rgba(130,170,255,.35); animation: pop 1s cubic-bezier(.34,1.56,.64,1) both; }
+  .hero .logo-ring {
+    position: absolute; inset: -14px; border-radius: 34px; z-index: 1;
+    background: conic-gradient(from 0deg, var(--blue), var(--purple), var(--teal), var(--blue));
+    filter: blur(18px); opacity: .55; animation: spin-slow 8s linear infinite;
+  }
+  @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes spin-slow { to { transform: rotate(360deg); } }
   .badge {
     display: inline-flex; align-items: center; gap: 7px;
-    padding: 5px 13px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
+    padding: 6px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
     color: var(--teal); border: 1px solid rgba(94,234,212,.28); background: rgba(94,234,212,.08);
-    margin-bottom: 22px;
+    margin-bottom: 22px; animation: fadeUp .7s ease both .1s;
   }
-  .hero h1 { font-size: clamp(40px, 6vw, 62px); font-weight: 800; letter-spacing: -1.5px; line-height: 1.08; }
+  .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); animation: pulse 2s ease infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(94,234,212,.5);} 50% { opacity: .6; box-shadow: 0 0 0 7px rgba(94,234,212,0);} }
+  .hero h1 { font-size: clamp(40px, 6vw, 64px); font-weight: 800; letter-spacing: -1.5px; line-height: 1.07; animation: fadeUp .7s ease both .2s; }
   .hero h1 .grad {
-    background: linear-gradient(120deg, var(--blue), var(--purple), var(--teal));
+    background: linear-gradient(120deg, var(--blue), var(--purple), var(--teal), var(--blue));
+    background-size: 300% 300%;
     -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: gradShift 6s ease infinite;
   }
-  .hero p.sub { max-width: 620px; margin: 22px auto 34px; color: var(--muted); font-size: 18px; }
-  .hero .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-  .hero .hint { margin-top: 18px; color: var(--faint); font-size: 13px; }
+  @keyframes gradShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  .hero p.sub { max-width: 640px; margin: 22px auto 34px; color: var(--muted); font-size: 18px; animation: fadeUp .7s ease both .3s; }
+  .hero .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; animation: fadeUp .7s ease both .4s; }
+  .hero .hint { margin-top: 18px; color: var(--faint); font-size: 13px; animation: fadeUp .7s ease both .5s; }
 
-  /* sections */
-  section { padding: 70px 0; }
+  /* stats strip */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 56px; }
+  .stat {
+    background: rgba(20,24,40,.5); border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px 10px; text-align: center;
+  }
+  .stat b { display: block; font-size: 28px; font-weight: 800; font-family: 'JetBrains Mono', monospace;
+    background: linear-gradient(120deg, var(--blue), var(--teal)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .stat span { color: var(--muted); font-size: 12.5px; }
+  .stat code { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--fg); }
+
+  /* ---------- sections ---------- */
+  section { padding: 72px 0; }
   .sec-head { text-align: center; max-width: 640px; margin: 0 auto 48px; }
   .sec-head h2 { font-size: clamp(28px, 4vw, 38px); font-weight: 800; letter-spacing: -.8px; }
   .sec-head p { color: var(--muted); margin-top: 12px; font-size: 16px; }
@@ -102,23 +161,70 @@
     text-transform: uppercase; color: var(--blue); margin-bottom: 12px;
   }
 
-  /* features */
+  /* reveal on scroll */
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity .6s ease, transform .6s cubic-bezier(.22,1,.36,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  .reveal[data-delay="1"] { transition-delay: .08s; }
+  .reveal[data-delay="2"] { transition-delay: .16s; }
+  .reveal[data-delay="3"] { transition-delay: .24s; }
+
+  /* ---------- features ---------- */
   .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   .card {
     background: linear-gradient(180deg, rgba(20,24,40,.7), rgba(16,19,29,.7));
-    border: 1px solid var(--border); border-radius: 16px; padding: 26px;
-    transition: transform .15s ease, border-color .15s ease;
+    border: 1px solid var(--border); border-radius: 16px; padding: 26px; position: relative;
+    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
   }
-  .card:hover { transform: translateY(-3px); border-color: #33405c; }
+  .card::before {
+    content: ''; position: absolute; inset: 0; border-radius: 16px; padding: 1px;
+    background: linear-gradient(135deg, rgba(130,170,255,.6), rgba(199,146,234,.5), transparent 60%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    opacity: 0; transition: opacity .25s ease;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(0,0,0,.4); }
+  .card:hover::before { opacity: 1; }
   .card .ic {
     width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; margin-bottom: 16px;
-    background: rgba(130,170,255,.12); color: var(--blue);
+    background: rgba(130,170,255,.12); color: var(--blue); transition: transform .3s cubic-bezier(.34,1.56,.64,1), background .3s, color .3s;
   }
+  .card:hover .ic { transform: scale(1.12) rotate(-5deg); background: linear-gradient(135deg, var(--blue), var(--purple)); color: #0b0d14; }
   .card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
   .card p { color: var(--muted); font-size: 14px; }
   .card code, .cmd code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: rgba(255,255,255,.05); padding: 2px 7px; border-radius: 6px; color: var(--teal); }
 
-  /* AI tools */
+  /* ---------- screenshots ---------- */
+  .shots { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; align-items: start; }
+  .shots-main { position: relative; }
+  .frame {
+    background: #0a0c12; border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+    box-shadow: 0 24px 70px rgba(0,0,0,.55); transform: translateZ(0);
+  }
+  .frame-bar { display: flex; align-items: center; gap: 7px; padding: 11px 14px; border-bottom: 1px solid var(--border); background: rgba(20,24,40,.6); }
+  .frame-bar .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .frame-url { margin-left: 8px; font-size: 12px; color: var(--faint); font-family: 'JetBrains Mono', monospace; }
+  .frame img { width: 100%; transition: transform .6s cubic-bezier(.22,1,.36,1), opacity .25s ease; }
+  .shots-main .frame:hover img { transform: scale(1.02); }
+  .shot-caption { margin-top: 12px; display: flex; align-items: center; gap: 10px; }
+  .shot-caption b { font-size: 14px; }
+  .shot-caption span { color: var(--faint); font-size: 12.5px; }
+  .shots-thumbs { display: flex; flex-direction: column; gap: 12px; }
+  .shots-thumbs button {
+    position: relative; text-align: left; background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 8px; cursor: pointer; overflow: hidden;
+    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  .shots-thumbs button:hover { transform: translateY(-2px); border-color: #33405c; }
+  .shots-thumbs button.active { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue), 0 10px 30px rgba(130,170,255,.2); }
+  .shots-thumbs img { border-radius: 8px; transition: transform .4s ease; }
+  .shots-thumbs button:hover img { transform: scale(1.04); }
+  .shots-thumbs .th-label {
+    position: absolute; left: 12px; bottom: 12px; z-index: 2;
+    font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 7px;
+    background: rgba(11,13,20,.75); backdrop-filter: blur(6px); border: 1px solid rgba(35,40,56,.8); color: var(--fg);
+  }
+
+  /* ---------- AI ---------- */
   .ai-wrap { display: grid; grid-template-columns: 1.05fr .95fr; gap: 34px; align-items: center; }
   .ai-wrap ul { list-style: none; margin-top: 8px; }
   .ai-wrap li { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(35,40,56,.6); }
@@ -126,14 +232,16 @@
   .ai-wrap .tic {
     flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; margin-top: 2px;
     display: grid; place-items: center; font-size: 13px; font-weight: 700;
-    background: rgba(94,234,212,.14); color: var(--teal);
+    background: rgba(94,234,212,.14); color: var(--teal); transition: transform .3s;
   }
+  .ai-wrap li:hover .tic { transform: scale(1.15) rotate(8deg); }
   .ai-wrap li b { display: block; font-size: 15px; }
   .ai-wrap li span { color: var(--muted); font-size: 14px; }
   .console {
     background: #0a0c12; border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    box-shadow: 0 20px 60px rgba(0,0,0,.5); transition: transform .25s ease, box-shadow .25s ease;
   }
+  .console:hover { transform: translateY(-4px); box-shadow: 0 30px 80px rgba(0,0,0,.6); }
   .console .bar { display: flex; gap: 7px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
   .console .dot { width: 11px; height: 11px; border-radius: 50%; }
   .console pre { padding: 18px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #c9d1e3; overflow-x: auto; }
@@ -142,13 +250,17 @@
   .console .t { color: var(--teal); }
   .console .p { color: var(--purple); }
 
-  /* CLI */
+  /* ---------- CLI ---------- */
   .cmds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-  .cmd-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+  .cmd-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px;
+    transition: transform .18s ease, border-color .18s ease, background .18s ease;
+  }
+  .cmd-card:hover { transform: translateY(-3px); border-color: #33405c; background: #141828; }
   .cmd-card code { font-size: 14px; display: block; margin-bottom: 6px; color: var(--fg); background: none; padding: 0; }
   .cmd-card p { color: var(--muted); font-size: 13.5px; }
 
-  /* download */
+  /* ---------- download ---------- */
   .dl-wrap { text-align: center; }
   .dl-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
   .dl-btns .btn { padding: 14px 26px; font-size: 15px; }
@@ -157,22 +269,32 @@
 
   footer { border-top: 1px solid rgba(35,40,56,.7); padding: 30px 0; color: var(--faint); font-size: 13.5px; }
   footer .container { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-  footer a { color: var(--muted); }
+  footer a { color: var(--muted); transition: color .2s; }
   footer a:hover { color: var(--fg); }
 
-  @media (max-width: 880px) {
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+
+  @media (max-width: 920px) {
     .grid { grid-template-columns: 1fr 1fr; }
     .ai-wrap { grid-template-columns: 1fr; }
     .cmds { grid-template-columns: 1fr; }
+    .shots { grid-template-columns: 1fr; }
     .nav-links { display: none; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 560px) {
     .grid { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   }
 </style>
 </head>
 <body>
 <div class="bg-glow"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
 
 <nav>
   <div class="container">
@@ -191,6 +313,7 @@
     </a>
     <div class="nav-links">
       <a href="#funciones">Funciones</a>
+      <a href="#capturas">Capturas</a>
       <a href="#ia">IA</a>
       <a href="#cli">Terminal</a>
       <a href="#descargar">Descargar</a>
@@ -200,17 +323,20 @@
 </nav>
 
 <header class="hero container">
-  <svg class="logo" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-    <defs>
-      <linearGradient id="ng2" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#7fb0ff"/><stop offset="55%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#5eead4"/>
-      </linearGradient>
-    </defs>
-    <rect width="64" height="64" rx="15" fill="url(#ng2)"/>
-    <path d="M20 46V18l24 28V18" stroke="#fff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M50 7.5l1.6 4 4 1.6-4 1.6-1.6 4-1.6-4-4-1.6 4-1.6z" fill="#fff"/>
-  </svg>
-  <div class="badge">● v1.0.0 · código abierto</div>
+  <div class="logo-wrap">
+    <div class="logo-ring"></div>
+    <svg class="logo" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="ng2" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#7fb0ff"/><stop offset="55%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#5eead4"/>
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="15" fill="url(#ng2)"/>
+      <path d="M20 46V18l24 28V18" stroke="#fff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M50 7.5l1.6 4 4 1.6-4 1.6-1.6 4-1.6-4-4-1.6 4-1.6z" fill="#fff"/>
+    </svg>
+  </div>
+  <div class="badge"><span class="dot"></span> v1.0.0 estable · código abierto</div>
   <h1>El editor de código<br/>con <span class="grad">IA integrada</span></h1>
   <p class="sub">Nova combina el poder de Monaco con un asistente de IA que de verdad trabaja contigo: lee tu proyecto, propone cambios y ejecuta comandos — con tu aprobación.</p>
   <div class="cta">
@@ -219,93 +345,83 @@
     <a class="btn btn-ghost" href="https://github.com/adrianfilitos/nova-editor/releases">Ver releases</a>
   </div>
   <p class="hint">Windows · instalador y versión portable · gratuito</p>
+
+  <div class="stats">
+    <div class="stat"><b data-count="1.0">0</b><span>release estable</span></div>
+    <div class="stat"><b data-count="9">0</b><span>temas integrados</span></div>
+    <div class="stat"><b data-count="25">0</b><span>+ ajustes de editor</span></div>
+    <div class="stat"><code>VSIX</code><span>Extension Host incluido</span></div>
+  </div>
 </header>
 
 <section id="funciones">
   <div class="container">
-    <div class="sec-head">
+    <div class="sec-head reveal">
       <span class="kicker">Funciones</span>
       <h2>Todo lo que esperas de un editor moderno</h2>
       <p>Construido con Electron, React, Monaco y Vite. Rápido, oscuro y listo para tu día a día.</p>
     </div>
     <div class="grid">
-      <div class="card">
-        <div class="ic">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6z"/><path d="M14 3v6h6"/></svg>
+      <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6z"/><path d="M14 3v6h6"/></svg></div><h3>Editor Monaco</h3><p>Sintaxis, minimapa, multi-cursor, esquema de símbolos y atajos tipo VS Code.</p></div>
+      <div class="card reveal" data-delay="1"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/></svg></div><h3>IA con herramientas</h3><p>El asistente <b>lee</b> y <b>busca</b> en tu proyecto, <b>escribe</b> archivos y <b>ejecuta</b> comandos con tu permiso.</p></div>
+      <div class="card reveal" data-delay="2"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6-6-6M12 19h8"/></svg></div><h3>Terminal real</h3><p>PowerShell integrado en el editor, no un simulacro. Ejecuta de verdad.</p></div>
+      <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></div><h3>Explorador de archivos</h3><p>Árbol de archivos con búsqueda, crear/renombrar/eliminar y arrastrar y soltar.</p></div>
+      <div class="card reveal" data-delay="1"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2.5"/><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="7" r="2.5"/><path d="M6 7.5v9M18 9.5a4 4 0 0 1-4 4H8"/></svg></div><h3>Git con UI dedicada</h3><p>Estado, staging, commits, ramas, historial y diffs con push, pull y fetch integrados.</p></div>
+      <div class="card reveal" data-delay="2"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M8 8l4-4 4 4M16 16l-4 4-4-4"/></svg></div><h3>Modo Vim</h3><p>Emulación real de Vim: modos normal, insertar y visual, motions, operadores y búsqueda.</p></div>
+      <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1h3a2 2 0 0 1 2 2v3h1a2 2 0 0 1 0 4h-1v3a2 2 0 0 1-2 2h-3v1a2 2 0 0 1-4 0v-1H7a2 2 0 0 1-2-2v-3H4a2 2 0 0 1 0-4h1V6a2 2 0 0 1 2-2h3V3z"/></svg></div><h3>Marketplace real (Open VSX)</h3><p>Busca e instala miles de extensiones reales desde open-vsx.org, con descargas y valoraciones.</p></div>
+      <div class="card reveal" data-delay="1"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6z"/><path d="M14 3v6h6"/><path d="M9 13h6M12 10v6"/></svg></div><h3>Extension Host de VS Code</h3><p>Ejecuta el <b>código JS</b> de las extensiones: comandos, autocompletado, hover y edición real.</p></div>
+      <div class="card reveal" data-delay="2"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><h3>Búsqueda global</h3><p>Busca y reemplaza en todos los archivos del espacio de trabajo con resultados en vivo.</p></div>
+      <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg></div><h3>9 temas personalizables</h3><p>Dark, Light, Midnight, Ocean, Forest, Sunset, Sakura, Mono y Paper. Cambia el aspecto al instante.</p></div>
+      <div class="card reveal" data-delay="1"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></div><h3>Actualizaciones automáticas</h3><p>Detecta, descarga e instala versiones nuevas desde GitHub Releases sin tocar tus datos.</p></div>
+      <div class="card reveal" data-delay="2"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5 5 5-5"/><path d="M4 21h16"/></svg></div><h3>DeepSeek · OpenAI · Anthropic</h3><p>Elige tu proveedor de IA favorito. <code>DeepSeek</code> viene preconfigurado y recomendado.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="capturas" style="background:linear-gradient(180deg, transparent, rgba(130,170,255,.045), transparent)">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="kicker">Capturas reales</span>
+      <h2>Así se ve Nova</h2>
+      <p>Imágenes reales de la aplicación: el editor, los temas y el asistente de IA integrado.</p>
+    </div>
+    <div class="shots reveal">
+      <div class="shots-main">
+        <div class="frame">
+          <div class="frame-bar">
+            <span class="dot" style="background:#f7768e"></span>
+            <span class="dot" style="background:#e0af68"></span>
+            <span class="dot" style="background:#9ece6a"></span>
+            <span class="frame-url">nova — editor de código</span>
+          </div>
+          <img id="shotImg" src="screenshots/dark.png" alt="Nova editor con el proyecto demo abierto" />
         </div>
-        <h3>Editor Monaco</h3>
-        <p>Sintaxis, minimapa, multi-cursor, esquema de símbolos y atajos tipo VS Code.</p>
+        <div class="shot-caption">
+          <b id="shotTitle">Nova Dark · editor</b>
+          <span id="shotDesc">Proyecto demo con App.tsx abierto</span>
+        </div>
       </div>
-      <div class="card">
-        <div class="ic">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/></svg>
-        </div>
-        <h3>IA con herramientas</h3>
-        <p>El asistente <b>lee</b> y <b>busca</b> en tu proyecto, <b>escribe</b> archivos y <b>ejecuta</b> comandos con tu permiso.</p>
-      </div>
-      <div class="card">
-        <div class="ic">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
-        </div>
-        <h3>Terminal real</h3>
-        <p>PowerShell integrado en el editor, no un simulacro. Ejecuta de verdad.</p>
-      </div>
-      <div class="card">
-        <div class="ic">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
-        </div>
-        <h3>Explorador de archivos</h3>
-        <p>Árbol de archivos con búsqueda, crear/renombrar/eliminar y arrastrar y soltar.</p>
-      </div>
-      <div class="card">
-        <div class="ic">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2.5"/><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="7" r="2.5"/><path d="M6 7.5v9M18 9.5a4 4 0 0 1-4 4H8"/></svg>
-        </div>
-        <h3>Git con UI dedicada</h3>
-        <p>Estado, staging, commits, ramas, historial y diffs con push, pull y fetch integrados.</p>
-      </div>
-      <div class="card">
-        <div class="ic">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M8 8l4-4 4 4M16 16l-4 4-4-4"/></svg>
-        </div>
-        <h3>Modo Vim</h3>
-        <p>Emulación real de Vim: modos normal, insertar y visual, motions, operadores y búsqueda.</p>
-      </div>
-      <div class="card">
-        <div class="ic">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1h3a2 2 0 0 1 2 2v3h1a2 2 0 0 1 0 4h-1v3a2 2 0 0 1-2 2h-3v1a2 2 0 0 1-4 0v-1H7a2 2 0 0 1-2-2v-3H4a2 2 0 0 1 0-4h1V6a2 2 0 0 1 2-2h3V3z"/></svg>
-        </div>
-        <h3>Marketplace real (Open VSX)</h3>
-        <p>Busca e instala miles de extensiones reales desde open-vsx.org, con descargas y valoraciones.</p>
-      </div>
-      <div class="card">
-        <div class="ic">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
-        </div>
-        <h3>Explorador de archivos</h3>
-        <p>Árbol de archivos con búsqueda, crear/renombrar/eliminar y arrastrar y soltar.</p>
-      </div>
-      <div class="card">
-        <div class="ic">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        </div>
-        <h3>Búsqueda global</h3>
-        <p>Busca y reemplaza en todos los archivos del espacio de trabajo con resultados en vivo.</p>
-      </div>
-      <div class="card">
-        <div class="ic">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5 5 5-5"/><path d="M4 21h16"/></svg>
-        </div>
-        <h3>DeepSeek · OpenAI · Anthropic</h3>
-        <p>Elige tu proveedor de IA favorito. <code>DeepSeek</code> viene preconfigurado y recomendado.</p>
+      <div class="shots-thumbs">
+        <button class="active" data-src="screenshots/dark.png" data-title="Nova Dark · editor" data-desc="Proyecto demo con App.tsx abierto">
+          <img src="screenshots/dark.png" alt="Tema Nova Dark" />
+          <span class="th-label">Dark</span>
+        </button>
+        <button data-src="screenshots/ocean.png" data-title="Nova Ocean · tema" data-desc="El mismo proyecto en tonos marinos">
+          <img src="screenshots/ocean.png" alt="Tema Nova Ocean" />
+          <span class="th-label">Ocean</span>
+        </button>
+        <button data-src="screenshots/ai.png" data-title="Asistente de IA" data-desc="Panel de IA integrado en la app">
+          <img src="screenshots/ai.png" alt="Panel de IA de Nova" />
+          <span class="th-label">IA</span>
+        </button>
       </div>
     </div>
   </div>
 </section>
 
-<section id="ia" style="background:linear-gradient(180deg, transparent, rgba(130,170,255,.04), transparent)">
+<section id="ia">
   <div class="container ai-wrap">
-    <div>
+    <div class="reveal">
       <span class="kicker">Asistente de IA</span>
       <h2 style="font-size:clamp(26px,3.5vw,36px);font-weight:800;letter-spacing:-.7px;margin-bottom:14px">No solo chatea: actúa</h2>
       <p style="color:var(--muted);font-size:16px;margin-bottom:14px">Nova AI tiene acceso a tu espacio de trabajo y usa herramientas reales para ayudarte mejor. Las acciones que modifican archivos o ejecutan comandos siempre requieren tu aprobación.</p>
@@ -316,7 +432,7 @@
         <li><span class="tic">✓</span><div><b>Ejecuta comandos</b><span><code>run_command</code> corre en PowerShell con tu permiso explícito.</span></div></li>
       </ul>
     </div>
-    <div class="console">
+    <div class="console reveal" data-delay="1">
       <div class="bar"><span class="dot" style="background:#f7768e"></span><span class="dot" style="background:#e0af68"></span><span class="dot" style="background:#9ece6a"></span></div>
       <pre><span class="p">tú</span>: ¿dónde se valida la API key y qué falta por hacer?
 <span class="p">Nova</span>: déjame revisar el proyecto…
@@ -333,18 +449,18 @@ indicador en la UI cuando no hay clave configurada.
 
 <section id="cli">
   <div class="container">
-    <div class="sec-head">
+    <div class="sec-head reveal">
       <span class="kicker">Terminal y CLI</span>
       <h2>Nova desde tu terminal</h2>
       <p>El instalador añade los comandos <code>nova</code> y <code>nova-ai</code> a tu PATH.</p>
     </div>
     <div class="cmds">
-      <div class="cmd-card"><code>nova</code><p>Abre el editor.</p></div>
-      <div class="cmd-card"><code>nova .</code><p>Abre la carpeta actual como espacio de trabajo.</p></div>
-      <div class="cmd-card"><code>nova archivo.ts</code><p>Abre un archivo directamente en el editor.</p></div>
-      <div class="cmd-card"><code>nova-ai</code><p>Abre el editor con el asistente de IA enfocado.</p></div>
-      <div class="cmd-card"><code>Ctrl+K Ctrl+S</code><p>Referencia completa de atajos dentro de la app.</p></div>
-      <div class="cmd-card"><code>Ctrl+`</code><p>Abre la terminal PowerShell integrada.</p></div>
+      <div class="cmd-card reveal"><code>nova</code><p>Abre el editor.</p></div>
+      <div class="cmd-card reveal" data-delay="1"><code>nova .</code><p>Abre la carpeta actual como espacio de trabajo.</p></div>
+      <div class="cmd-card reveal" data-delay="2"><code>nova archivo.ts</code><p>Abre un archivo directamente en el editor.</p></div>
+      <div class="cmd-card reveal"><code>nova-ai</code><p>Abre el editor con el asistente de IA enfocado.</p></div>
+      <div class="cmd-card reveal" data-delay="1"><code>Ctrl+K Ctrl+S</code><p>Referencia completa de atajos dentro de la app.</p></div>
+      <div class="cmd-card reveal" data-delay="2"><code>Ctrl+`</code><p>Abre la terminal PowerShell integrada.</p></div>
     </div>
   </div>
 </section>
@@ -369,5 +485,59 @@ indicador en la UI cuando no hay clave configurada.
     <span><a href="https://github.com/adrianfilitos/nova-editor">GitHub</a> · <a href="https://github.com/adrianfilitos/nova-editor/releases">Releases</a></span>
   </div>
 </footer>
+
+<script>
+  // Revelar elementos al hacer scroll
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) }
+    },
+    { threshold: 0.12 },
+  )
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el))
+
+  // Contadores animados
+  const cio = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue
+        cio.unobserve(e.target)
+        const el = e.target
+        const target = parseFloat(el.dataset.count)
+        const decimals = (el.dataset.count.split('.')[1] || '').length
+        const dur = 900
+        const t0 = performance.now()
+        const tick = (t) => {
+          const p = Math.min(1, (t - t0) / dur)
+          const eased = 1 - Math.pow(1 - p, 3)
+          el.textContent = (target * eased).toFixed(decimals)
+          if (p < 1) requestAnimationFrame(tick)
+        }
+        requestAnimationFrame(tick)
+      }
+    },
+    { threshold: 0.6 },
+  )
+  document.querySelectorAll('.stat [data-count]').forEach((el) => cio.observe(el))
+
+  // Galería de capturas
+  const shotImg = document.getElementById('shotImg')
+  const shotTitle = document.getElementById('shotTitle')
+  const shotDesc = document.getElementById('shotDesc')
+  const thumbs = document.querySelectorAll('.shots-thumbs button')
+  thumbs.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      thumbs.forEach((b) => b.classList.remove('active'))
+      btn.classList.add('active')
+      shotImg.style.opacity = '0'
+      setTimeout(() => {
+        shotImg.src = btn.dataset.src
+        shotTitle.textContent = btn.dataset.title
+        shotDesc.textContent = btn.dataset.desc
+        shotImg.style.opacity = '1'
+      }, 180)
+    })
+  })
+</script>
 </body>
 </html>
