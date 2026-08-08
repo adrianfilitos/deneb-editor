@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#0b0d14" />
+<title>Deneb — Editor de código con IA integrada</title>
+<meta name="description" content="Deneb es un editor de código moderno con IA integrada: edita con Monaco, usa el asistente con herramientas reales, terminal PowerShell, Git, extensiones y más." />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<nav>
+  <div class="container">
+    <a class="brand" href="#">
+      <svg width="26" height="26" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="ng1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#7fb0ff"/><stop offset="55%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#5eead4"/>
+          </linearGradient>
+          <radialGradient id="ng1r" cx="0.3" cy="0.25" r="1">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+            <stop offset="60%" stop-color="#ffffff" stop-opacity="0.06"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="64" height="64" rx="15" fill="url(#ng1)"/>
+        <rect width="64" height="64" rx="15" fill="url(#ng1r)"/>
+        <path d="M32 12 C34.2 22.6 35.8 25.2 47 28 C36.8 30.2 34.2 31.8 32 42 C29.8 31.8 27.2 30.2 17 28 C28.2 25.2 29.8 22.6 32 12 Z" fill="#fff"/>
+        <circle cx="32" cy="28" r="3.4" fill="#0b0d14" opacity="0.82"/>
+        <path d="M32 4.5 l1.4 3.4 3.4 1.4 -3.4 1.4 -1.4 3.4 -1.4 -3.4 -3.4 -1.4 3.4 -1.4 Z" fill="#fff" opacity="0.9"/>
+        <path d="M51 45 l1.1 2.7 2.7 1.1 -2.7 1.1 -1.1 2.7 -1.1 -2.7 -2.7 -1.1 2.7 -1.1 Z" fill="#fff" opacity="0.65"/>
+        <path d="M13 46 l0.9 2.2 2.2 0.9 -2.2 0.9 -0.9 2.2 -0.9 -2.2 -2.2 -0.9 2.2 -0.9 Z" fill="#fff" opacity="0.45"/>
+      </svg>
+      Deneb
+    </a>
+    <div class="nav-links">
+      <a href="#funciones">Funciones</a>
+      <a href="#capturas">Capturas</a>
+      <a href="#ia">IA</a>
+      <a href="#cli">Terminal</a>
+      <a href="#faq">FAQ</a>
+      <a href="downloads/">Descargar</a>
+      <a class="btn btn-primary" style="padding:8px 16px" href="https://github.com/adrianfilitos/deneb-editor">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero container">
+  <div class="logo-wrap">
+    <div class="logo-ring"></div>
+    <svg class="logo" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="ng2" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#7fb0ff"/><stop offset="55%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#5eead4"/>
+        </linearGradient>
+        <radialGradient id="ng2r" cx="0.3" cy="0.25" r="1">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+          <stop offset="60%" stop-color="#ffffff" stop-opacity="0.06"/>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="64" height="64" rx="15" fill="url(#ng2)"/>
+      <rect width="64" height="64" rx="15" fill="url(#ng2r)"/>
+      <path d="M32 12 C34.2 22.6 35.8 25.2 47 28 C36.8 30.2 34.2 31.8 32 42 C29.8 31.8 27.2 30.2 17 28 C28.2 25.2 29.8 22.6 32 12 Z" fill="#fff"/>
+      <circle cx="32" cy="28" r="3.4" fill="#0b0d14" opacity="0.82"/>
+      <path d="M32 4.5 l1.4 3.4 3.4 1.4 -3.4 1.4 -1.4 3.4 -1.4 -3.4 -3.4 -1.4 3.4 -1.4 Z" fill="#fff" opacity="0.9"/>
+      <path d="M51 45 l1.1 2.7 2.7 1.1 -2.7 1.1 -1.1 2.7 -1.1 -2.7 -2.7 -1.1 2.7 -1.1 Z" fill="#fff" opacity="0.65"/>
+      <path d="M13 46 l0.9 2.2 2.2 0.9 -2.2 0.9 -0.9 2.2 -0.9 -2.2 -2.2 -0.9 2.2 -0.9 Z" fill="#fff" opacity="0.45"/>
+    </svg>
+  </div>
+  <div class="badge"><span class="dot"></span> v1.0.0 estable · código abierto</div>
+  <h1>El editor de código<br/>con <span class="grad">IA integrada</span></h1>
+  <p class="sub">Deneb combina el poder de Monaco con un asistente de IA que de verdad trabaja contigo: lee tu proyecto, propone cambios y ejecuta comandos — con tu aprobación.</p>
+  <div class="cta">
+    <a class="btn btn-primary" id="hero-download" href="downloads/">Descargar para <span id="hero-os">tu sistema</span></a>
+    <a class="btn btn-teal" href="app/">Probar en el navegador</a>
+    <a class="btn btn-ghost" href="https://github.com/adrianfilitos/deneb-editor/releases">Ver releases</a>
+  </div>
+  <p class="hint">Windows · macOS · Linux · gratis y de código abierto</p>
+
+  <div class="stats">
+    <div class="stat"><b data-count="1.0">0</b><span>release estable</span></div>
+    <div class="stat"><b data-count="9">0</b><span>temas integrados</span></div>
+    <div class="stat"><b data-count="25">0</b><span>+ ajustes de editor</span></div>
+    <div class="stat"><code>VSIX</code><span>Extension Host incluido</span></div>
+  </div>
+</header>
+
+<section id="funciones">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="kicker">Funciones</span>
+      <h2>Todo lo que esperas de un editor moderno</h2>
+      <p>Construido con Electron, React, Monaco y Vite. Rápido, oscuro y listo para tu día a día.</p>
+    </div>
+    <div class="grid">
+      <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6z"/><path d="M14 3v6h6"/></svg></div><h3>Editor Monaco</h3><p>Sintaxis, minimapa, multi-cursor, esquema de símbolos y atajos tipo VS Code.</p></div>
+      <div class="card reveal" data-delay="1"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/></svg></div><h3>IA con herramientas</h3><p>El asistente <b>lee</b> y <b>busca</b> en tu proyecto, <b>escribe</b> archivos y <b>ejecuta</b> comandos con tu permiso.</p></div>
+      <div class="card reveal" data-delay="2"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6-6-6M12 19h8"/></svg></div><h3>Terminal real</h3><p>Shell real integrada: PowerShell en Windows, zsh en macOS y bash en Linux. No un simulacro.</p></div>
+      <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></div><h3>Explorador de archivos</h3><p>Árbol de archivos con búsqueda, crear/renombrar/eliminar y arrastrar y soltar.</p></div>
+      <div class="card reveal" data-delay="1"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2.5"/><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="7" r="2.5"/><path d="M6 7.5v9M18 9.5a4 4 0 0 1-4 4H8"/></svg></div><h3>Git con UI dedicada</h3><p>Estado, staging, commits, ramas, historial y diffs con push, pull y fetch integrados.</p></div>
+      <div class="card reveal" data-delay="2"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M8 8l4-4 4 4M16 16l-4 4-4-4"/></svg></div><h3>Modo Vim</h3><p>Emulación real de Vim: modos normal, insertar y visual, motions, operadores y búsqueda.</p></div>
+      <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1h3a2 2 0 0 1 2 2v3h1a2 2 0 0 1 0 4h-1v3a2 2 0 0 1-2 2h-3v1a2 2 0 0 1-4 0v-1H7a2 2 0 0 1-2-2v-3H4a2 2 0 0 1 0-4h1V6a2 2 0 0 1 2-2h3V3z"/></svg></div><h3>Marketplace real (Open VSX)</h3><p>Busca e instala miles de extensiones reales desde open-vsx.org, con descargas y valoraciones.</p></div>
+      <div class="card reveal" data-delay="1"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6z"/><path d="M14 3v6h6"/><path d="M9 13h6M12 10v6"/></svg></div><h3>Extension Host de VS Code</h3><p>Ejecuta el <b>código JS</b> de las extensiones: comandos, autocompletado, hover y edición real.</p></div>
+      <div class="card reveal" data-delay="2"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><h3>Búsqueda global</h3><p>Busca y reemplaza en todos los archivos del espacio de trabajo con resultados en vivo.</p></div>
+      <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg></div><h3>9 temas personalizables</h3><p>Dark, Light, Midnight, Ocean, Forest, Sunset, Sakura, Mono y Paper. Cambia el aspecto al instante.</p></div>
+      <div class="card reveal" data-delay="1"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></div><h3>Actualizaciones automáticas</h3><p>Detecta, descarga e instala versiones nuevas desde GitHub Releases sin tocar tus datos.</p></div>
+      <div class="card reveal" data-delay="2"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5 5 5-5"/><path d="M4 21h16"/></svg></div><h3>DeepSeek · OpenAI · Anthropic</h3><p>Elige tu proveedor de IA favorito. <code>DeepSeek</code> viene preconfigurado y recomendado.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="capturas" style="background:linear-gradient(180deg, transparent, rgba(130,170,255,.045), transparent)">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="kicker">Capturas reales</span>
+      <h2>Así se ve Deneb</h2>
+      <p>Imágenes reales de la aplicación: el editor, los temas y el asistente de IA integrado.</p>
+    </div>
+    <div class="shots reveal">
+      <div class="shots-main">
+        <div class="frame">
+          <div class="frame-bar">
+            <span class="dot" style="background:#f7768e"></span>
+            <span class="dot" style="background:#e0af68"></span>
+            <span class="dot" style="background:#9ece6a"></span>
+            <span class="frame-url">deneb — editor de código</span>
+          </div>
+          <img id="shotImg" src="screenshots/user-1.png" alt="Deneb en acción" />
+        </div>
+        <div class="shot-caption">
+          <b id="shotTitle">Deneb · vista 1</b>
+          <span id="shotDesc">Captura real de la aplicación</span>
+        </div>
+      </div>
+      <div class="shots-thumbs">
+        <button class="active" data-src="screenshots/user-1.png" data-title="Deneb · vista 1" data-desc="Captura real de la aplicación">
+          <img src="screenshots/user-1.png" alt="Captura 1" />
+          <span class="th-label">Vista 1</span>
+        </button>
+        <button data-src="screenshots/user-2.png" data-title="Deneb · vista 2" data-desc="Captura real de la aplicación">
+          <img src="screenshots/user-2.png" alt="Captura 2" />
+          <span class="th-label">Vista 2</span>
+        </button>
+        <button data-src="screenshots/user-3.png" data-title="Deneb · vista 3" data-desc="Captura real de la aplicación">
+          <img src="screenshots/user-3.png" alt="Captura 3" />
+          <span class="th-label">Vista 3</span>
+        </button>
+        <button data-src="screenshots/dark.png" data-title="Deneb Dark · editor" data-desc="Proyecto demo con App.tsx abierto">
+          <img src="screenshots/dark.png" alt="Tema Deneb Dark" />
+          <span class="th-label">Dark</span>
+        </button>
+        <button data-src="screenshots/ocean.png" data-title="Deneb Ocean · tema" data-desc="El mismo proyecto en tonos marinos">
+          <img src="screenshots/ocean.png" alt="Tema Deneb Ocean" />
+          <span class="th-label">Ocean</span>
+        </button>
+        <button data-src="screenshots/ai.png" data-title="Asistente de IA" data-desc="Panel de IA integrado en la app">
+          <img src="screenshots/ai.png" alt="Panel de IA de Deneb" />
+          <span class="th-label">IA</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ia">
+  <div class="container ai-wrap">
+    <div class="reveal">
+      <span class="kicker">Asistente de IA</span>
+      <h2 style="font-size:clamp(26px,3.5vw,36px);font-weight:800;letter-spacing:-.7px;margin-bottom:14px">No solo chatea: actúa</h2>
+      <p style="color:var(--muted);font-size:16px;margin-bottom:14px">Deneb AI tiene acceso a tu espacio de trabajo y usa herramientas reales para ayudarte mejor. Las acciones que modifican archivos o ejecutan comandos siempre requieren tu aprobación.</p>
+      <ul>
+        <li><span class="tic">✓</span><div><b>Lista y lee archivos</b><span><code>list_dir</code> y <code>read_file</code> para entender tu proyecto antes de responder.</span></div></li>
+        <li><span class="tic">✓</span><div><b>Busca en el código</b><span><code>search_files</code> encuentra coincidencias con número de línea.</span></div></li>
+        <li><span class="tic">✓</span><div><b>Escribe archivos</b><span><code>write_file</code> crea o reemplaza archivos solo tras tu confirmación.</span></div></li>
+        <li><span class="tic">✓</span><div><b>Ejecuta comandos</b><span><code>run_command</code> corre en PowerShell con tu permiso explícito.</span></div></li>
+      </ul>
+    </div>
+    <div class="console reveal" data-delay="1">
+      <div class="bar"><span class="dot" style="background:#f7768e"></span><span class="dot" style="background:#e0af68"></span><span class="dot" style="background:#9ece6a"></span></div>
+      <pre><span class="p">tú</span>: ¿dónde se valida la API key y qué falta por hacer?
+<span class="p">Deneb</span>: déjame revisar el proyecto…
+
+> [herramienta] <span class="c">search_files</span> pattern=apiKey
+> [resultado] <span class="t">src/lib/ai.ts:158</span>: if (!cfg.apiKey) { onChunk(...) }
+
+<span class="p">Deneb</span>: se valida en <span class="t">src/lib/ai.ts</span>. Falta añadir un
+indicador en la UI cuando no hay clave configurada.
+¿Quieres que lo implemente? <span class="g">[escribe el archivo]</span></pre>
+    </div>
+  </div>
+</section>
+
+<section id="cli">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="kicker">Terminal y CLI</span>
+      <h2>Deneb desde tu terminal</h2>
+      <p>El instalador añade los comandos <code>deneb</code> y <code>deneb-ai</code> a tu PATH.</p>
+    </div>
+    <div class="cmds">
+      <div class="cmd-card reveal"><code>deneb</code><p>Abre el editor.</p></div>
+      <div class="cmd-card reveal" data-delay="1"><code>deneb .</code><p>Abre la carpeta actual como espacio de trabajo.</p></div>
+      <div class="cmd-card reveal" data-delay="2"><code>deneb archivo.ts</code><p>Abre un archivo directamente en el editor.</p></div>
+      <div class="cmd-card reveal"><code>deneb-ai</code><p>Abre el editor con el asistente de IA enfocado.</p></div>
+      <div class="cmd-card reveal" data-delay="1"><code>Ctrl+K Ctrl+S</code><p>Referencia completa de atajos dentro de la app.</p></div>
+      <div class="cmd-card reveal" data-delay="2"><code>Ctrl+`</code><p>Abre la terminal integrada (PowerShell / zsh / bash).</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="comparativa">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="kicker">Comparativa</span>
+      <h2>¿Por qué elegir Deneb?</h2>
+      <p>Todo lo esencial de un editor moderno, sin costes ni dependencias.</p>
+    </div>
+    <div class="cmp-wrap reveal">
+      <div class="cmp-col">
+        <h3>Deneb</h3>
+        <ul>
+          <li><span class="tick">✓</span> IA integrada con herramientas reales</li>
+          <li><span class="tick">✓</span> Gratis y código abierto (MIT)</li>
+          <li><span class="tick">✓</span> Terminal real (PowerShell / zsh / bash)</li>
+          <li><span class="tick">✓</span> Extension Host de VS Code + Open VSX</li>
+          <li><span class="tick">✓</span> Windows · macOS · Linux</li>
+          <li><span class="tick">✓</span> Tu clave de IA se queda en tu equipo</li>
+        </ul>
+      </div>
+      <div class="cmp-col muted">
+        <h3>Otros editores</h3>
+        <ul>
+          <li><span class="cross">✕</span> IA solo por suscripción</li>
+          <li><span class="cross">✕</span> Funciones pro extra de pago</li>
+          <li><span class="cross">✕</span> Terminal solo en versiones completas</li>
+          <li><span class="cross">✕</span> Extensiones limitadas o de pago</li>
+          <li><span class="cross">✕</span> Versión Windows únicamente</li>
+          <li><span class="cross">✕</span> Telemetría y datos en la nube</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="kicker">Preguntas frecuentes</span>
+      <h2>Resolvemos tus dudas</h2>
+    </div>
+    <div class="faq">
+      <details class="reveal" open>
+        <summary>¿Deneb es gratis?</summary>
+        <p>Sí. Deneb es de código abierto (licencia MIT) y completamente gratuito. La IA usa tu propia clave de <b>DeepSeek</b>, <b>OpenAI</b> o <b>Anthropic</b> — tú eliges el proveedor.</p>
+      </details>
+      <details class="reveal">
+        <summary>¿Mis archivos se envían a la nube?</summary>
+        <p>No. Todo se procesa en tu equipo. Solo se envía a la API de IA el texto que el asistente necesita para responder, y tu clave de API se guarda localmente.</p>
+      </details>
+      <details class="reveal">
+        <summary>¿Funciona en Windows, macOS y Linux?</summary>
+        <p>Sí. Deneb se compila para las tres plataformas. La terminal usa PowerShell en Windows, zsh en macOS y bash en Linux.</p>
+      </details>
+      <details class="reveal">
+        <summary>¿Puedo instalar extensiones de VS Code?</summary>
+        <p>Sí. Deneb tiene un Extension Host propio que ejecuta el código JavaScript de las extensiones, y un marketplace conectado a <b>Open VSX</b>.</p>
+      </details>
+      <details class="reveal">
+        <summary>¿Necesito conexión a internet?</summary>
+        <p>Para el editor, no. Solo la función de IA requiere conexión. Puedes editar, usar Git, terminal y extensiones sin estar conectado.</p>
+      </details>
+      <details class="reveal">
+        <summary>¿Cómo se actualiza Deneb?</summary>
+        <p>Deneb detecta versiones nuevas desde GitHub Releases y las instala automáticamente con un solo clic, en cada plataforma.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="cta-final">
+  <div class="container">
+    <div class="final-card reveal">
+      <span class="kicker">Empieza hoy</span>
+      <h2>Descarga Deneb y escribe mejor código</h2>
+      <p>Gratis, rápido y con la IA que tú controlas.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="downloads/">Descargar para <span id="final-os">tu sistema</span></a>
+        <a class="btn btn-teal" href="app/">Probar en el navegador</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <span>© 2026 Deneb · Hecho con Electron, React, Monaco y Vite</span>
+    <span><a href="https://github.com/adrianfilitos/deneb-editor">GitHub</a> · <a href="https://github.com/adrianfilitos/deneb-editor/releases">Releases</a></span>
+  </div>
+</footer>
+
+<script>
+  // Revelar elementos al hacer scroll
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) }
+    },
+    { threshold: 0.12 },
+  )
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el))
+
+  // Contadores animados
+  const cio = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue
+        cio.unobserve(e.target)
+        const el = e.target
+        const target = parseFloat(el.dataset.count)
+        const decimals = (el.dataset.count.split('.')[1] || '').length
+        const dur = 900
+        const t0 = performance.now()
+        const tick = (t) => {
+          const p = Math.min(1, (t - t0) / dur)
+          const eased = 1 - Math.pow(1 - p, 3)
+          el.textContent = (target * eased).toFixed(decimals)
+          if (p < 1) requestAnimationFrame(tick)
+        }
+        requestAnimationFrame(tick)
+      }
+    },
+    { threshold: 0.6 },
+  )
+  document.querySelectorAll('.stat [data-count]').forEach((el) => cio.observe(el))
+
+  // Galería de capturas
+  const shotImg = document.getElementById('shotImg')
+  const shotTitle = document.getElementById('shotTitle')
+  const shotDesc = document.getElementById('shotDesc')
+  const thumbs = document.querySelectorAll('.shots-thumbs button')
+  thumbs.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      thumbs.forEach((b) => b.classList.remove('active'))
+      btn.classList.add('active')
+      shotImg.style.opacity = '0'
+      setTimeout(() => {
+        shotImg.src = btn.dataset.src
+        shotTitle.textContent = btn.dataset.title
+        shotDesc.textContent = btn.dataset.desc
+        shotImg.style.opacity = '1'
+      }, 180)
+    })
+  })
+
+  // ---------- Descargas: detectar SO y etiquetar los botones ----------
+  ;(() => {
+    const detect = () => {
+      const ua = navigator.userAgent
+      if (/windows/i.test(ua)) return 'Windows'
+      if (/macintosh|mac os x|iphone|ipad/i.test(ua)) return 'macOS'
+      if (/linux|ubuntu|fedora|debian|manjaro/i.test(ua)) return 'Linux'
+      return null
+    }
+    const you = detect()
+    if (you) {
+      document.querySelectorAll('#hero-os, #final-os').forEach((el) => { el.textContent = you })
+    }
+    // Última versión (footer/nota si existe)
+    fetch('https://api.github.com/repos/adrianfilitos/deneb-editor/releases/latest')
+      .then((r) => r.json())
+      .then((rel) => {
+        if (rel && rel.tag_name) {
+          document.querySelectorAll('[data-latest]').forEach((el) => { el.textContent = rel.tag_name })
+        }
+      })
+      .catch(() => {})
+  })()
+</script>
+</body>
+</html>
