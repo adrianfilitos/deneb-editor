@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import { executeCommand, COMMANDS } from '../lib/terminal'
-import { isDesktop } from '../lib/electronBridge'
+import { isDesktop, desktopPlatform } from '../lib/electronBridge'
 import type { DesktopEntry } from '../types'
 import { Icons } from './icons'
 
@@ -166,7 +166,7 @@ function PowerShellTerminal() {
   return (
     <div className="terminal" onClick={() => inputRef.current?.focus()}>
       <div className="terminal__header">
-        <span><Icons.terminalIcon size={12} /> PowerShell</span>
+        <span><Icons.terminalIcon size={12} /> {desktopPlatform() === 'win32' ? 'PowerShell' : desktopPlatform() === 'darwin' ? 'zsh' : 'bash'}</span>
         <button className="terminal__clear" title="Limpiar (Ctrl+L)" onClick={() => setLines([{ id: lineCounter++, text: '' }])}>
           <Icons.delete size={12} />
         </button>

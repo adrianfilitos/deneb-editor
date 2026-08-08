@@ -137,10 +137,10 @@ const TOOLS: ToolSchema[] = [
     type: 'function',
     function: {
       name: 'run_command',
-      description: 'Ejecuta un comando en PowerShell dentro del espacio de trabajo y devuelve su salida. Requiere aprobación del usuario.',
+      description: 'Ejecuta un comando de shell (PowerShell en Windows, sh en macOS/Linux) dentro del espacio de trabajo y devuelve su salida. Requiere aprobación del usuario.',
       parameters: {
         type: 'object',
-        properties: { command: { type: 'string', description: 'Comando de PowerShell a ejecutar' } },
+        properties: { command: { type: 'string', description: 'Comando de shell a ejecutar' } },
         required: ['command'],
       },
     },
@@ -405,7 +405,7 @@ Tienes herramientas integradas para trabajar con el espacio de trabajo abierto e
 - 'read_file(ruta)' — lee un archivo.
 - 'search_files(patrón, ruta?)' — busca texto en los archivos.
 - 'write_file(ruta, contenido)' — crea o reemplaza un archivo (requiere aprobación del usuario).
-- 'run_command(comando)' — ejecuta un comando en PowerShell (requiere aprobación del usuario).
+- 'run_command(comando)' — ejecuta un comando de shell (requiere aprobación del usuario).
 
 Reglas de uso:
 - Usa 'list_dir', 'read_file' y 'search_files' cuando necesites información real del proyecto en lugar de inventarla.

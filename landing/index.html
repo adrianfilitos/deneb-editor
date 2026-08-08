@@ -262,10 +262,18 @@
 
   /* ---------- download ---------- */
   .dl-wrap { text-align: center; }
-  .dl-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
-  .dl-btns .btn { padding: 14px 26px; font-size: 15px; }
+  .dl-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; justify-content: center; margin: 26px auto 22px; max-width: 760px; }
+  .dl-group { border: 1px solid rgba(35,40,56,.9); border-radius: 14px; padding: 16px 18px; background: #12151f; }
+  .dl-group b { display: block; color: var(--fg); font-size: 15px; margin-bottom: 10px; letter-spacing: .2px; }
+  .dl-group a { display: block; color: var(--blue); font-size: 13.5px; padding: 5px 0; transition: color .2s; }
+  .dl-group a:hover { color: #6cb1ff; }
   .dl-note { margin-top: 16px; color: var(--faint); font-size: 13px; }
   .dl-note a { color: var(--blue); }
+
+  /* ---------- CTA por plataforma (hero) ---------- */
+  .cta-os { margin-top: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-os { border: 1px solid rgba(45,52,74,.9); color: var(--muted); background: rgba(20,24,40,.6); padding: 8px 18px; border-radius: 999px; font-size: 13px; transition: all .2s; }
+  .btn-os:hover { border-color: #3a4a6e; color: var(--fg); background: #161b2b; }
 
   footer { border-top: 1px solid rgba(35,40,56,.7); padding: 30px 0; color: var(--faint); font-size: 13.5px; }
   footer .container { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
@@ -281,6 +289,7 @@
     .shots { grid-template-columns: 1fr; }
     .nav-links { display: none; }
     .stats { grid-template-columns: repeat(2, 1fr); }
+    .dl-btns { grid-template-columns: 1fr; }
   }
   @media (max-width: 560px) {
     .grid { grid-template-columns: 1fr; }
@@ -340,11 +349,16 @@
   <h1>El editor de código<br/>con <span class="grad">IA integrada</span></h1>
   <p class="sub">Nova combina el poder de Monaco con un asistente de IA que de verdad trabaja contigo: lee tu proyecto, propone cambios y ejecuta comandos — con tu aprobación.</p>
   <div class="cta">
-    <a class="btn btn-primary" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-Setup-1.0.0.exe">Descargar para Windows</a>
+    <a class="btn btn-primary" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-Setup-1.0.0.exe">Windows · instalador (.exe)</a>
     <a class="btn btn-teal" href="app/">Probar en el navegador</a>
     <a class="btn btn-ghost" href="https://github.com/adrianfilitos/nova-editor/releases">Ver releases</a>
   </div>
-  <p class="hint">Windows · instalador y versión portable · gratuito</p>
+  <div class="cta cta-os">
+    <a class="btn-os" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0-mac.dmg">macOS · .dmg</a>
+    <a class="btn-os" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0-linux.AppImage">Linux · AppImage</a>
+    <a class="btn-os" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0.exe">Windows · portable</a>
+  </div>
+  <p class="hint">macOS · Windows · Linux · gratis y de código abierto</p>
 
   <div class="stats">
     <div class="stat"><b data-count="1.0">0</b><span>release estable</span></div>
@@ -364,7 +378,7 @@
     <div class="grid">
       <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6z"/><path d="M14 3v6h6"/></svg></div><h3>Editor Monaco</h3><p>Sintaxis, minimapa, multi-cursor, esquema de símbolos y atajos tipo VS Code.</p></div>
       <div class="card reveal" data-delay="1"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/></svg></div><h3>IA con herramientas</h3><p>El asistente <b>lee</b> y <b>busca</b> en tu proyecto, <b>escribe</b> archivos y <b>ejecuta</b> comandos con tu permiso.</p></div>
-      <div class="card reveal" data-delay="2"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6-6-6M12 19h8"/></svg></div><h3>Terminal real</h3><p>PowerShell integrado en el editor, no un simulacro. Ejecuta de verdad.</p></div>
+      <div class="card reveal" data-delay="2"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6-6-6M12 19h8"/></svg></div><h3>Terminal real</h3><p>Shell real integrada: PowerShell en Windows, zsh en macOS y bash en Linux. No un simulacro.</p></div>
       <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></div><h3>Explorador de archivos</h3><p>Árbol de archivos con búsqueda, crear/renombrar/eliminar y arrastrar y soltar.</p></div>
       <div class="card reveal" data-delay="1"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2.5"/><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="7" r="2.5"/><path d="M6 7.5v9M18 9.5a4 4 0 0 1-4 4H8"/></svg></div><h3>Git con UI dedicada</h3><p>Estado, staging, commits, ramas, historial y diffs con push, pull y fetch integrados.</p></div>
       <div class="card reveal" data-delay="2"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M8 8l4-4 4 4M16 16l-4 4-4-4"/></svg></div><h3>Modo Vim</h3><p>Emulación real de Vim: modos normal, insertar y visual, motions, operadores y búsqueda.</p></div>
@@ -472,7 +486,7 @@ indicador en la UI cuando no hay clave configurada.
       <div class="cmd-card reveal" data-delay="2"><code>nova archivo.ts</code><p>Abre un archivo directamente en el editor.</p></div>
       <div class="cmd-card reveal"><code>nova-ai</code><p>Abre el editor con el asistente de IA enfocado.</p></div>
       <div class="cmd-card reveal" data-delay="1"><code>Ctrl+K Ctrl+S</code><p>Referencia completa de atajos dentro de la app.</p></div>
-      <div class="cmd-card reveal" data-delay="2"><code>Ctrl+`</code><p>Abre la terminal PowerShell integrada.</p></div>
+      <div class="cmd-card reveal" data-delay="2"><code>Ctrl+`</code><p>Abre la terminal integrada (PowerShell / zsh / bash).</p></div>
     </div>
   </div>
 </section>
@@ -483,10 +497,23 @@ indicador en la UI cuando no hay clave configurada.
     <h2 style="font-size:clamp(28px,4vw,40px);font-weight:800;letter-spacing:-.8px">Empieza en un minuto</h2>
     <p style="color:var(--muted);margin-top:12px;max-width:520px;margin-left:auto;margin-right:auto">Instala el editor y añade tu clave de IA en <b>Ajustes → Asistente de IA</b>. Tu clave se guarda solo en tu equipo.</p>
     <div class="dl-btns">
-      <a class="btn btn-primary" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-Setup-1.0.0.exe">Instalador (.exe)</a>
-      <a class="btn btn-ghost" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0.exe">Portable (.exe)</a>
-      <a class="btn btn-teal" href="app/">Probar en el navegador</a>
+      <div class="dl-group">
+        <b>Windows</b>
+        <a href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-Setup-1.0.0.exe">Instalador (.exe)</a>
+        <a href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0.exe">Portable (.exe)</a>
+      </div>
+      <div class="dl-group">
+        <b>macOS</b>
+        <a href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0-mac.dmg">App (.dmg)</a>
+        <a href="https://github.com/adrianfilitos/nova-editor/releases">Ver alternativas</a>
+      </div>
+      <div class="dl-group">
+        <b>Linux</b>
+        <a href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0-linux.AppImage">AppImage</a>
+        <a href="https://github.com/adrianfilitos/nova-editor/releases">Ver alternativas (.deb)</a>
+      </div>
     </div>
+    <a class="btn btn-teal" href="app/">Probar en el navegador</a>
     <p class="dl-note">También en <a href="https://github.com/adrianfilitos/nova-editor/releases">GitHub Releases</a> · Código abierto bajo <a href="https://github.com/adrianfilitos/nova-editor">licencia MIT</a></p>
   </div>
 </section>

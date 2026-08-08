@@ -137,6 +137,14 @@ function registerUpdateHandlers() {
   })
 }
 
+function terminalShell() {
+  if (process.platform === 'win32') {
+    return { file: 'powershell.exe', args: ['-NoLogo', '-NoExit', '-Command', '-'], init: '[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; $OutputEncoding = [System.Text.Encoding]::UTF8\r\n', name: 'PowerShell' }
+  }
+  const shell = process.env.SHELL || (process.platform === 'darwin' ? '/bin/zsh' : '/bin/bash')
+  return { file: shell, args: ['-i'], init: 'export LANG="${LANG:-en_US.UTF-8}"\r', name: process.platform === 'darwin' ? 'zsh' : 'bash' }
+}
+
 function startTerminal(cwd) {
   try {
     if (termProc) {
@@ -144,7 +152,8 @@ function startTerminal(cwd) {
       termProc = null
     }
     const id = ++termId
-    const proc = spawn('powershell.exe', ['-NoLogo', '-NoExit', '-Command', '-'], {
+    const shell = terminalShell()
+    const proc = spawn(shell.file, shell.args, {
       cwd: cwd || os.homedir(),
       windowsHide: true,
       env: process.env,
@@ -160,7 +169,7 @@ function startTerminal(cwd) {
     })
     proc.on('error', (e) => {
       if (id === termId) {
-        sendToWindow('nova:term:data', `\r\n[Error al iniciar PowerShell: ${e.message}]\r\n`)
+        sendToWindow('nova:term:data', `\r\n[Error al iniciar ${shell.name}: ${e.message}]\r\n`)
       }
     })
     proc.on('exit', () => {
@@ -169,8 +178,8 @@ function startTerminal(cwd) {
         sendToWindow('nova:term:exit')
       }
     })
-    if (proc.stdin && proc.stdin.writable) {
-      proc.stdin.write('[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; $OutputEncoding = [System.Text.Encoding]::UTF8\r\n')
+    if (proc.stdin && proc.stdin.writable && shell.init) {
+      proc.stdin.write(shell.init)
     }
   } catch (e) {
     sendToWindow('nova:term:data', `\r\n[Error: ${e.message}]\r\n`)
@@ -534,21 +543,19 @@ function registerFsHandlers() {
     }
     return out
   })
-
   ipcMain.handle('nova:fs:exec', async (_e, cwd, command) => {
     const dir = cwd && typeof cwd === 'string' && fs.existsSync(cwd) ? cwd : workspaceRoot || os.homedir()
     return await new Promise((resolve) => {
-      const child = spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', String(command)], {
-        cwd: dir,
-        windowsHide: true,
-        env: process.env,
-      })
+      const winShell = process.platform === 'win32'
+      const child = winShell
+        ? spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', String(command)], { cwd: dir, windowsHide: true, env: process.env })
+        : spawn('/bin/sh', ['-c', String(command)], { cwd: dir, env: process.env })
       let out = ''
       child.stdout.setEncoding('utf8')
       child.stderr.setEncoding('utf8')
       child.stdout.on('data', (d) => (out += d))
       child.stderr.on('data', (d) => (out += d))
-      child.on('error', (e) => resolve(`Error al iniciar PowerShell: ${e.message}`))
+      child.on('error', (e) => resolve(winShell ? `Error al iniciar PowerShell: ${e.message}` : `Error al iniciar sh: ${e.message}`))
       const timer = setTimeout(() => {
         try {
           child.kill()

@@ -131,6 +131,7 @@ export interface NovaDesktopUpdates {
 
 export interface NovaDesktopBridge {
   isDesktop: boolean
+  platform?: string
   on: (channel: string, cb: (data?: unknown) => void) => () => void
   fs: NovaDesktopFs
   term: NovaDesktopTerm
@@ -150,6 +151,10 @@ declare global {
 
 export function isDesktop(): boolean {
   return typeof window !== 'undefined' && !!window.novaDesktop?.isDesktop
+}
+
+export function desktopPlatform(): string {
+  return window.novaDesktop?.platform || 'web'
 }
 
 export function desktopFs(): NovaDesktopFs | null {

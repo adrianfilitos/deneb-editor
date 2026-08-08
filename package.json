@@ -2,7 +2,7 @@
   "name": "nova-code-editor",
   "private": true,
   "version": "1.0.0",
-  "description": "Nova — Editor de código con IA (web + escritorio)",
+  "description": "Nova â€” Editor de cÃ³digo con IA (web + escritorio)",
   "type": "module",
   "main": "electron/main.cjs",
   "repository": {
@@ -20,6 +20,9 @@
     "test:ext:electron-ls": "node scripts/ext-test/electron-liveserver.mjs",
     "electron:dev": "concurrently -k \"npm:dev\" \"cross-env NOVA_DEV=1 electron .\"",
     "electron:build": "npm run build && electron-builder",
+    "electron:build:win": "npm run build && electron-builder --win",
+    "electron:build:mac": "npm run build && electron-builder --mac",
+    "electron:build:linux": "npm run build && electron-builder --linux",
     "electron:start": "cross-env NOVA_DEV=0 electron .",
     "dist": "electron-builder --publish never"
   },
@@ -65,7 +68,30 @@
         "nsis",
         "portable"
       ],
-      "icon": "public/icon.png"
+      "icon": "build/icon.png"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.developer-tools",
+      "icon": "build/icon.png",
+      "artifactName": "Nova-${version}-mac.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Development",
+      "icon": "build/icon.png",
+      "executableName": "nova",
+      "maintainer": "adrianfilitos <adrianfilitos@users.noreply.github.com>",
+      "artifactName": "Nova-${version}-linux.${ext}"
+    },
+    "dmg": {
+      "artifactName": "Nova-${version}-mac.${ext}"
     },
     "nsis": {
       "oneClick": false,

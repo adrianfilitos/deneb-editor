@@ -2,6 +2,7 @@ const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('novaDesktop', {
   isDesktop: true,
+  platform: process.platform,
   on: (channel, cb) => {
     const handler = (_e, data) => cb(data)
     ipcRenderer.on(channel, handler)
