@@ -4,3 +4,4 @@ release/
 temp/
 *.log
 .DS_Store
+scripts/.build/
