@@ -21,8 +21,10 @@ import './styles/bottom.css'
 import './styles/outline.css'
 import './styles/shortcuts.css'
 import { setupElectronBridge } from './lib/electronBridge'
+import { useExtensionStore } from './store/extensionStore'
 
 setupElectronBridge()
+void useExtensionStore.getState().init()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

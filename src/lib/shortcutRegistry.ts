@@ -1,7 +1,9 @@
 export interface DynamicShortcut {
   id: string
   key: string
+  ctrl?: boolean
   shift?: boolean
+  alt?: boolean
   run: () => void
 }
 

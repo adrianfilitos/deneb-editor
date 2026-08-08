@@ -1,3 +1,5 @@
+import { lookupContributedLanguage } from './extensions/languageRegistry'
+
 const EXT_LANG: Record<string, string> = {
   '.js': 'javascript',
   '.mjs': 'javascript',
@@ -79,6 +81,8 @@ const NAME_LANG: Record<string, string> = {
 }
 
 export function languageFromPath(path: string): string {
+  const contributed = lookupContributedLanguage(path)
+  if (contributed) return contributed
   const name = path.split('/').pop() || path
   const lower = name.toLowerCase()
   const byName = NAME_LANG[lower]

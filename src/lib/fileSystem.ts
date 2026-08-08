@@ -5,6 +5,11 @@ export type AnyHandle = FileSystemDirectoryHandle | FileSystemFileHandle | Virtu
 
 let backendKind: 'native' | 'virtual' | 'desktop' = 'native'
 
+/** Notifica a watchers (fs.watch de las extensiones) que algo cambió en el workspace. */
+export function emitFsChange(kind: 'created' | 'changed' | 'deleted', path: string) {
+  window.dispatchEvent(new CustomEvent('nova:fs-change', { detail: { kind, path } }))
+}
+
 export function fsSupported(): boolean {
   return typeof window !== 'undefined' && 'showDirectoryPicker' in window
 }
@@ -545,6 +550,7 @@ export async function writeFileAt(dirHandle: AnyHandle, path: string, content: s
   const target = await resolvePath(dirHandle, path)
   if (!target || target.kind !== 'file') return false
   await writeText(target, content)
+  emitFsChange('changed', normalizeRelPath(path))
   return true
 }
 
@@ -570,6 +576,7 @@ export async function createFileAt(dirHandle: AnyHandle, path: string, content =
   const vdir = parent as VirtualDir
   if (vdir.entries.has(name)) return false
   vdir.entries.set(name, { kind: 'file', name, content, mtime: Date.now() })
+  emitFsChange('created', normalizeRelPath(path))
   return true
 }
 
@@ -593,6 +600,7 @@ export async function createDirAt(dirHandle: AnyHandle, path: string): Promise<b
   const vdir = parent as VirtualDir
   if (vdir.entries.has(name)) return false
   vdir.entries.set(name, { kind: 'directory', name, entries: new Map() })
+  emitFsChange('created', normalizeRelPath(path))
   return true
 }
 
@@ -614,7 +622,9 @@ export async function removeAt(dirHandle: AnyHandle, path: string): Promise<bool
     return true
   }
   const vdir = parent as VirtualDir
-  return vdir.entries.delete(name)
+  const ok = vdir.entries.delete(name)
+  if (ok) emitFsChange('deleted', normalizeRelPath(path))
+  return ok
 }
 
 export async function isDirectoryAt(dirHandle: AnyHandle, path: string): Promise<boolean> {

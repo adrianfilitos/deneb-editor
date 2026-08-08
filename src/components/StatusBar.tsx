@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import { useGitStore } from '../store/gitStore'
+import { useExtUiStore } from '../store/extUiStore'
 import { displayLanguage } from '../lib/languages'
+import { executeExtensionCommand } from '../lib/extHost/vscodeShim'
 import { Icons } from './icons'
 
 export function StatusBar() {
@@ -25,6 +27,24 @@ export function StatusBar() {
   const [vimState, setVimState] = useState<'NORMAL' | 'INSERT' | 'VISUAL' | 'VISUAL LINE' | 'SEARCH' | 'OFF'>(
     settings.vimMode ? 'NORMAL' : 'OFF',
   )
+
+  const statusItems = useExtUiStore((s) => s.statusItems)
+  const extLeft = Object.values(statusItems)
+    .filter((i) => i.show && i.align === 0)
+    .sort((a, b) => b.priority - a.priority)
+  const extRight = Object.values(statusItems)
+    .filter((i) => i.show && i.align === 1)
+    .sort((a, b) => b.priority - a.priority)
+
+  const runStatus = (item: (typeof extLeft)[number]) => {
+    if (!item.command) return
+    try {
+      const r = executeExtensionCommand(item.command)
+      if (r && typeof r.then === 'function') r.catch(() => {})
+    } catch {
+      // ignore
+    }
+  }
 
   useEffect(() => {
     const onMode = (e: Event) => {
@@ -75,6 +95,16 @@ export function StatusBar() {
               {dirtyCount > 0 ? `● ${dirtyCount} sin guardar` : 'Sincronizado'}
             </span>
             {statusMessage && <span className="status-item status-item--text status-item--message">{statusMessage}</span>}
+            {extLeft.map((item) => (
+              <button
+                key={item.id}
+                className="status-item status-item--ext"
+                title={item.tooltip}
+                onClick={() => runStatus(item)}
+              >
+                {item.text}
+              </button>
+            ))}
           </>
         )}
       </div>
@@ -112,6 +142,16 @@ export function StatusBar() {
           <Icons.gear size={13} />
         </button>
         <span className="status-item status-item--text">{demoMode ? 'Modo demo' : 'FSA'}</span>
+        {extRight.map((item) => (
+          <button
+            key={item.id}
+            className="status-item status-item--ext"
+            title={item.tooltip}
+            onClick={() => runStatus(item)}
+          >
+            {item.text}
+          </button>
+        ))}
         <span className="status-item status-item--model mono" title={settings.ai.model}>
           <Icons.zap size={12} style={{ color: 'var(--purple)' }} /> {settings.ai.model}
         </span>

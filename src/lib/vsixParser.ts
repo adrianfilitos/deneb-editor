@@ -1,11 +1,20 @@
 import { unzipSync, strFromU8 } from 'fflate'
 import type { ExtSnippetDef, ExtThemeDef } from './extensionTypes'
+import { getVsix } from './extensions/blobStore'
 
 export interface VsixParseResult {
   id: string
+  publisher: string
+  name: string
   displayName: string
   version: string
   description?: string
+  engines?: { vscode?: string }
+  /** package.json completo (para contributes, configuration, etc.) */
+  pkg: Record<string, unknown>
+  main: string | null
+  /** Árbol de archivos de la extensión (claves sin el prefijo extension/) */
+  files: Record<string, Uint8Array>
   themes: ExtThemeDef[]
   snippets: ExtSnippetDef[]
   code?: string
@@ -21,6 +30,8 @@ interface VsCodeThemeToken {
   scope?: string | string[]
   settings?: { foreground?: string; fontStyle?: string }
 }
+
+const cache = new Map<string, VsixParseResult>()
 
 function ruleColor(rules: ExtThemeDef['rules'], names: string[]): string | null {
   for (const r of rules) {
@@ -46,29 +57,17 @@ export function themeToExtTheme(id: string, label: string, themeJson: { type?: s
     })
     .filter((r) => r.token && (r.foreground || r.fontStyle))
 
-  // Deriva una paleta CSS básica a partir de los colores del tema
   const colors: Record<string, string> = { ...(themeJson.colors || {}) }
-  if (!colors['editor.background']) {
-    colors['editor.background'] = dark ? '#0f111a' : '#fafbfe'
-  }
-  if (!colors['editor.foreground']) {
-    colors['editor.foreground'] = dark ? '#d5d9e6' : '#263238'
-  }
+  if (!colors['editor.background']) colors['editor.background'] = dark ? '#0f111a' : '#fafbfe'
+  if (!colors['editor.foreground']) colors['editor.foreground'] = dark ? '#d5d9e6' : '#263238'
   if (!colors['editorCursor.foreground']) {
-    colors['editorCursor.foreground'] =
-      ruleColor(rules, ['keyword', 'storage']) || (dark ? '#82aaff' : '#2962ff')
+    colors['editorCursor.foreground'] = ruleColor(rules, ['keyword', 'storage']) || (dark ? '#82aaff' : '#2962ff')
   }
-  const stringColor = ruleColor(rules, ['string']) || (dark ? '#a5e075' : '#689f38')
-  const numberColor = ruleColor(rules, ['number']) || (dark ? '#f78c6c' : '#e65100')
-  const keywordColor = ruleColor(rules, ['keyword', 'storage']) || (dark ? '#c792ea' : '#b072d1')
-  const delimiterColor = ruleColor(rules, ['delimiter', 'operator']) || (dark ? '#89ddff' : '#00838f')
-  const typeColor = ruleColor(rules, ['type', 'support.type']) || (dark ? '#82aaff' : '#2962ff')
-
-  colors['nova.string'] = stringColor
-  colors['nova.number'] = numberColor
-  colors['nova.keyword'] = keywordColor
-  colors['nova.delimiter'] = delimiterColor
-  colors['nova.type'] = typeColor
+  colors['nova.string'] = ruleColor(rules, ['string']) || (dark ? '#a5e075' : '#689f38')
+  colors['nova.number'] = ruleColor(rules, ['number']) || (dark ? '#f78c6c' : '#e65100')
+  colors['nova.keyword'] = ruleColor(rules, ['keyword', 'storage']) || (dark ? '#c792ea' : '#b072d1')
+  colors['nova.delimiter'] = ruleColor(rules, ['delimiter', 'operator']) || (dark ? '#89ddff' : '#00838f')
+  colors['nova.type'] = ruleColor(rules, ['type', 'support.type']) || (dark ? '#82aaff' : '#2962ff')
 
   return { id, label, base, colors, rules }
 }
@@ -77,9 +76,14 @@ function stripLeadingSlash(p: string): string {
   return p.replace(/^\.?\//, '')
 }
 
-/** Extrae temas y snippets de un .vsix (formato VS Code). */
-export function parseVsix(bytes: Uint8Array): VsixParseResult {
-  const files = unzipSync(bytes)
+/** Extrae TODO el contenido de un .vsix (formato VS Code) con su package.json y árbol de archivos. */
+export function parseVsix(bytes: Uint8Array, id?: string): VsixParseResult {
+  let files: Record<string, Uint8Array>
+  try {
+    files = unzipSync(bytes) as Record<string, Uint8Array>
+  } catch (e) {
+    throw new Error(`No se pudo descomprimir el .vsix: ${(e as Error).message}`)
+  }
   const readText = (p: string): string | null => {
     const b = files[p]
     if (!b) return null
@@ -92,28 +96,30 @@ export function parseVsix(bytes: Uint8Array): VsixParseResult {
 
   const pkgRaw = readText('extension/package.json')
   if (!pkgRaw) throw new Error('No se encontró extension/package.json en el .vsix')
-  let pkg: {
-    publisher?: string
-    name?: string
-    displayName?: string
-    version?: string
-    description?: string
-    main?: string
-    contributes?: {
-      themes?: { label?: string; id?: string; path?: string }[]
-      snippets?: { language?: string; path?: string }[]
-    }
-  }
+  let pkg: Record<string, unknown>
   try {
-    pkg = JSON.parse(pkgRaw)
+    pkg = JSON.parse(pkgRaw) as Record<string, unknown>
   } catch {
     throw new Error('El package.json del .vsix no es JSON válido')
   }
-  const publisher = pkg.publisher || 'unknown'
-  const name = pkg.name || 'unknown'
+
+  const contributes = (pkg.contributes || {}) as {
+    themes?: { label?: string; id?: string; path?: string }[]
+    snippets?: { language?: string; path?: string }[]
+  }
+  const publisher = String(pkg.publisher || 'unknown')
+  const name = String(pkg.name || 'unknown')
+
+  // --- árbol de archivos (sin el prefijo extension/) ---
+  const tree: Record<string, Uint8Array> = {}
+  for (const [path, data] of Object.entries(files)) {
+    if (path === 'extension/package.json') continue
+    if (path.startsWith('extension/')) tree[path.slice('extension/'.length)] = data
+    else tree[path] = data
+  }
 
   const themes: ExtThemeDef[] = []
-  for (const t of pkg.contributes?.themes || []) {
+  for (const t of contributes.themes || []) {
     if (!t.path) continue
     const raw = readText(`extension/${stripLeadingSlash(t.path)}`)
     if (!raw) continue
@@ -132,7 +138,7 @@ export function parseVsix(bytes: Uint8Array): VsixParseResult {
   }
 
   const snippets: ExtSnippetDef[] = []
-  for (const s of pkg.contributes?.snippets || []) {
+  for (const s of contributes.snippets || []) {
     if (!s.path || !s.language) continue
     const raw = readText(`extension/${stripLeadingSlash(s.path)}`)
     if (!raw) continue
@@ -152,21 +158,54 @@ export function parseVsix(bytes: Uint8Array): VsixParseResult {
     }
   }
 
-  // Código JS de la extensión (main) para el Extension Host
+  const mainEntry = typeof pkg.main === 'string' ? pkg.main : null
   let code: string | undefined
-  const mainEntry = pkg.main
-  if (typeof mainEntry === 'string' && mainEntry) {
+  if (mainEntry) {
     const raw = readText(`extension/${stripLeadingSlash(mainEntry)}`)
-    if (raw && raw.length <= 500_000) code = raw
+    if (raw && raw.length <= 3_000_000) code = raw
   }
 
-  return {
+  const result: VsixParseResult = {
     id: `${publisher}.${name}`,
-    displayName: pkg.displayName || `${publisher}.${name}`,
-    version: pkg.version || '1.0.0',
-    description: pkg.description,
+    publisher,
+    name,
+    displayName: String(pkg.displayName || pkg.name || `${publisher}.${name}`),
+    version: String(pkg.version || '1.0.0'),
+    description: pkg.description ? String(pkg.description) : undefined,
+    engines: pkg.engines as { vscode?: string } | undefined,
+    pkg,
+    main: mainEntry,
+    files: tree,
     themes,
     snippets,
     code,
+  }
+  if (id) cache.set(id, result)
+  return result
+}
+
+/** Resultado parseado ya en memoria (si la extensión se está ejecutando). */
+export function getParsedVsix(id: string): VsixParseResult | undefined {
+  return cache.get(id)
+}
+
+export function cacheParsedVsix(id: string, parsed: VsixParseResult): void {
+  cache.set(id, parsed)
+}
+
+export function dropParsedVsix(id: string): void {
+  cache.delete(id)
+}
+
+/** Carga el .vsix desde IndexedDB y lo parsea (para restaurar extensiones al iniciar). */
+export async function loadParsedVsixFromStore(id: string): Promise<VsixParseResult | null> {
+  const cached = cache.get(id)
+  if (cached) return cached
+  const bytes = await getVsix(id)
+  if (!bytes) return null
+  try {
+    return parseVsix(bytes, id)
+  } catch {
+    return null
   }
 }

@@ -67,7 +67,7 @@ const toolsCommands: ExtCommandDef[] = [
 ]
 
 const toolsShortcuts: ExtShortcutDef[] = [
-  { id: 'nova.tools.shortcut.date', key: 'd', shift: true, commandId: 'nova.tools.insertDate', run: toolsCommands[0].run },
+  { id: 'nova.tools.shortcut.date', key: 'd', ctrl: true, shift: true, commandId: 'nova.tools.insertDate', run: toolsCommands[0].run },
 ]
 
 const candyTheme = {

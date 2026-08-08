@@ -4,6 +4,8 @@ import { iconForFile } from '../lib/fileIcons'
 import { Icons } from './icons'
 import type { TreeNode } from '../types'
 import { ContextMenu, type MenuItem } from './ContextMenu'
+import { getContributedMenu } from '../lib/extensions/menuRegistry'
+import { executeExtensionCommand } from '../lib/extHost/vscodeShim'
 
 interface ExplorerProps {
   onOpenFile?: (path: string) => void
@@ -192,6 +194,21 @@ function TreeView({
   }
   items.push({ label: 'Renombrar', icon: 'pencil', run: () => setRenaming(true) })
   items.push({ label: 'Eliminar', icon: 'trash', danger: true, run: () => void deleteItem() })
+
+  // Menú contextual aportado por extensiones (contributes.menus → explorer/context)
+  for (const m of getContributedMenu('explorer/context')) {
+    items.push({
+      label: m.label,
+      run: () => {
+        try {
+          const r = executeExtensionCommand(m.command)
+          if (r && typeof r.then === 'function') r.catch(() => {})
+        } catch {
+          // ignore
+        }
+      },
+    })
+  }
 
   async function deleteItem() {
     if (!window.confirm(`¿Eliminar "${node.name}"? Esta acción no se puede deshacer.`)) return

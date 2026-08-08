@@ -16,7 +16,7 @@ interface SessionData {
   tabs: StoredTab[]
   groups: { id: string; activePath: string | null }[]
   activeGroupId: string
-  bottomView: 'terminal' | 'problems' | null
+  bottomView: 'terminal' | 'problems' | 'output' | null
 }
 
 function openDb(): Promise<IDBDatabase> {

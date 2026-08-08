@@ -43,7 +43,7 @@ interface EditorStore {
   cursor: CursorPosition
   settings: EditorSettings
   statusMessage: string | null
-  bottomView: 'terminal' | 'problems' | null
+  bottomView: 'terminal' | 'problems' | 'output' | null
   bottomHeight: number
   zenMode: boolean
 
@@ -77,7 +77,7 @@ interface EditorStore {
   updateSettings: (patch: Partial<EditorSettings>) => void
   setStatus: (msg: string | null, timeoutMs?: number) => void
   applyAIBuffer: (path: string, buffer: string) => void
-  setBottomView: (v: 'terminal' | 'problems' | null) => void
+  setBottomView: (v: 'terminal' | 'problems' | 'output' | null) => void
   setBottomHeight: (h: number) => void
   toggleZen: () => void
   patch: (partial: Partial<EditorStore>) => void

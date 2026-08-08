@@ -5,6 +5,8 @@ import { registerDynamicCommand, unregisterDynamicCommand } from './commandRegis
 import { registerDynamicShortcut, unregisterDynamicShortcut } from './shortcutRegistry'
 import { NATIVE_MAP } from './nativeExtensions'
 import { runExtension, stopExtension } from './extHost/host'
+import { applyContributions } from './extensions/contributions'
+import { getParsedVsix } from './vsixParser'
 import { lighten, darken, mix, rgba } from './colorUtils'
 import type { ExtThemeDef, InstalledExt } from './extensionTypes'
 
@@ -15,6 +17,7 @@ interface AppliedRec {
   prevTheme: string | null
   commandIds: string[]
   shortcutIds: string[]
+  contributionUndo?: () => void
 }
 
 const applied = new Map<string, AppliedRec>()
@@ -172,9 +175,15 @@ export function applyExtension(ext: InstalledExt) {
     rec.shortcutIds.push(sc.id)
   }
 
-  // Extension Host: ejecuta el código JS de la extensión
-  if (ext.code) {
-    runExtension(ext)
+  // Contribuciones del .vsix (lenguajes, menús, comandos, keybindings, configuración)
+  const parsed = getParsedVsix(ext.id)
+  if (parsed) {
+    rec.contributionUndo = applyContributions(ext.id, parsed)
+  }
+
+  // Extension Host: ejecuta el código JS de la extensión (main del .vsix)
+  if (ext.code || parsed?.code) {
+    void runExtension(ext)
   }
 
   applied.set(ext.id, rec)
@@ -200,6 +209,7 @@ export function undoExtension(ext: InstalledExt) {
   }
   for (const id of rec.commandIds) unregisterDynamicCommand(id)
   for (const id of rec.shortcutIds) unregisterDynamicShortcut(id)
+  rec.contributionUndo?.()
   if (ext.code) stopExtension(ext.id)
   applied.delete(ext.id)
 }

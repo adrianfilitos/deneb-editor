@@ -30,6 +30,7 @@ export interface ExtCommandDef {
 export interface ExtShortcutDef {
   id: string
   key: string
+  ctrl?: boolean
   shift?: boolean
   commandId: string
   run: () => void
@@ -60,4 +61,6 @@ export interface InstalledExt {
   contrib: ExtContribData
   /** Código JS de la extensión (main del .vsix) para el Extension Host */
   code?: string
+  /** true si el .vsix completo está guardado en IndexedDB */
+  archive?: boolean
 }

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import { Terminal } from './Terminal'
 import { ProblemsPanel } from './ProblemsPanel'
+import { OutputPanel } from './OutputPanel'
 import { Icons } from './icons'
 
 export function BottomPanel() {
@@ -55,13 +56,19 @@ export function BottomPanel() {
         >
           <Icons.warning size={12} /> Problemas
         </button>
+        <button
+          className={`bottom-tab${view === 'output' ? ' bottom-tab--active' : ''}`}
+          onClick={() => setBottomView('output')}
+        >
+          <Icons.terminalIcon size={12} /> Salida
+        </button>
         <div className="bottom-panel__spacer" />
         <button className="bottom-panel__close" title="Cerrar panel (Ctrl+J)" onClick={() => setBottomView(null)}>
           <Icons.close size={13} />
         </button>
       </div>
       <div className="bottom-panel__body">
-        {view === 'terminal' ? <Terminal /> : <ProblemsPanel />}
+        {view === 'terminal' ? <Terminal /> : view === 'problems' ? <ProblemsPanel /> : <OutputPanel />}
       </div>
     </div>
   )

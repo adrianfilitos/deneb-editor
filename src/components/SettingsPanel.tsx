@@ -4,6 +4,7 @@ import { AI_PROVIDERS, providerPreset } from '../lib/ai'
 import { clearNovaData } from '../lib/storageReset'
 import { THEME_PALETTES, THEME_IDS } from '../lib/monaco'
 import { UpdatesSection } from './UpdatesSection'
+import { getContributedConfigSections, type ContributedConfigProp } from '../lib/extensions/configRegistry'
 import type { AIProvider, ThemeId } from '../types'
 import { Icons } from './icons'
 
@@ -19,13 +20,14 @@ const THEME_NAMES: Record<ThemeId, string> = {
   'nova-paper': 'Paper',
 }
 
-type SettingsTab = 'apariencia' | 'editor' | 'ia' | 'sistema'
+type SettingsTab = 'apariencia' | 'editor' | 'ia' | 'sistema' | 'extensiones'
 
 const TABS: { id: SettingsTab; label: string; icon: keyof typeof Icons }[] = [
   { id: 'apariencia', label: 'Apariencia', icon: 'sparkles' },
   { id: 'editor', label: 'Editor', icon: 'pencil' },
   { id: 'ia', label: 'Asistente de IA', icon: 'zap' },
   { id: 'sistema', label: 'Sistema', icon: 'gear' },
+  { id: 'extensiones', label: 'Extensiones', icon: 'extension' },
 ]
 
 export function SettingsPanel() {
@@ -53,6 +55,7 @@ export function SettingsPanel() {
         {tab === 'editor' && <EditorTab />}
         {tab === 'ia' && <AITab />}
         {tab === 'sistema' && <SystemTab />}
+        {tab === 'extensiones' && <ExtConfigTab />}
       </div>
     </div>
   )
@@ -373,6 +376,85 @@ function SystemTab() {
           </div>
         </div>
       </Group>
+    </>
+  )
+}
+
+// ---------------------------------------------------------------------------
+//  EXTENSIONES (configuración contribuida por extensiones)
+// ---------------------------------------------------------------------------
+
+function ExtConfigTab() {
+  const settings = useEditorStore((s) => s.settings)
+  const update = useEditorStore((s) => s.updateSettings)
+  const sections = getContributedConfigSections()
+
+  if (sections.length === 0) {
+    return (
+      <div className="settings__empty">
+        <p>Sin ajustes contribuidos.</p>
+        <p className="settings__note">
+          Instala extensiones que declaren <span className="mono">contributes.configuration</span> (como Live Server) para
+          ver sus ajustes aquí.
+        </p>
+      </div>
+    )
+  }
+
+  const settingsMap = settings as unknown as Record<string, unknown>
+  const read = (p: ContributedConfigProp) => {
+    const v = settingsMap[p.key]
+    return v !== undefined ? v : p.default
+  }
+  const write = (p: ContributedConfigProp, value: unknown) => {
+    update({ [p.key]: value } as never)
+  }
+
+  return (
+    <>
+      {sections.map((sec) => (
+        <Group key={sec.extId} title={sec.title} subtitle={sec.extId}>
+          {sec.properties.map((p) => {
+            const label = p.key.split('.').pop() || p.key
+            const value = read(p)
+            return (
+              <Row key={p.key} label={`${label} · ${p.description || p.key}`}>
+                {p.enum ? (
+                  <select
+                    className="settings__input"
+                    value={String(value)}
+                    onChange={(e) => write(p, e.target.value)}
+                  >
+                    {p.enum.map((opt) => (
+                      <option key={String(opt)} value={String(opt)}>
+                        {String(opt)}
+                      </option>
+                    ))}
+                  </select>
+                ) : p.type === 'boolean' ? (
+                  <Toggle value={!!value} onChange={(v) => write(p, v)} />
+                ) : p.type === 'number' || p.type === 'integer' ? (
+                  <input
+                    className="settings__input mono"
+                    type="number"
+                    min={p.minimum}
+                    max={p.maximum}
+                    value={String(value ?? '')}
+                    onChange={(e) => write(p, Number(e.target.value))}
+                  />
+                ) : (
+                  <input
+                    className="settings__input mono"
+                    type="text"
+                    value={String(value ?? '')}
+                    onChange={(e) => write(p, e.target.value)}
+                  />
+                )}
+              </Row>
+            )
+          })}
+        </Group>
+      ))}
     </>
   )
 }

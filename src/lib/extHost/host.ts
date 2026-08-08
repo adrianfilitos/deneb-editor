@@ -1,81 +1,12 @@
 import { createVscodeApi, type HostHandle } from './vscodeShim'
 import type { InstalledExt } from '../extensionTypes'
+import { getParsedVsix } from '../vsixParser'
+import { CommonJsLoader } from '../extensions/loader'
+import { getNodeBuiltins } from '../extensions/nodeBuiltins'
+import { extFs } from '../extensions/extFs'
+import { useExtensionStore } from '../../store/extensionStore'
 
 const hosts = new Map<string, HostHandle>()
-
-const pathStub = {
-  join: (...parts: string[]) => parts.join('/').replace(/\/+/g, '/'),
-  basename: (p: string) => String(p).split(/[\\/]/).pop() || '',
-  dirname: (p: string) => String(p).split(/[\\/]/).slice(0, -1).join('/'),
-  extname: (p: string) => {
-    const base = String(p).split(/[\\/]/).pop() || ''
-    const i = base.lastIndexOf('.')
-    return i > 0 ? base.slice(i) : ''
-  },
-  resolve: (...parts: string[]) => parts.join('/'),
-  sep: '/',
-  normalize: (p: string) => p,
-}
-
-const osStub = { EOL: '\n', platform: 'win32', tmpdir: () => '/tmp', homedir: () => '/home', cpus: () => [], arch: () => 'x64' }
-
-const utilStub = {
-  inspect: (o: unknown) => {
-    try {
-      return JSON.stringify(o)
-    } catch {
-      return String(o)
-    }
-  },
-  promisify: (fn: (...a: any[]) => void) => (...a: any[]) => Promise.resolve(fn(...a)),
-  format: (...a: any[]) => a.map((x) => String(x)).join(' '),
-}
-
-const fsStub = {
-  existsSync: () => false,
-  readFileSync: () => {
-    throw new Error('Nova: fs.readFileSync no está soportado en extensiones')
-  },
-  writeFileSync: () => {},
-  readdirSync: () => [],
-  statSync: () => ({ isDirectory: () => false, isFile: () => true }),
-  mkdirSync: () => {},
-  unlinkSync: () => {},
-  appendFileSync: () => {},
-  rmSync: () => {},
-  promises: {},
-}
-
-const nodeBuiltins: Record<string, unknown> = {
-  path: pathStub,
-  'path/posix': pathStub,
-  'path/win32': pathStub,
-  os: osStub,
-  util: utilStub,
-  fs: fsStub,
-  'fs/promises': {},
-  url: { URL, fileURLToPath: (u: string) => String(u).replace(/^file:\/\//, '') },
-  assert: { ok: () => {}, strict: () => {} },
-  events: { EventEmitter: class {} },
-  crypto: globalThis.crypto,
-  child_process: { spawnSync: () => ({ status: 1, stdout: '', stderr: '' }), execSync: () => '', spawn: () => ({ on: () => {}, stdin: { write: () => {} } }) },
-  stream: {},
-  http: {},
-  https: {},
-  buffer: { Buffer: { from: (s: string) => s, isBuffer: () => false, alloc: () => ({}) } },
-}
-
-const processStub = {
-  env: {},
-  platform: 'win32',
-  versions: { node: '18.0.0' },
-  on: () => {},
-  once: () => {},
-  nextTick: (cb: () => void) => queueMicrotask(cb),
-  cwd: () => '/',
-  argv: [],
-  exit: () => {},
-}
 
 export interface RunningHost {
   id: string
@@ -86,63 +17,60 @@ export function isHostRunning(id: string): boolean {
   return hosts.has(id)
 }
 
-/** Ejecuta el código de la extensión (main del .vsix) con la API vscode. */
-export function runExtension(ext: InstalledExt): boolean {
-  if (!ext.code) return false
+function status(msg: string) {
+  window.dispatchEvent(new CustomEvent('nova:status', { detail: msg }))
+}
+
+/**
+ * Ejecuta el main de la extensión con el cargador CommonJS de Nova:
+ * resuelve require('vscode') contra el shim, los builtins de Node contra los
+ * polyfills (fs sobre el workspace real) y las rutas relativas dentro del .vsix.
+ */
+export async function runExtension(ext: InstalledExt): Promise<boolean> {
+  const parsed = getParsedVsix(ext.id)
+  if (!ext.code && !parsed) return false
   if (hosts.has(ext.id)) return true
 
   const handle = createVscodeApi(ext.id, { id: ext.id, version: ext.version })
-  const moduleObj: { exports: any } = { exports: {} }
-
-  const makeRequire = (name: string): any => {
-    if (name === 'vscode') return handle.api
-    if (name in nodeBuiltins) return nodeBuiltins[name]
-    throw new Error(`Módulo no soportado por el Extension Host de Nova: "${name}"`)
+  const builtins = getNodeBuiltins()
+  const env = {
+    vscode: handle.api,
+    builtins,
+    process: builtins.process,
+    globalThisRef: globalThis,
   }
 
+  const files: Record<string, Uint8Array> = parsed
+    ? parsed.files
+    : { 'extension.js': new TextEncoder().encode(ext.code || '') }
+  const main = parsed?.main ?? 'extension.js'
+
+  let exported: any
   try {
-    // Sandbox en el hilo principal con un sistema de módulos mínimo (CommonJS).
-    const runner = new Function(
-      'module',
-      'exports',
-      'require',
-      '__filename',
-      '__dirname',
-      'process',
-      'global',
-      ext.code,
-    )
-    runner(moduleObj, moduleObj.exports, makeRequire, 'extension.js', '/', processStub, globalThis)
+    await extFs.hydrate()
+    if (useExtensionStore.getState().installed[ext.id]?.enabled === false) {
+      handle.disposeAll()
+      return false
+    }
+    const loader = new CommonJsLoader(files, env)
+    exported = loader.loadMain(main)
   } catch (e) {
-    window.dispatchEvent(
-      new CustomEvent('nova:status', {
-        detail: `La extensión ${ext.name} no pudo activarse: ${(e as Error).message}`,
-      }),
-    )
+    status(`La extensión ${ext.name} no pudo activarse: ${(e as Error).message}`)
     handle.disposeAll()
     return false
   }
 
-  const exported = moduleObj.exports
   const activate = typeof exported === 'function' ? exported : exported?.activate
   if (typeof activate === 'function') {
     try {
       const r = activate(handle.context)
       if (r && typeof r.then === 'function') {
         r.catch((err: Error) => {
-          window.dispatchEvent(
-            new CustomEvent('nova:status', {
-              detail: `Error al activar ${ext.name}: ${err.message}`,
-            }),
-          )
+          status(`Error al activar ${ext.name}: ${err.message}`)
         })
       }
     } catch (e) {
-      window.dispatchEvent(
-        new CustomEvent('nova:status', {
-          detail: `Error al activar ${ext.name}: ${(e as Error).message}`,
-        }),
-      )
+      status(`Error al activar ${ext.name}: ${(e as Error).message}`)
       handle.disposeAll()
       return false
     }

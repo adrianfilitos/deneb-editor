@@ -1,16 +1,49 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import Editor, { type Monaco, type OnMount } from '@monaco-editor/react'
-import type { editor as monacoEditor, languages as monacoLanguages } from 'monaco-editor'
+import type { editor as monacoEditor, languages as monacoLanguages, IDisposable } from 'monaco-editor'
 import { useEditorStore } from '../store/editorStore'
 import { defineNovaThemes, setEditorTheme } from '../lib/monaco'
 import { VimMode } from '../lib/vim'
 import { useAIChatStore } from '../store/aiChatStore'
 import type { ChatMessage } from '../types'
+import { getContributedMenu } from '../lib/extensions/menuRegistry'
+import { executeExtensionCommand } from '../lib/extHost/vscodeShim'
 
 let themesDefined = false
 
 type FocusTracker = { __novaFocusPath?: string; __novaEditor?: monacoEditor.IStandaloneCodeEditor }
 const focusWindow = window as unknown as FocusTracker
+
+const editorMenuActions = new Map<monacoEditor.IStandaloneCodeEditor, IDisposable[]>()
+
+function syncEditorContextMenu(editor: monacoEditor.IStandaloneCodeEditor) {
+  const old = editorMenuActions.get(editor) || []
+  for (const d of old) {
+    try {
+      d.dispose()
+    } catch {
+      // ignore
+    }
+  }
+  const disps: IDisposable[] = []
+  for (const m of getContributedMenu('editor/context')) {
+    const disp = editor.addAction({
+      id: `ext-menu:${m.extId}:${m.command}`,
+      label: m.label,
+      contextMenuGroupId: 'extensions',
+      run: () => {
+        try {
+          const r = executeExtensionCommand(m.command)
+          if (r && typeof r.then === 'function') r.catch(() => {})
+        } catch {
+          // ignore
+        }
+      },
+    })
+    disps.push(disp)
+  }
+  editorMenuActions.set(editor, disps)
+}
 
 export function EditorPane({ groupId }: { groupId: string }) {
   const group = useEditorStore((s) => s.groups.find((g) => g.id === groupId))
@@ -83,6 +116,14 @@ export function EditorPane({ groupId }: { groupId: string }) {
     vimRef.current.setEnabled(settings.vimMode)
     setupAIActions(editor, monaco)
     setupInlineCompletions(monaco)
+    syncEditorContextMenu(editor)
+    const onMenusChanged = () => syncEditorContextMenu(editor)
+    window.addEventListener('nova:ext-menus-changed', onMenusChanged)
+    editor.onDidDispose(() => {
+      window.removeEventListener('nova:ext-menus-changed', onMenusChanged)
+      for (const d of editorMenuActions.get(editor) || []) d.dispose()
+      editorMenuActions.delete(editor)
+    })
     editor.onDidChangeCursorPosition((e) => {
       setCursor({ lineNumber: e.position.lineNumber, column: e.position.column })
       window.dispatchEvent(new CustomEvent('nova:cursor-pos'))

@@ -7,6 +7,7 @@ import { SettingsPanel } from './SettingsPanel'
 import { OutlinePanel } from './OutlinePanel'
 import { GitPanel } from './GitPanel'
 import { ErrorBoundary } from './ErrorBoundary'
+import { ExtViewsPanel } from './ExtViewsPanel'
 import { Icons } from './icons'
 
 const TITLES: Record<string, { title: string; subtitle?: string }> = {
@@ -17,6 +18,7 @@ const TITLES: Record<string, { title: string; subtitle?: string }> = {
   extensions: { title: 'Extensiones' },
   settings: { title: 'Ajustes' },
   outline: { title: 'Esquema', subtitle: 'símbolos' },
+  extviews: { title: 'Vistas', subtitle: 'de extensiones' },
 }
 
 export function Sidebar() {
@@ -51,6 +53,7 @@ export function Sidebar() {
           {view === 'extensions' && <ExtensionsPanel />}
           {view === 'settings' && <SettingsPanel />}
           {view === 'outline' && <OutlinePanel />}
+          {view === 'extviews' && <ExtViewsPanel />}
         </ErrorBoundary>
       </div>
     </aside>

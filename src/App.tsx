@@ -13,6 +13,8 @@ import { useGlobalShortcuts } from './hooks/useGlobalShortcuts'
 import { restoreSession, persistSession } from './lib/session'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { TitleBar } from './components/TitleBar'
+import { ExtModal } from './components/ExtModal'
+import { ExtWebviewHost } from './components/ExtWebviewHost'
 
 export default function App() {
   const sidebarVisible = useEditorStore((s) => s.sidebarVisible)
@@ -105,6 +107,8 @@ export default function App() {
       <ErrorBoundary label="la paleta de comandos">
         <CommandPalette />
       </ErrorBoundary>
+      <ExtModal />
+      <ExtWebviewHost />
       {shortcutsOpen && (
         <ErrorBoundary label="la referencia de atajos">
           <ShortcutsModal onClose={() => setShortcutsOpen(false)} />

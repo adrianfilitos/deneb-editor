@@ -7,6 +7,19 @@ function isModKey(e: KeyboardEvent): boolean {
   return (e.ctrlKey || e.metaKey) && !e.altKey
 }
 
+function normalizeKey(e: KeyboardEvent): string {
+  const map: Record<string, string> = {
+    arrowup: 'up',
+    arrowdown: 'down',
+    arrowleft: 'left',
+    arrowright: 'right',
+    ' ': 'space',
+    escape: 'esc',
+  }
+  const k = e.key.toLowerCase()
+  return map[k] || k
+}
+
 export function useGlobalShortcuts() {
   const chordRef = useRef<string | null>(null)
   const chordTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -40,6 +53,21 @@ export function useGlobalShortcuts() {
           chordRef.current = null
         }, 2000)
         return
+      }
+
+      // Atajos aportados por extensiones (keybindings de VS Code), primero
+      // para que puedan reasignar los atajos por defecto igual que VS Code.
+      const modPressed = e.ctrlKey || e.metaKey
+      const normKey = normalizeKey(e)
+      for (const sc of getDynamicShortcuts()) {
+        if ((sc.ctrl === true) !== modPressed) continue
+        if ((sc.shift === true) !== e.shiftKey) continue
+        if ((sc.alt === true) !== e.altKey) continue
+        if (normKey === sc.key.toLowerCase() || key === sc.key.toLowerCase()) {
+          e.preventDefault()
+          sc.run()
+          return
+        }
       }
 
       // Ctrl+Shift+P or F1 → command palette
@@ -138,16 +166,6 @@ export function useGlobalShortcuts() {
         e.preventDefault()
         store.splitGroup()
         return
-      }
-      // Atajos aportados por extensiones
-      if (isModKey(e)) {
-        for (const sc of getDynamicShortcuts()) {
-          if (e.shiftKey === !!sc.shift && key === sc.key) {
-            e.preventDefault()
-            sc.run()
-            return
-          }
-        }
       }
     }
 

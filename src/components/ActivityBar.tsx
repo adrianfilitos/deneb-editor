@@ -11,6 +11,7 @@ const NAV: { view: SidebarView; icon: IconName; label: string; ai?: boolean }[] 
   { view: 'ai', icon: 'sparkles', label: 'Asistente de IA', ai: true },
   { view: 'outline', icon: 'list', label: 'Esquema' },
   { view: 'extensions', icon: 'extension', label: 'Extensiones' },
+  { view: 'extviews', icon: 'folderOpen', label: 'Vistas de extensiones' },
 ]
 
 export function ActivityBar() {

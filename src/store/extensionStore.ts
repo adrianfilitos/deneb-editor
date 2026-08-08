@@ -2,7 +2,13 @@ import { create } from 'zustand'
 import type { InstalledExt } from '../lib/extensionTypes'
 import { applyExtension, undoExtension } from '../lib/extensionRuntime'
 import { NATIVE_MAP } from '../lib/nativeExtensions'
-import { parseVsix } from '../lib/vsixParser'
+import {
+  parseVsix,
+  cacheParsedVsix,
+  dropParsedVsix,
+  loadParsedVsixFromStore,
+} from '../lib/vsixParser'
+import { putVsix, deleteVsix } from '../lib/extensions/blobStore'
 
 const STORAGE_KEY = 'nova.extensions.installed.v2'
 
@@ -26,7 +32,7 @@ function persistInstalled(installed: Record<string, InstalledExt>) {
 
 interface ExtensionStore {
   installed: Record<string, InstalledExt>
-  init: () => void
+  init: () => Promise<void>
   installNative: (id: string) => void
   installVsixFromBytes: (bytes: Uint8Array, fallbackName: string, fallbackIcon?: string) => string | null
   setEnabled: (id: string, on: boolean) => void
@@ -36,10 +42,15 @@ interface ExtensionStore {
 export const useExtensionStore = create<ExtensionStore>((set, get) => ({
   installed: loadInstalled(),
 
-  init: () => {
+  init: async () => {
     const installed = get().installed
     for (const ext of Object.values(installed)) {
-      if (ext.enabled) applyExtension(ext)
+      if (!ext.enabled) continue
+      if (ext.type === 'vsix' && ext.archive) {
+        const parsed = await loadParsedVsixFromStore(ext.id)
+        if (parsed) cacheParsedVsix(ext.id, parsed)
+      }
+      applyExtension(ext)
     }
   },
 
@@ -77,6 +88,7 @@ export const useExtensionStore = create<ExtensionStore>((set, get) => ({
     } catch {
       return null
     }
+    cacheParsedVsix(parsed.id, parsed)
     const ext: InstalledExt = {
       id: parsed.id,
       type: 'vsix',
@@ -87,7 +99,9 @@ export const useExtensionStore = create<ExtensionStore>((set, get) => ({
       enabled: true,
       contrib: { themes: parsed.themes, snippets: parsed.snippets },
       code: parsed.code,
+      archive: true,
     }
+    void putVsix(parsed.id, bytes)
     set((s) => {
       const installed = { ...s.installed, [ext.id]: ext }
       persistInstalled(installed)
@@ -101,8 +115,16 @@ export const useExtensionStore = create<ExtensionStore>((set, get) => ({
     const ext = get().installed[id]
     if (!ext || ext.enabled === on) return
     const next = { ...ext, enabled: on }
-    if (on) applyExtension(next)
-    else undoExtension(ext)
+    if (on) {
+      if (next.type === 'vsix' && next.archive) {
+        void loadParsedVsixFromStore(id).then((parsed) => {
+          if (parsed) cacheParsedVsix(id, parsed)
+        })
+      }
+      applyExtension(next)
+    } else {
+      undoExtension(ext)
+    }
     set((s) => {
       const installed = { ...s.installed, [id]: next }
       persistInstalled(installed)
@@ -114,6 +136,10 @@ export const useExtensionStore = create<ExtensionStore>((set, get) => ({
     const ext = get().installed[id]
     if (!ext) return
     if (ext.enabled) undoExtension(ext)
+    if (ext.type === 'vsix') {
+      void deleteVsix(id)
+      dropParsedVsix(id)
+    }
     set((s) => {
       const installed = { ...s.installed }
       delete installed[id]
