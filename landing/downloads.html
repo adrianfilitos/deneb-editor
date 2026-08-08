@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#0b0d14" />
+<title>Descargar Nova — Windows, macOS y Linux</title>
+<meta name="description" content="Descarga Nova para Windows, macOS y Linux. Instalador, portable, AppImage y .dmg. Gratis y de código abierto." />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<nav>
+  <div class="container">
+    <a class="brand" href="./">
+      <svg width="26" height="26" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="nd1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#7fb0ff"/><stop offset="55%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#5eead4"/>
+          </linearGradient>
+        </defs>
+        <rect width="64" height="64" rx="15" fill="url(#nd1)"/>
+        <path d="M20 46V18l24 28V18" stroke="#fff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M50 7.5l1.6 4 4 1.6-4 1.6-1.6 4-1.6-4-4-1.6 4-1.6z" fill="#fff"/>
+      </svg>
+      Nova
+    </a>
+    <div class="nav-links">
+      <a href="./#funciones">Funciones</a>
+      <a href="./#capturas">Capturas</a>
+      <a href="./#ia">IA</a>
+      <a href="./#faq">FAQ</a>
+      <a class="btn btn-primary" style="padding:8px 16px" href="https://github.com/adrianfilitos/nova-editor">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" style="padding:72px 0 40px">
+  <div class="badge"><span class="dot"></span> v1.0.0 estable · código abierto</div>
+  <h1 style="font-size:clamp(32px,5vw,52px)">Descarga Nova</h1>
+  <p class="sub" style="max-width:560px">Elige tu sistema y descarga el instalador. Añade tu clave de IA en <b>Ajustes → Asistente de IA</b> — se guarda solo en tu equipo.</p>
+  <p class="hint" id="dl-updates">Comprobando la última versión…</p>
+</header>
+
+<section id="dl-section">
+  <div class="container dl-wrap" style="padding-top:0">
+    <div class="dl-grid">
+      <div class="dl-card" data-os="win">
+        <span class="dl-badge">tu sistema</span>
+        <div class="dl-logo win"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M0 3.45l9.83-1.33V11.5H0zM11.33 1.99L24 0v11.5H11.33zM0 12.5h9.83v9.38L0 20.55zM11.33 12.5H24v11.5L11.33 22z"/></svg></div>
+        <h3>Windows</h3>
+        <p>Instalador o versión portable</p>
+        <a class="dl-btn primary" data-dl="win-installer" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-Setup-1.0.0.exe">Descargar instalador</a>
+        <a class="dl-btn ghost" data-dl="win-portable" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0.exe">Portable .exe</a>
+        <span class="dl-meta"><b data-size="Nova-Setup-1.0.0.exe">…</b> · instalador</span>
+      </div>
+      <div class="dl-card" data-os="mac">
+        <span class="dl-badge">tu sistema</span>
+        <div class="dl-logo mac"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M21.03 12.02c.02 2.66 2.33 3.55 2.36 3.56-.02.06-.37 1.26-1.22 2.5-.73 1.07-1.49 2.14-2.69 2.16-1.18.03-1.56-.7-2.91-.7s-1.77.68-2.89.72c-1.17.05-2.06-1.16-2.8-2.23-1.52-2.2-2.68-6.21-1.12-8.92.78-1.35 2.17-2.21 3.68-2.23 1.15-.02 2.23.77 2.93.77s1.6-.96 2.9-.82c.98.04 2 .44 2.76 1.17a6.04 6.04 0 0 0-1.1 2.06l.1.06zM17.82 4.9c.61-.74 1.02-1.76.91-2.78-.88.04-1.94.59-2.57 1.33-.57.66-1.06 1.71-.93 2.72.98.08 1.98-.5 2.59-1.27z"/></svg></div>
+        <h3>macOS</h3>
+        <p>Apple Silicon e Intel</p>
+        <a class="dl-btn primary" data-dl="mac" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0-mac.dmg">Descargar .dmg</a>
+        <span class="dl-meta"><b data-size="Nova-1.0.0-mac.dmg">…</b> · universal</span>
+      </div>
+      <div class="dl-card" data-os="linux">
+        <span class="dl-badge">tu sistema</span>
+        <div class="dl-logo linux"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><circle cx="12" cy="12" r="2.2"/><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 17l9 5 9-5"/></svg></div>
+        <h3>Linux</h3>
+        <p>AppImage · funciona en la mayoría de distros</p>
+        <a class="dl-btn primary" data-dl="linux" href="https://github.com/adrianfilitos/nova-editor/releases/download/v1.0.0/Nova-1.0.0-linux.AppImage">Descargar AppImage</a>
+        <a class="dl-btn ghost" href="https://github.com/adrianfilitos/nova-editor/releases">Otros formatos (.deb)</a>
+        <span class="dl-meta"><b data-size="Nova-1.0.0-linux.AppImage">…</b> · x64</span>
+      </div>
+    </div>
+
+    <div class="dl-steps">
+      <div class="step"><b>1</b><span>Descarga tu archivo</span></div>
+      <div class="step"><b>2</b><span>Instala o descomprime</span></div>
+      <div class="step"><b>3</b><span>Abre Nova y añade tu clave de IA</span></div>
+    </div>
+
+    <div class="dl-notes">
+      <p><b>Windows:</b> el instalador añade los comandos <code>nova</code> y <code>nova-ai</code> al PATH. La versión portable no necesita instalación.</p>
+      <p><b>macOS:</b> arrastra Nova a Aplicaciones. Si macOS lo bloquea, clic derecho → Abrir. El .dmg incluye Apple Silicon e Intel.</p>
+      <p><b>Linux:</b> haz ejecutable el AppImage (<code>chmod +x Nova-*.AppImage</code>) y ejecútalo. También hay paquete <code>.deb</code> en Releases.</p>
+    </div>
+
+    <a class="btn btn-teal" href="../app/">Probar en el navegador</a>
+    <p class="dl-note">¿No sabes cuál elegir? <a href="#dl-section" id="pick-os">Detecta tu sistema automáticamente</a> · Código abierto bajo <a href="https://github.com/adrianfilitos/nova-editor">licencia MIT</a></p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <span>© 2026 Nova · Hecho con Electron, React, Monaco y Vite</span>
+    <span><a href="./">Inicio</a> · <a href="https://github.com/adrianfilitos/nova-editor">GitHub</a> · <a href="https://github.com/adrianfilitos/nova-editor/releases">Releases</a></span>
+  </div>
+</footer>
+
+<script>
+  // ---------- Descargas: detectar SO + tamaños desde GitHub ----------
+  ;(() => {
+    const cards = document.querySelectorAll('.dl-card')
+    const detect = () => {
+      const ua = navigator.userAgent
+      if (/windows/i.test(ua)) return 'win'
+      if (/macintosh|mac os x|iphone|ipad/i.test(ua)) return 'mac'
+      if (/linux|ubuntu|fedora|debian|manjaro/i.test(ua)) return 'linux'
+      return null
+    }
+    const you = detect()
+    if (you) {
+      cards.forEach((c) => {
+        if (c.dataset.os === you) c.classList.add('is-you')
+      })
+    }
+    document.getElementById('pick-os')?.addEventListener('click', (e) => {
+      e.preventDefault()
+      if (!you) return
+      cards.forEach((c) => c.classList.remove('is-you'))
+      document.querySelector(`.dl-card[data-os="${you}"]`)?.classList.add('is-you')
+      document.querySelector(`.dl-card[data-os="${you}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+    const sizes = { 'Nova-Setup-1.0.0.exe': null, 'Nova-1.0.0-mac.dmg': null, 'Nova-1.0.0-linux.AppImage': null }
+    fetch('https://api.github.com/repos/adrianfilitos/nova-editor/releases/tags/v1.0.0')
+      .then((r) => r.json())
+      .then((rel) => {
+        if (!rel || !Array.isArray(rel.assets)) return
+        for (const a of rel.assets) sizes[a.name] = a.size
+        const fmt = (b) => (b >= 1e6 ? (b / 1e6).toFixed(0) + ' MB' : (b / 1e3).toFixed(0) + ' KB')
+        document.querySelectorAll('[data-size]').forEach((el) => {
+          const s = sizes[el.dataset.size]
+          el.textContent = s ? fmt(s) : '—'
+        })
+      })
+      .catch(() => {})
+    fetch('https://api.github.com/repos/adrianfilitos/nova-editor/releases/latest')
+      .then((r) => r.json())
+      .then((rel) => {
+        if (rel && rel.tag_name) {
+          document.getElementById('dl-updates').textContent = `Última versión: ${rel.tag_name} · compilada para Windows, macOS y Linux`
+        }
+      })
+      .catch(() => {
+        document.getElementById('dl-updates').textContent = ''
+      })
+  })()
+</script>
+</body>
+</html>
