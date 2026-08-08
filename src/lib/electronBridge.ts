@@ -99,6 +99,13 @@ export interface NovaDesktopExt {
   dir: () => Promise<string>
 }
 
+export interface NovaDesktopLiveServer {
+  start: (port: number, root: string) => Promise<{ ok: boolean; port?: number; url?: string; error?: string }>
+  stop: () => Promise<{ ok: boolean }>
+  status: () => Promise<{ running: boolean; port?: number; root?: string; url?: string }>
+  onStatus: (cb: (s: { running: boolean; port?: number; url?: string }) => void) => () => void
+}
+
 export type UpdateStatusType = 'checking' | 'available' | 'downloading' | 'downloaded' | 'not-available' | 'error'
 
 export interface UpdateStatusPayload {
@@ -131,6 +138,7 @@ export interface NovaDesktopBridge {
   menu: NovaDesktopMenu
   git?: NovaDesktopGit
   ext?: NovaDesktopExt
+  liveServer?: NovaDesktopLiveServer
   updates?: NovaDesktopUpdates
 }
 
@@ -146,6 +154,10 @@ export function isDesktop(): boolean {
 
 export function desktopFs(): NovaDesktopFs | null {
   return window.novaDesktop?.fs ?? null
+}
+
+export function desktopLiveServer(): NovaDesktopLiveServer | null {
+  return window.novaDesktop?.liveServer ?? null
 }
 
 export function setupElectronBridge() {

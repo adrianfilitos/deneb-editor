@@ -235,7 +235,25 @@ if (typeof monaco !== 'undefined' && monaco.editor) {
 }
 
 /** Ejecuta un comando registrado por cualquier extensión (o uno propio de Nova). */
+const commandOverrides = new Map<string, (...a: any[]) => any>()
+
+/** Permite a Nova interceptar el comportamiento de un comando de una extensión. */
+export function overrideExtensionCommand(id: string, fn: (...a: any[]) => any) {
+  commandOverrides.set(id, fn)
+}
+
 export function executeExtensionCommand(id: string, ...args: any[]): any {
+  const ov = commandOverrides.get(id)
+  if (ov) {
+    try {
+      const r = ov(...args)
+      if (r && typeof r.then === 'function') r.catch(() => {})
+      return r
+    } catch (err) {
+      status(`Error en comando ${id}: ${(err as Error).message}`)
+      return undefined
+    }
+  }
   const h = globalExtCommands.get(id)
   if (h) {
     try {

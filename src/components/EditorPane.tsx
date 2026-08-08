@@ -6,8 +6,9 @@ import { defineNovaThemes, setEditorTheme } from '../lib/monaco'
 import { VimMode } from '../lib/vim'
 import { useAIChatStore } from '../store/aiChatStore'
 import type { ChatMessage } from '../types'
-import { getContributedMenu } from '../lib/extensions/menuRegistry'
+import { getContributedMenu, type WhenContext } from '../lib/extensions/menuRegistry'
 import { executeExtensionCommand } from '../lib/extHost/vscodeShim'
+import { languageFromPath } from '../lib/languages'
 
 let themesDefined = false
 
@@ -16,7 +17,18 @@ const focusWindow = window as unknown as FocusTracker
 
 const editorMenuActions = new Map<monacoEditor.IStandaloneCodeEditor, IDisposable[]>()
 
-function syncEditorContextMenu(editor: monacoEditor.IStandaloneCodeEditor) {
+function editorWhenCtx(path: string | null): WhenContext {
+  const extMatch = path ? /\.([a-zA-Z0-9]+)$/.exec(path.split('/').pop() || '') : null
+  return {
+    resourceLangId: path ? languageFromPath(path) : undefined,
+    resourceExtname: path ? `.${(extMatch?.[1] || '').toLowerCase()}` : undefined,
+    resourceFilename: path ? path.split('/').pop() : undefined,
+    editorLangId: path ? languageFromPath(path) : undefined,
+    resourceScheme: 'file',
+  }
+}
+
+function syncEditorContextMenu(editor: monacoEditor.IStandaloneCodeEditor, path: string | null) {
   const old = editorMenuActions.get(editor) || []
   for (const d of old) {
     try {
@@ -26,7 +38,8 @@ function syncEditorContextMenu(editor: monacoEditor.IStandaloneCodeEditor) {
     }
   }
   const disps: IDisposable[] = []
-  for (const m of getContributedMenu('editor/context')) {
+  const ctx = editorWhenCtx(path)
+  for (const m of getContributedMenu('editor/context', ctx)) {
     const disp = editor.addAction({
       id: `ext-menu:${m.extId}:${m.command}`,
       label: m.label,
@@ -116,8 +129,8 @@ export function EditorPane({ groupId }: { groupId: string }) {
     vimRef.current.setEnabled(settings.vimMode)
     setupAIActions(editor, monaco)
     setupInlineCompletions(monaco)
-    syncEditorContextMenu(editor)
-    const onMenusChanged = () => syncEditorContextMenu(editor)
+    syncEditorContextMenu(editor, activePath)
+    const onMenusChanged = () => syncEditorContextMenu(editor, activePath)
     window.addEventListener('nova:ext-menus-changed', onMenusChanged)
     editor.onDidDispose(() => {
       window.removeEventListener('nova:ext-menus-changed', onMenusChanged)
@@ -147,6 +160,8 @@ export function EditorPane({ groupId }: { groupId: string }) {
 
   useEffect(() => {
     pathRef.current = activePath
+    const editor = editorRef.current
+    if (editor) syncEditorContextMenu(editor, activePath)
   }, [activePath])
 
   // Sync external value changes (AI apply / revert / save all) without cursor jumps

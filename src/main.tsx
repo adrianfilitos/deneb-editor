@@ -22,8 +22,10 @@ import './styles/outline.css'
 import './styles/shortcuts.css'
 import { setupElectronBridge } from './lib/electronBridge'
 import { useExtensionStore } from './store/extensionStore'
+import { setupLiveServerCommands } from './lib/extensions/liveServer'
 
 setupElectronBridge()
+setupLiveServerCommands()
 void useExtensionStore.getState().init()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

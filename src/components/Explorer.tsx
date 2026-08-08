@@ -4,8 +4,9 @@ import { iconForFile } from '../lib/fileIcons'
 import { Icons } from './icons'
 import type { TreeNode } from '../types'
 import { ContextMenu, type MenuItem } from './ContextMenu'
-import { getContributedMenu } from '../lib/extensions/menuRegistry'
+import { getContributedMenu, type WhenContext } from '../lib/extensions/menuRegistry'
 import { executeExtensionCommand } from '../lib/extHost/vscodeShim'
+import { languageFromPath } from '../lib/languages'
 
 interface ExplorerProps {
   onOpenFile?: (path: string) => void
@@ -196,7 +197,15 @@ function TreeView({
   items.push({ label: 'Eliminar', icon: 'trash', danger: true, run: () => void deleteItem() })
 
   // Menú contextual aportado por extensiones (contributes.menus → explorer/context)
-  for (const m of getContributedMenu('explorer/context')) {
+  const extMatch = /\.([a-zA-Z0-9]+)$/.exec(node.name)
+  const whenCtx: WhenContext = {
+    resourceLangId: isDir ? undefined : languageFromPath(node.path),
+    resourceExtname: isDir ? undefined : `.${(extMatch?.[1] || '').toLowerCase()}`,
+    resourceFilename: node.name,
+    explorerResourceIsFolder: isDir,
+    resourceScheme: 'file',
+  }
+  for (const m of getContributedMenu('explorer/context', whenCtx)) {
     items.push({
       label: m.label,
       run: () => {

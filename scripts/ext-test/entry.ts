@@ -232,6 +232,16 @@ async function main() {
   check('polyfill path.basename("/x/y.js") === "y.js"', pathPoly.basename('/x/y.js') === 'y.js', pathPoly.basename('/x/y.js'))
   check('polyfill path.extname("a.ts") === ".ts"', pathPoly.extname('a.ts') === '.ts', pathPoly.extname('a.ts'))
 
+  // ------------------------------------------------------------------
+  // 4) Evaluador de cláusulas "when" (menús contextuales de extensiones)
+  // ------------------------------------------------------------------
+  const { evaluateWhen } = await import('../../src/lib/extensions/menuRegistry')
+  console.log('\n=== 4) when (menús contextuales) ===')
+  check('resourceLangId == html → true en html', evaluateWhen('resourceLangId == html', { resourceLangId: 'html' }) === true)
+  check('resourceLangId == html → false en javascript', evaluateWhen('resourceLangId == html', { resourceLangId: 'javascript' }) === false)
+  check('OR: html || xml', evaluateWhen('resourceLangId == html || resourceExtname == .xml', { resourceExtname: '.xml' }) === true)
+  check('AND con paréntesis', evaluateWhen('(resourceLangId == html) && explorerResourceIsFolder == false', { resourceLangId: 'html', explorerResourceIsFolder: false }) === true)
+
   console.log(`\n=== RESULTADO: ${pass} PASS, ${fail} FAIL ===`)
   process.exit(fail === 0 ? 0 : 1)
 }

@@ -4,6 +4,7 @@ const fs = require('fs')
 const os = require('os')
 const { spawn } = require('child_process')
 const { autoUpdater } = require('electron-updater')
+const liveServer = require('./liveServer.cjs')
 
 const isDev = process.env.NOVA_DEV === '1'
 const DEV_URL = 'http://127.0.0.1:5173'
@@ -421,6 +422,20 @@ function registerExtHandlers() {
   ipcMain.handle('nova:ext:dir', () => extDir())
 }
 
+function registerLiveServerHandlers() {
+  ipcMain.handle('nova:liveserver:start', async (_e, port, rootAbs) => {
+    const r = await liveServer.start(Number(port) || 5500, String(rootAbs))
+    if (r.ok) sendToWindow('nova:liveserver:status', liveServer.status())
+    return r
+  })
+  ipcMain.handle('nova:liveserver:stop', () => {
+    const r = liveServer.stop()
+    sendToWindow('nova:liveserver:status', { running: false })
+    return r
+  })
+  ipcMain.handle('nova:liveserver:status', () => liveServer.status())
+}
+
 function registerFsHandlers() {
   ipcMain.handle('nova:fs:open-workspace', async () => {
     const res = await dialog.showOpenDialog(mainWindow, {
@@ -739,11 +754,16 @@ app.whenReady().then(() => {
   registerTerminalHandlers()
   registerWindowHandlers()
   registerMenuHandlers()
+  registerLiveServerHandlers()
   createWindow()
   setupAutoUpdater()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+})
+
+app.on('before-quit', () => {
+  liveServer.stop()
 })
 
 app.on('window-all-closed', () => {
