@@ -58,4 +58,6 @@ export interface InstalledExt {
   icon?: string
   enabled: boolean
   contrib: ExtContribData
+  /** Código JS de la extensión (main del .vsix) para el Extension Host */
+  code?: string
 }

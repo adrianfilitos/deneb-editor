@@ -81,10 +81,12 @@ export function EditorPane({ groupId }: { groupId: string }) {
     setupInlineCompletions(monaco)
     editor.onDidChangeCursorPosition((e) => {
       setCursor({ lineNumber: e.position.lineNumber, column: e.position.column })
+      window.dispatchEvent(new CustomEvent('nova:cursor-pos'))
     })
     editor.onDidFocusEditorText(() => {
       focusWindow.__novaEditor = editor
       if (activePath) focusWindow.__novaFocusPath = activePath
+      window.dispatchEvent(new CustomEvent('nova:editor-active'))
     })
   }
 
@@ -92,6 +94,7 @@ export function EditorPane({ groupId }: { groupId: string }) {
     (value?: string) => {
       if (activeTab && value !== undefined && pathRef.current === activeTab.path) {
         updateTabContent(activeTab.path, value)
+        window.dispatchEvent(new CustomEvent('nova:doc-change', { detail: { model: editorRef.current?.getModel() } }))
       }
     },
     [activeTab, updateTabContent],

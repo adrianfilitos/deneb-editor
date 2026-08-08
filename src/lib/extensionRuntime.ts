@@ -4,6 +4,7 @@ import { useEditorStore } from '../store/editorStore'
 import { registerDynamicCommand, unregisterDynamicCommand } from './commandRegistry'
 import { registerDynamicShortcut, unregisterDynamicShortcut } from './shortcutRegistry'
 import { NATIVE_MAP } from './nativeExtensions'
+import { runExtension, stopExtension } from './extHost/host'
 import { lighten, darken, mix, rgba } from './colorUtils'
 import type { ExtThemeDef, InstalledExt } from './extensionTypes'
 
@@ -171,6 +172,11 @@ export function applyExtension(ext: InstalledExt) {
     rec.shortcutIds.push(sc.id)
   }
 
+  // Extension Host: ejecuta el código JS de la extensión
+  if (ext.code) {
+    runExtension(ext)
+  }
+
   applied.set(ext.id, rec)
 }
 
@@ -194,5 +200,6 @@ export function undoExtension(ext: InstalledExt) {
   }
   for (const id of rec.commandIds) unregisterDynamicCommand(id)
   for (const id of rec.shortcutIds) unregisterDynamicShortcut(id)
+  if (ext.code) stopExtension(ext.id)
   applied.delete(ext.id)
 }

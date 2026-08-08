@@ -223,8 +223,10 @@ export async function listChildren(node: TreeNode): Promise<TreeNode[]> {
   }
   const dir = node.handle as VirtualDir
   const out: TreeNode[] = []
-  for (const entry of dir.entries.values()) {
-    out.push(toNode(entry, node.path))
+  if (dir && dir.entries) {
+    for (const entry of dir.entries.values()) {
+      out.push(toNode(entry, node.path))
+    }
   }
   return sortNodes(out)
 }
@@ -395,8 +397,10 @@ async function listAny(dirHandle: AnyHandle): Promise<{ name: string; kind: 'fil
   }
   const dir = dirHandle as VirtualDir
   const out: { name: string; kind: 'file' | 'directory' }[] = []
-  for (const entry of dir.entries.values()) {
-    out.push({ name: entry.name, kind: entry.kind })
+  if (dir && dir.entries) {
+    for (const entry of dir.entries.values()) {
+      out.push({ name: entry.name, kind: entry.kind })
+    }
   }
   return out
 }
@@ -516,8 +520,10 @@ export async function listAt(dirHandle: AnyHandle, path: string): Promise<ListEn
   }
   const vdir = target as VirtualDir
   const out: ListEntry[] = []
-  for (const v of vdir.entries.values()) {
-    out.push({ name: v.name, kind: v.kind, handle: v })
+  if (vdir && vdir.entries) {
+    for (const v of vdir.entries.values()) {
+      out.push({ name: v.name, kind: v.kind, handle: v })
+    }
   }
   return sortList(out)
 }

@@ -8,6 +8,7 @@ export interface VsixParseResult {
   description?: string
   themes: ExtThemeDef[]
   snippets: ExtSnippetDef[]
+  code?: string
 }
 
 interface VsCodeSnippet {
@@ -97,6 +98,7 @@ export function parseVsix(bytes: Uint8Array): VsixParseResult {
     displayName?: string
     version?: string
     description?: string
+    main?: string
     contributes?: {
       themes?: { label?: string; id?: string; path?: string }[]
       snippets?: { language?: string; path?: string }[]
@@ -150,6 +152,14 @@ export function parseVsix(bytes: Uint8Array): VsixParseResult {
     }
   }
 
+  // Código JS de la extensión (main) para el Extension Host
+  let code: string | undefined
+  const mainEntry = pkg.main
+  if (typeof mainEntry === 'string' && mainEntry) {
+    const raw = readText(`extension/${stripLeadingSlash(mainEntry)}`)
+    if (raw && raw.length <= 500_000) code = raw
+  }
+
   return {
     id: `${publisher}.${name}`,
     displayName: pkg.displayName || `${publisher}.${name}`,
@@ -157,5 +167,6 @@ export function parseVsix(bytes: Uint8Array): VsixParseResult {
     description: pkg.description,
     themes,
     snippets,
+    code,
   }
 }

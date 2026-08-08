@@ -226,6 +226,7 @@ function NativeTab() {
                 <div className="ext-card__stats">
                   <span>Nativa</span>
                   <span>{ext.contrib.settings ? 'ajustes' : ext.contrib.themes ? 'tema' : ext.contrib.snippets ? 'snippets' : ext.commands ? 'comandos' : ''}</span>
+                  {ext.code ? <span className="ext-card__tag ext-card__tag--code">código</span> : null}
                 </div>
               </div>
               {meta ? (
@@ -302,6 +303,7 @@ function InstalledTab({ onStatus }: { onStatus: (msg: string, timeout?: number) 
                 <span>{ext.contrib.themes?.length ? `tema${ext.contrib.themes.length > 1 ? 's' : ''}` : ''}</span>
                 <span>{ext.contrib.snippets?.length ? 'snippets' : ''}</span>
                 <span>{ext.contrib.settings ? 'ajustes' : ''}</span>
+                {ext.code ? <span className="ext-card__tag ext-card__tag--code">código</span> : null}
               </div>
             </div>
             <div className="ext-card__actions">

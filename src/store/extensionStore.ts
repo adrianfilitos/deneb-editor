@@ -60,6 +60,7 @@ export const useExtensionStore = create<ExtensionStore>((set, get) => ({
       icon: def.icon,
       enabled: true,
       contrib: def.contrib,
+      code: def.code,
     }
     set((s) => {
       const installed = { ...s.installed, [id]: ext }
@@ -85,6 +86,7 @@ export const useExtensionStore = create<ExtensionStore>((set, get) => ({
       icon: fallbackIcon,
       enabled: true,
       contrib: { themes: parsed.themes, snippets: parsed.snippets },
+      code: parsed.code,
     }
     set((s) => {
       const installed = { ...s.installed, [ext.id]: ext }

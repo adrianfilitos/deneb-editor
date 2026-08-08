@@ -9,6 +9,7 @@ export interface NativeExtDef {
   contrib: ExtContribData
   commands?: ExtCommandDef[]
   shortcuts?: ExtShortcutDef[]
+  code?: string
 }
 
 const activeEditor = () => (window as unknown as { __novaEditor?: { executeEdits: (s: string, e: unknown[]) => void; getModel: () => { getLineMaxColumn: (l: number) => number } | null; getPosition: () => { lineNumber: number; column: number } | null; setPosition: (p: { lineNumber: number; column: number }) => void } }).__novaEditor
@@ -151,6 +152,45 @@ const jsSnippets = {
 }
 
 export const NATIVE_EXTENSIONS: NativeExtDef[] = [
+  {
+    id: 'nova.host-demo',
+    name: 'Host Demo',
+    version: '1.0.0',
+    description: 'Demuestra el Extension Host: usa la API vscode real (comandos, mensajes, edición).',
+    icon: '#38bdf8',
+    contrib: {},
+    code: `const vscode = require('vscode');
+
+function activate(context) {
+  context.subscriptions.push(
+    vscode.commands.registerCommand('nova.host.hello', function () {
+      vscode.window.showInformationMessage('¡Hola desde el Extension Host de VS Code!');
+      const editor = vscode.window.activeTextEditor;
+      if (editor) {
+        editor.edit(function (builder) {
+          const pos = editor.selection.active;
+          builder.insert(pos, '\\n// Línea insertada por el Extension Host\\n');
+        });
+      }
+    }),
+    vscode.commands.registerCommand('nova.host.saludo', function (nombre) {
+      vscode.window.showInformationMessage('Hola, ' + (nombre || 'mundo'));
+      return 'ok';
+    }),
+    vscode.languages.registerCompletionItemProvider('typescript', {
+      provideCompletionItems: function (document, position) {
+        return [ new vscode.CompletionItem('nova-nativo', vscode.CompletionItemKind.Function) ];
+      }
+    })
+  );
+  vscode.window.showInformationMessage('Extension Host activo: ' + vscode.env.appName + ' v' + vscode.env.version);
+}
+
+function deactivate() {}
+
+module.exports = { activate, deactivate };
+`,
+  },
   {
     id: 'nova.auto-format',
     name: 'Auto-Formato',
