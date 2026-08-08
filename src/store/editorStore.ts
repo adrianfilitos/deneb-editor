@@ -241,12 +241,14 @@ export const useEditorStore = create<EditorStore>((set, get) => {
 
     patch: (partial) => set(partial),
 
-  openWorkspace: async () => {
+    openWorkspace: async () => {
       try {
         set({ busy: true })
         const { root, demo } = await fsOpenWorkspace()
         set({ root, demoMode: demo, busy: false, sidebarVisible: true, sidebarView: 'explorer' })
         void get().expandNode(root)
+        await applyWorkspaceConfig()
+        window.dispatchEvent(new CustomEvent('nova:workspace-opened'))
         get().setStatus(demo ? 'Espacio de demostración abierto' : 'Carpeta abierta', 2500)
       } catch (e) {
         set({ busy: false })
@@ -262,6 +264,8 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         const { root, demo } = await fsOpenWorkspaceAt(absPath)
         set({ root, demoMode: demo, busy: false, sidebarVisible: true, sidebarView: 'explorer' })
         void get().expandNode(root)
+        await applyWorkspaceConfig()
+        window.dispatchEvent(new CustomEvent('nova:workspace-opened'))
         get().setStatus('Carpeta abierta', 2500)
       } catch (e) {
         set({ busy: false })
@@ -639,6 +643,18 @@ export const useEditorStore = create<EditorStore>((set, get) => {
 
 export function getActiveTab(s: { openTabs: OpenTab[]; activePath: string | null }): OpenTab | undefined {
   return s.openTabs.find((t) => t.path === s.activePath)
+}
+
+async function applyWorkspaceConfig() {
+  try {
+    const mod = await import('../lib/userConfig')
+    const file = await mod.readConfigFile()
+    mod.applyUserSettings(file)
+    mod.applyUserKeybindings(file)
+    void mod.loadUserSnippets()
+  } catch {
+    // ignore
+  }
 }
 
 async function ensurePathLoaded(root: TreeNode, path: string) {

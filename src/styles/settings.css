@@ -398,3 +398,23 @@ select.settings__input {
   flex-direction: column;
   gap: 8px;
 }
+
+.settings__code {
+  background: #10131d;
+  border: 1px solid var(--border, #232838);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: #9ece6a;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 6px 0;
+  line-height: 1.5;
+}
+.btn--secondary {
+  background: rgba(130,170,255,.1);
+  border: 1px solid rgba(130,170,255,.35);
+  color: #82aaff;
+}
+.btn--secondary:hover { background: rgba(130,170,255,.18); }

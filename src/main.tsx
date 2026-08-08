@@ -23,9 +23,13 @@ import './styles/shortcuts.css'
 import { setupElectronBridge } from './lib/electronBridge'
 import { useExtensionStore } from './store/extensionStore'
 import { setupLiveServerCommands } from './lib/extensions/liveServer'
+import { initEditorEnhancements } from './lib/editorEnhancements'
+import { setupIndexHooks } from './lib/workspaceLanguage'
 
 setupElectronBridge()
 setupLiveServerCommands()
+initEditorEnhancements()
+setupIndexHooks()
 void useExtensionStore.getState().init()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

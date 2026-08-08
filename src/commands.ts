@@ -136,6 +136,47 @@ export function commands(): CommandDef[] {
       run: () => s.splitGroup(),
     },
     {
+      id: 'workbench.action.toggleDebug',
+      title: 'Ver: Ejecutar y depurar',
+      category: 'Ver',
+      keybinding: 'Ctrl+Shift+D',
+      icon: 'play',
+      run: () => s.setSidebarView('debug'),
+    },
+    {
+      id: 'workbench.action.showTasks',
+      title: 'Ver: Tareas',
+      category: 'Ver',
+      icon: 'play',
+      run: () => s.setSidebarView('tasks'),
+    },
+    {
+      id: 'workbench.action.toggleBreakpoint',
+      title: 'Depurar: Alternar breakpoint',
+      category: 'Depurar',
+      keybinding: 'F9',
+      icon: 'circle',
+      run: () => {
+        const editor = (window as unknown as { __novaEditor?: { getPosition?: () => { lineNumber: number } | null } | undefined }).__novaEditor
+        const pos = editor?.getPosition?.()
+        const path = (window as unknown as { __novaFocusPath?: string }).__novaFocusPath
+        if (pos && path) {
+          void import('./lib/debugger').then((m) => m.toggleBreakpoint(path, pos.lineNumber))
+        }
+      },
+    },
+    {
+      id: 'workbench.action.debug.start',
+      title: 'Depurar: Iniciar depuración',
+      category: 'Depurar',
+      keybinding: 'F5',
+      icon: 'play',
+      run: () => {
+        s.setSidebarView('debug')
+        void import('./lib/debugger').then((m) => m.startDebug())
+      },
+    },
+    {
       id: 'workbench.action.closeGroup',
       title: 'Cerrar grupo del editor',
       category: 'Ver',

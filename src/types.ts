@@ -1,4 +1,4 @@
-export type SidebarView = 'explorer' | 'search' | 'ai' | 'extensions' | 'settings' | 'outline' | 'git' | 'extviews'
+export type SidebarView = 'explorer' | 'search' | 'ai' | 'extensions' | 'settings' | 'outline' | 'git' | 'extviews' | 'tasks' | 'debug'
 
 export interface VirtualFile {
   kind: 'file'

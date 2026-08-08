@@ -16,3 +16,21 @@
 .monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused {
   background: var(--bg-active) !important;
 }
+
+/* ---------- Debug: breakpoints y línea actual ---------- */
+.nova-breakpoint-glyph {
+  background: #f7768e;
+  border-radius: 50%;
+  margin-left: 5px;
+  margin-top: 7px;
+  width: 10px !important;
+  height: 10px !important;
+  cursor: pointer;
+}
+.monaco-editor .margin-view-overlays .cgmr.nova-breakpoint-glyph {
+  background: #f7768e;
+}
+.nova-debug-current-line {
+  background: rgba(158,206,106,.12);
+  box-shadow: inset 2px 0 0 #9ece6a;
+}

@@ -167,6 +167,38 @@ export function useGlobalShortcuts() {
         store.splitGroup()
         return
       }
+      // F9 → toggle breakpoint
+      if (e.key === 'F9') {
+        e.preventDefault()
+        const editor = (window as unknown as { __novaEditor?: { getPosition?: () => { lineNumber: number } | null } | undefined }).__novaEditor
+        const pos = editor?.getPosition?.()
+        const path = (window as unknown as { __novaFocusPath?: string }).__novaFocusPath
+        if (pos && path) {
+          void import('../lib/debugger').then((m) => m.toggleBreakpoint(path, pos.lineNumber))
+        }
+        return
+      }
+      // F5 → iniciar/continuar debug
+      if (e.key === 'F5') {
+        e.preventDefault()
+        const d = import('../lib/debugger')
+        store.setSidebarView('debug')
+        void d.then((m) => {
+          const st = m.getDebuggerState()
+          if (st.paused) m.continueDebug()
+          else void m.startDebug()
+        })
+        return
+      }
+      // F10 → paso
+      if (e.key === 'F10') {
+        e.preventDefault()
+        void import('../lib/debugger').then((m) => {
+          const st = m.getDebuggerState()
+          if (st.paused) m.stepOver()
+        })
+        return
+      }
     }
 
     // Use capture phase so Monaco / inputs don't swallow shortcuts

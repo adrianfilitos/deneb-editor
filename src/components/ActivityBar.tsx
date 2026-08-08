@@ -10,6 +10,8 @@ const NAV: { view: SidebarView; icon: IconName; label: string; ai?: boolean }[] 
   { view: 'git', icon: 'git', label: 'Control de código fuente' },
   { view: 'ai', icon: 'sparkles', label: 'Asistente de IA', ai: true },
   { view: 'outline', icon: 'list', label: 'Esquema' },
+  { view: 'tasks', icon: 'play', label: 'Tareas' },
+  { view: 'debug', icon: 'play', label: 'Ejecutar y depurar' },
   { view: 'extensions', icon: 'extension', label: 'Extensiones' },
   { view: 'extviews', icon: 'folderOpen', label: 'Vistas de extensiones' },
 ]

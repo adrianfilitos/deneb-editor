@@ -17,6 +17,8 @@
     "test:ext": "node scripts/run-ext-test.mjs",
     "test:ext:liveserver": "node scripts/run-ext-test.mjs live-server.ts",
     "test:ext:csharp": "node scripts/run-ext-test.mjs csharp.ts",
+    "test:ext:debugger": "node scripts/run-ext-test.mjs debugger.ts",
+    "test:ext:debugger-e2e": "node scripts/run-ext-test.mjs debugger-e2e.ts",
     "test:ext:electron-ls": "node scripts/ext-test/electron-liveserver.mjs",
     "electron:dev": "concurrently -k \"npm:dev\" \"cross-env NOVA_DEV=1 electron .\"",
     "electron:build": "npm run build && electron-builder",
@@ -29,6 +31,7 @@
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
     "electron-updater": "^6.8.9",
+    "emmet-monaco-es": "^5.7.0",
     "fflate": "^0.8.3",
     "monaco-editor": "^0.52.2",
     "react": "^18.3.1",

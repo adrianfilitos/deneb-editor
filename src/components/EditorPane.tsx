@@ -9,6 +9,8 @@ import type { ChatMessage } from '../types'
 import { getContributedMenu, type WhenContext } from '../lib/extensions/menuRegistry'
 import { executeExtensionCommand } from '../lib/extHost/vscodeShim'
 import { languageFromPath } from '../lib/languages'
+import { registerWorkspaceLanguageProviders } from '../lib/workspaceLanguage'
+import { handleGutterClick, updateBreakpointDecorations } from '../lib/debugger'
 
 let themesDefined = false
 
@@ -127,6 +129,7 @@ export function EditorPane({ groupId }: { groupId: string }) {
     if (activePath) focusWindow.__novaFocusPath = activePath
     vimRef.current = new VimMode(editor)
     vimRef.current.setEnabled(settings.vimMode)
+    registerWorkspaceLanguageProviders(monaco as typeof import('monaco-editor'))
     setupAIActions(editor, monaco)
     setupInlineCompletions(monaco)
     syncEditorContextMenu(editor, activePath)
@@ -145,7 +148,15 @@ export function EditorPane({ groupId }: { groupId: string }) {
       focusWindow.__novaEditor = editor
       if (activePath) focusWindow.__novaFocusPath = activePath
       window.dispatchEvent(new CustomEvent('nova:editor-active'))
+      updateBreakpointDecorations()
     })
+    editor.onMouseDown((e) => {
+      if (e.target?.type === monaco.editor.MouseTargetType.GUTTER_GLYPH_MARGIN && e.target.position) {
+        handleGutterClick(e.target.position.lineNumber)
+      }
+    })
+    editor.onDidChangeModel(() => updateBreakpointDecorations())
+    updateBreakpointDecorations()
   }
 
   const handleChange = useCallback(

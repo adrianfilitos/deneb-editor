@@ -7,6 +7,7 @@ import { UpdatesSection } from './UpdatesSection'
 import { getContributedConfigSections, type ContributedConfigProp } from '../lib/extensions/configRegistry'
 import type { AIProvider, ThemeId } from '../types'
 import { Icons } from './icons'
+import { getConfigPath, openConfigInEditor, isNativeBackend } from '../lib/userConfig'
 
 const THEME_NAMES: Record<ThemeId, string> = {
   'nova-dark': 'Nova Dark',
@@ -20,7 +21,7 @@ const THEME_NAMES: Record<ThemeId, string> = {
   'nova-paper': 'Paper',
 }
 
-type SettingsTab = 'apariencia' | 'editor' | 'ia' | 'sistema' | 'extensiones'
+type SettingsTab = 'apariencia' | 'editor' | 'ia' | 'sistema' | 'extensiones' | 'archivos'
 
 const TABS: { id: SettingsTab; label: string; icon: keyof typeof Icons }[] = [
   { id: 'apariencia', label: 'Apariencia', icon: 'sparkles' },
@@ -28,6 +29,7 @@ const TABS: { id: SettingsTab; label: string; icon: keyof typeof Icons }[] = [
   { id: 'ia', label: 'Asistente de IA', icon: 'zap' },
   { id: 'sistema', label: 'Sistema', icon: 'gear' },
   { id: 'extensiones', label: 'Extensiones', icon: 'extension' },
+  { id: 'archivos', label: 'settings.json', icon: 'file' },
 ]
 
 export function SettingsPanel() {
@@ -56,6 +58,7 @@ export function SettingsPanel() {
         {tab === 'ia' && <AITab />}
         {tab === 'sistema' && <SystemTab />}
         {tab === 'extensiones' && <ExtConfigTab />}
+        {tab === 'archivos' && <ConfigFilesTab />}
       </div>
     </div>
   )
@@ -455,6 +458,66 @@ function ExtConfigTab() {
           })}
         </Group>
       ))}
+    </>
+  )
+}
+
+// ---------------------------------------------------------------------------
+//  ARCHIVOS DE CONFIGURACIÓN (settings.json / keybindings.json)
+// ---------------------------------------------------------------------------
+
+function ConfigFilesTab() {
+  const hasRoot = !!useEditorStore((s) => s.root)
+  const paths = getConfigPath()
+
+  return (
+    <>
+      <Group title="Archivos de configuración" subtitle="Ajustes y atajos en el espacio de trabajo (.nova/)">
+        <p className="settings__note">
+          Los ajustes y atajos se pueden definir como archivos JSON en la carpeta <span className="mono">.nova/</span>
+          de tu espacio de trabajo. Tienen prioridad sobre la interfaz.
+        </p>
+        {!hasRoot ? (
+          <p className="settings__note">
+            Abre primero una carpeta para poder crear estos archivos en tu proyecto.
+          </p>
+        ) : (
+          <div className="settings__row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
+            <button className="btn btn--secondary" onClick={() => openConfigInEditor('settings')}>
+              <Icons.file size={14} /> Editar settings.json
+            </button>
+            <button className="btn btn--secondary" onClick={() => openConfigInEditor('keybindings')}>
+              <Icons.file size={14} /> Editar keybindings.json
+            </button>
+          </div>
+        )}
+      </Group>
+
+      <Group title="Ejemplo" subtitle="Qué puedes poner">
+        <pre className="settings__code">{`{
+  "fontSize": 16,
+  "wordWrap": "on",
+  "editor.tabSize": 2,
+  "liveServer.port": 5501
+}`}</pre>
+        <pre className="settings__code">{`[
+  { "key": "ctrl+shift+s", "command": "workbench.action.files.saveAll" },
+  { "key": "f6", "command": "workbench.action.debug.start" }
+]`}</pre>
+      </Group>
+
+      <Group title="Snippets de usuario" subtitle="Autocompletado personalizado">
+        <p className="settings__note">
+          Crea un archivo <span className="mono">.nova/snippets.json</span> con snippets como:
+        </p>
+        <pre className="settings__code">{`{
+  "log": {
+    "prefix": "log",
+    "body": "console.log('$1', $2)",
+    "description": "Console log"
+  }
+}`}</pre>
+      </Group>
     </>
   )
 }

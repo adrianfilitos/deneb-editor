@@ -8,6 +8,8 @@ import { OutlinePanel } from './OutlinePanel'
 import { GitPanel } from './GitPanel'
 import { ErrorBoundary } from './ErrorBoundary'
 import { ExtViewsPanel } from './ExtViewsPanel'
+import { TasksPanel } from './TasksPanel'
+import { DebugPanel } from './DebugPanel'
 import { Icons } from './icons'
 
 const TITLES: Record<string, { title: string; subtitle?: string }> = {
@@ -19,6 +21,8 @@ const TITLES: Record<string, { title: string; subtitle?: string }> = {
   settings: { title: 'Ajustes' },
   outline: { title: 'Esquema', subtitle: 'símbolos' },
   extviews: { title: 'Vistas', subtitle: 'de extensiones' },
+  tasks: { title: 'Tareas', subtitle: 'espacio de trabajo' },
+  debug: { title: 'Ejecutar y depurar', subtitle: 'JS/TS' },
 }
 
 export function Sidebar() {
@@ -54,6 +58,8 @@ export function Sidebar() {
           {view === 'settings' && <SettingsPanel />}
           {view === 'outline' && <OutlinePanel />}
           {view === 'extviews' && <ExtViewsPanel />}
+          {view === 'tasks' && <TasksPanel />}
+          {view === 'debug' && <DebugPanel />}
         </ErrorBoundary>
       </div>
     </aside>

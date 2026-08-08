@@ -37,6 +37,8 @@ jobs:
         run: |
           npm run typecheck
           node scripts/run-ext-test.mjs
+          node scripts/run-ext-test.mjs debugger.ts
+          node scripts/run-ext-test.mjs debugger-e2e.ts
 
       - name: Build app
         run: npm run build
