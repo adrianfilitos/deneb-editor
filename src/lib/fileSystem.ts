@@ -382,29 +382,30 @@ export async function walkFiles(
   const entries = await listAny(dirHandle)
   for (const entry of entries) {
     const p = `${dirHandle.name}/${entry.name}`.replace(/^\/+/, '')
+    const real = (entry as unknown as { handle?: AnyHandle }).handle || (entry as AnyHandle)
     if (entry.kind === 'file') {
-      onFile(p, entry as AnyHandle)
+      onFile(p, real)
     } else {
-      await walkFiles(entry as AnyHandle, (fp, fh) => onFile(`${dirHandle.name}/${fp}`.replace(/^\/+/, ''), fh))
+      await walkFiles(real, (fp, fh) => onFile(`${dirHandle.name}/${fp}`.replace(/^\/+/, ''), fh))
     }
   }
 }
 
-async function listAny(dirHandle: AnyHandle): Promise<{ name: string; kind: 'file' | 'directory' }[]> {
+async function listAny(dirHandle: AnyHandle): Promise<{ name: string; kind: 'file' | 'directory'; handle?: AnyHandle }[]> {
   if (backendKind === 'native') {
     const handle = dirHandle as FileSystemDirectoryHandle
     await requestPermission(handle)
-    const out: { name: string; kind: 'file' | 'directory' }[] = []
+    const out: { name: string; kind: 'file' | 'directory'; handle?: AnyHandle }[] = []
     for await (const entry of asyncEntries(handle)) {
       out.push({ name: entry.name, kind: entry.kind })
     }
     return out
   }
   const dir = dirHandle as VirtualDir
-  const out: { name: string; kind: 'file' | 'directory' }[] = []
+  const out: { name: string; kind: 'file' | 'directory'; handle?: AnyHandle }[] = []
   if (dir && dir.entries) {
     for (const entry of dir.entries.values()) {
-      out.push({ name: entry.name, kind: entry.kind })
+      out.push({ name: entry.name, kind: entry.kind, handle: entry })
     }
   }
   return out

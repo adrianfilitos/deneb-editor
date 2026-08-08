@@ -39,6 +39,18 @@ const BUILTIN_KEYS = new Set([
   'tls', 'buffer', 'console', 'string_decoder', 'timers', 'constants', 'querystring',
 ])
 
+// Módulos virtuales del host real de VS Code (proporcionados por otras
+// extensiones). Se resuelven con un stub para que las extensiones que los
+// requieren opcionalmente no se rompan.
+const VIRTUAL_MODULES: Record<string, unknown> = {
+  'vsls/vscode': {
+    getApi: () => Promise.resolve(undefined),
+    getSharedService: () => Promise.resolve(undefined),
+    sharedService: undefined,
+    name: 'vsls',
+  },
+}
+
 export class CommonJsLoader {
   private cache = new Map<string, LoadedModule>()
   private files: Record<string, Uint8Array>
@@ -63,7 +75,8 @@ export class CommonJsLoader {
     return p in this.files
   }
 
-  private resolvePath(p: string): string | null {
+  private resolvePath(input: string): string | null {
+    const p = input.replace(/^\.\//, '')
     if (this.has(p) && !p.endsWith('/')) return p
     for (const ext of ['.js', '.cjs', '.json', '.mjs']) {
       if (this.has(p + ext)) return p + ext
@@ -92,6 +105,7 @@ export class CommonJsLoader {
     if (spec === 'vscode') return 'vscode'
     if (spec.startsWith('vscode-')) return 'vscode'
     if (BUILTIN_KEYS.has(spec)) return `builtin:${spec}`
+    if (spec in VIRTUAL_MODULES) return `virtual:${spec}`
     if (spec.startsWith('./') || spec.startsWith('../') || spec === '.' || spec === '..') {
       return this.resolvePath(join(dirname(fromFile), spec))
     }
@@ -114,7 +128,14 @@ export class CommonJsLoader {
         const key = r.slice('builtin:'.length)
         return (this.env.builtins as unknown as Record<string, unknown>)[key] ?? {}
       }
+      if (r?.startsWith('virtual:')) {
+        return VIRTUAL_MODULES[r.slice('virtual:'.length)]
+      }
       if (!r) {
+        // Especificador "desnudo" sin empaquetar (p. ej. vsls/vscode): en el
+        // host real de VS Code se resuelve a undefined si el módulo no está.
+        // Así los guards del tipo `if (mod)` de las extensiones funcionan.
+        if (!spec.startsWith('.')) return undefined
         throw new Error(
           `Nova: no se pudo resolver "${spec}" (desde ${resolved}). El módulo no está empaquetado en la extensión.`,
         )

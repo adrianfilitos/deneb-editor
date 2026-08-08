@@ -49,7 +49,12 @@ export class ExtFs {
   }
 
   private key(p: string): string {
-    return p.replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+$/, '')
+    const k = p
+      .replace(/\\/g, '/')
+      .replace(/^\.\//, '')
+      .replace(/^\/+/, '')
+      .replace(/\/+$/, '')
+    return k === '.' ? '' : k
   }
 
   private async loadTree(): Promise<void> {
@@ -57,12 +62,19 @@ export class ExtFs {
     this.cache.clear()
     this.cache.set('', { type: 'dir', size: 0, mtime: Date.now() })
     if (!r) return
+    const prefix = r.name ? r.name + '/' : ''
+    const skipDirs = ['node_modules', '.git', 'dist', 'build', 'coverage', '.next']
+    const pending: string[] = []
     await walkFiles(r.handle, (path, _handle) => {
-      const rel = this.key(path)
+      let rel = this.key(path)
+      if (prefix && rel.startsWith(prefix)) rel = rel.slice(prefix.length)
+      const segs = rel.split('/')
+      if (segs.slice(0, -1).some((s) => skipDirs.includes(s))) return
       const i = rel.lastIndexOf('/')
       const name = i >= 0 ? rel.slice(i + 1) : rel
       if (name === '.git') return
       this.cache.set(rel, { type: 'file', size: 0, mtime: 0 })
+      pending.push(rel)
       let dir = i >= 0 ? rel.slice(0, i) : ''
       while (true) {
         if (dir && !this.cache.has(dir)) this.cache.set(dir, { type: 'dir', size: 0, mtime: 0 })
@@ -71,6 +83,23 @@ export class ExtFs {
         dir = j >= 0 ? dir.slice(0, j) : ''
       }
     })
+    // Hidrata contenidos (para fs.readFileSync). Se limita para no volcar
+    // repos enormes en memoria.
+    if (pending.length <= 1500) {
+      await Promise.all(
+        pending.map(async (rel) => {
+          try {
+            const h = await resolvePath(r.handle, rel)
+            if (h && h.kind === 'file') {
+              const text = await readText(h)
+              this.cache.set(rel, { type: 'file', content: text, size: text.length, mtime: Date.now() })
+            }
+          } catch {
+            // archivo no legible: se mantiene la entrada sin contenido
+          }
+        }),
+      )
+    }
   }
 
   /** Hidrata el espejo desde el workspace actual (una vez por raíz). */
@@ -150,6 +179,72 @@ export class ExtFs {
       ctimeMs: e.mtime,
       birthtimeMs: e.mtime,
       mode: isDir ? 0o40777 : 0o100666,
+    }
+  }
+
+  // ---- operaciones síncronas de escritura (espejo inmediato + persistencia) ----
+
+  writeFileSync(p: string, data: string | Uint8Array): void {
+    const text = typeof data === 'string' ? data : new TextDecoder().decode(data)
+    const rel = this.key(p)
+    const i = rel.lastIndexOf('/')
+    const parent = i >= 0 ? rel.slice(0, i) : ''
+    if (parent && !this.cache.has(parent)) throw enoent(parent)
+    this.cache.set(rel, { type: 'file', content: text, size: text.length, mtime: Date.now() })
+    void this.persistWrite(rel, text)
+  }
+
+  mkdirSync(p: string): void {
+    const rel = this.key(p)
+    if (this.cache.has(rel)) throw new Error(`EEXIST: file already exists, mkdir '${p}'`)
+    this.cache.set(rel, { type: 'dir', size: 0, mtime: Date.now() })
+    const r = this.root()
+    if (r) void createDirAt(r.handle, rel).catch(() => {})
+  }
+
+  rmSync(p: string): void {
+    const rel = this.key(p)
+    if (!this.cache.has(rel)) throw enoent(p)
+    const prefix = rel ? rel + '/' : ''
+    for (const k of [...this.cache.keys()]) {
+      if (k === rel || k.startsWith(prefix)) this.cache.delete(k)
+    }
+    const r = this.root()
+    if (r) void removeAt(r.handle, rel).catch(() => {})
+  }
+
+  renameSync(from: string, to: string): void {
+    const relFrom = this.key(from)
+    const relTo = this.key(to)
+    const e = this.cache.get(relFrom)
+    if (!e) throw enoent(from)
+    if (e.type === 'dir') {
+      const prefix = relFrom + '/'
+      const toMove = [...this.cache.keys()].filter((k) => k.startsWith(prefix))
+      for (const k of toMove) {
+        this.cache.set(relTo + '/' + k.slice(prefix.length), this.cache.get(k)!)
+        this.cache.delete(k)
+      }
+      this.cache.set(relTo, e)
+      this.cache.delete(relFrom)
+    } else {
+      this.cache.set(relTo, e)
+      this.cache.delete(relFrom)
+    }
+    const r = this.root()
+    if (r) {
+      void createFileAt(r.handle, relTo, e.type === 'file' ? (e.content ?? '') : '').catch(() => {})
+      void removeAt(r.handle, relFrom).catch(() => {})
+    }
+  }
+
+  private async persistWrite(rel: string, text: string): Promise<void> {
+    const r = this.root()
+    if (!r) return
+    try {
+      await writeFileAt(r.handle, rel, text)
+    } catch {
+      // la escritura real falló pero el espejo ya la reflejó
     }
   }
 

@@ -447,20 +447,23 @@ const fsPolyfill = {
   statSync: (p: string) => extFs.statSync(p),
   lstatSync: (p: string) => extFs.statSync(p),
   writeFileSync: (p: string, data: string | Uint8Array) => {
-    extFs.writeFile(p, data).catch(() => {})
+    extFs.writeFileSync(p, data)
   },
   appendFileSync: (p: string, data: string | Uint8Array) => {
     const existing = extFs.existsSync(p) ? String(extFs.readFileSync(p, 'utf8')) : ''
-    extFs.writeFile(p, existing + (typeof data === 'string' ? data : new TextDecoder().decode(data))).catch(() => {})
+    extFs.writeFileSync(p, existing + (typeof data === 'string' ? data : new TextDecoder().decode(data)))
   },
   mkdirSync: (p: string) => {
-    extFs.mkdir(p).catch(() => {})
+    extFs.mkdirSync(p)
   },
   unlinkSync: (p: string) => {
-    extFs.rm(p).catch(() => {})
+    extFs.rmSync(p)
   },
   rmSync: (p: string) => {
-    extFs.rm(p).catch(() => {})
+    extFs.rmSync(p)
+  },
+  renameSync: (from: string, to: string) => {
+    extFs.renameSync(from, to)
   },
   readFile: (p: string, ...rest: any[]) => {
     const cb = typeof rest[rest.length - 1] === 'function' ? rest.pop() : null
